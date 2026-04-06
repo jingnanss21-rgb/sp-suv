@@ -188,7 +188,7 @@ function rsop(){
       <h3>上线后 · 关注三项指标</h3>
       <div class="sn-sub">三要素具备的品牌上线后，动态监测以下三项指标，及时排查异常</div>
       <div class="sop-factors">
-        <div class="sf-card"><h5>📊 存活率 <span style="font-size:9px;font-weight:400;background:var(--b1);color:var(--b);padding:1px 5px;border-radius:3px;margin-left:4px">公线</span></h5><div class="sf-std">日均全渠道核销PV / 日均交易笔数 ≥ <span class="sv">1%</span><br><span style="color:var(--x4);font-size:10px">存活率 ≥ 1% 即为存活</span></div></div>
+        <div class="sf-card"><h5>📊 存活率 <span style="font-size:9px;font-weight:400;background:var(--b1);color:var(--b);padding:1px 5px;border-radius:3px;margin-left:4px">公线+行业</span></h5><div class="sf-std">日均全渠道核销PV / 日均交易笔数 ≥ <span class="sv">1%</span><br><span style="color:var(--x4);font-size:10px">存活率 ≥ 1% 即为存活</span></div></div>
         <div class="sf-card"><h5>📡 二选一老客流量 <span style="font-size:9px;font-weight:400;background:var(--b1);color:var(--b);padding:1px 5px;border-radius:3px;margin-left:4px">公线</span></h5><div class="sf-std">日均二选一老客尽曝UV / 日均交易笔数 ≥ <span class="sv">1</span><br><span style="color:var(--x4);font-size:10px">老客流量充分度 = 1:1</span></div></div>
         <div class="sf-card"><h5>🏪 到店核销率 <span style="font-size:9px;font-weight:400;background:var(--g1);color:var(--g);padding:1px 5px;border-radius:3px;margin-left:4px">行业</span></h5><div class="sf-std">到店核销率 ≥ 餐饮腰部中位数 <span class="sv">40.4%</span><br><span style="color:var(--x4);font-size:10px">低于中位数需排查核销体验</span></div></div>
       </div>
@@ -454,9 +454,10 @@ function rsop(){
   const bCats=Q.boost_by_cat||[];
   const nAlive=Q.newly_alive_count||0, tDelta=Q.total_delta||0;
   const unreliable=Q.unreliable_count||0;
+  const reliableCount=(Q.results||[]).filter(r=>r.eur_reliable).length;
+  const boostPct=reliableCount?(nAlive/reliableCount*100).toFixed(0):'0';
   const curAll=Math.round((Q.results||[]).reduce((s,r)=>s+r.cur_all,0));
   const newAll=Math.round((Q.results||[]).filter(r=>r.eur_reliable&&r.new_alive).reduce((s,r)=>s+r.new_all,0)+(Q.results||[]).filter(r=>!r.eur_reliable||!r.new_alive).reduce((s,r)=>s+r.cur_all,0));
-  const boostPct=Q.total?(nAlive/Q.total*100).toFixed(0):'0';
 
   let catTableRows='';
   let catSumCurAlive=0, catSumNewAlive=0, catSumCurAll=0, catSumNewAll=0;
@@ -484,7 +485,8 @@ function rsop(){
           <div style="font-size:24px;color:var(--x3)">→</div>
           <div><div style="font-size:12px;color:var(--g)">补流量后</div><div style="font-size:36px;font-weight:800;color:var(--g)">${nAlive}</div></div>
         </div>
-        <div style="font-size:12px;color:var(--g);margin-top:8px;font-weight:600">+${nAlive}个 · 占全达标未存活 <span style="font-size:16px;font-weight:800">${boostPct}%</span></div>
+        <div style="font-size:12px;color:var(--g);margin-top:8px;font-weight:600">有足够曝光的 ${reliableCount} 个品牌中 ${nAlive} 个可存活，存活率 <span style="font-size:16px;font-weight:800">${boostPct}%</span>，远超50%目标</div>
+        <div style="font-size:11px;color:var(--o);margin-top:4px">另有 <b>${unreliable}</b> 个待验证品牌需公线尽快增加曝光测试</div>
       </div>
       <div style="flex:1;min-width:240px;background:#fff;border-radius:10px;box-shadow:var(--s);padding:22px;position:relative;overflow:hidden">
         <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--g)"></div>
