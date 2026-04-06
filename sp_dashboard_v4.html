@@ -188,7 +188,7 @@ function rsop(){
       <h3>上线后 · 关注三项指标</h3>
       <div class="sn-sub">三要素具备的品牌上线后，动态监测以下三项指标，及时排查异常</div>
       <div class="sop-factors">
-        <div class="sf-card"><h5>📊 存活率 <span style="font-size:9px;font-weight:400;background:var(--b1);color:var(--b);padding:1px 5px;border-radius:3px;margin-left:4px">公线+行业</span></h5><div class="sf-std">日均全渠道核销PV / 日均交易笔数 ≥ <span class="sv">1%</span><br><span style="color:var(--x4);font-size:10px">存活率 ≥ 1% 即为存活</span></div></div>
+        <div class="sf-card"><h5>📊 存活率 <span style="font-size:9px;font-weight:400;background:var(--b1);color:var(--b);padding:1px 5px;border-radius:3px;margin-left:4px">公线</span><span style="font-size:9px;font-weight:400;background:var(--g1);color:var(--g);padding:1px 5px;border-radius:3px;margin-left:4px">行业</span></h5><div class="sf-std">日均全渠道核销PV / 日均交易笔数 ≥ <span class="sv">1%</span><br><span style="color:var(--x4);font-size:10px">存活率 ≥ 1% 即为存活</span></div></div>
         <div class="sf-card"><h5>📡 二选一老客流量 <span style="font-size:9px;font-weight:400;background:var(--b1);color:var(--b);padding:1px 5px;border-radius:3px;margin-left:4px">公线</span></h5><div class="sf-std">日均二选一老客尽曝UV / 日均交易笔数 ≥ <span class="sv">1</span><br><span style="color:var(--x4);font-size:10px">老客流量充分度 = 1:1</span></div></div>
         <div class="sf-card"><h5>🏪 到店核销率 <span style="font-size:9px;font-weight:400;background:var(--g1);color:var(--g);padding:1px 5px;border-radius:3px;margin-left:4px">行业</span></h5><div class="sf-std">到店核销率 ≥ 餐饮腰部中位数 <span class="sv">40.4%</span><br><span style="color:var(--x4);font-size:10px">低于中位数需排查核销体验</span></div></div>
       </div>
@@ -240,7 +240,8 @@ function rsop(){
         <th style="min-width:140px">其他反馈</th>
       </tr></thead><tbody></tbody></table></div>
       <div id="scrCnt" style="font-size:10px;color:var(--x4);margin-top:3px"></div>
-    </details>`;
+    </details>
+    <div id="scrFbSummary" style="margin-top:8px"></div>`;
 
   // 三要素排查清单渲染
   const SCR=S.screen_brands||[];
@@ -322,6 +323,65 @@ function rsop(){
       </tr>`;
     });
     document.getElementById('scrCnt').textContent=fl.length+'/'+SCR.length+' 品牌';
+    // 反馈汇总
+    if(_fbLoaded){
+      const bizC={},priceC={},infraC={};
+      const bizBrands=SCR.filter(b=>b.issues.includes('经营模式'));
+      const priceBrands=SCR.filter(b=>b.issues.includes('货盘'));
+      const infraBrands=SCR.filter(b=>b.issues.includes('基建'));
+      function countFb(brands,field){
+        const c={};
+        brands.forEach(b=>{
+          const v=(_fbCache[b.brandId+'_'+field]||'').trim();
+          const rm=(_fbCache[b.brandId+'_screen_remark']||'').trim();
+          const label=v||('(未填'+(rm?'，备注: '+rm:'')+')');
+          c[label]=(c[label]||0)+1;
+        });
+        return Object.entries(c).sort((a,b)=>b[1]-a[1]);
+      }
+      const bizFb=countFb(bizBrands,'screen_biz');
+      const priceFb=countFb(priceBrands,'screen_price');
+      const infraFb=countFb(infraBrands,'screen_infra');
+      // 决策分类
+      let keepN=0,offN=0,talkN=0,otherN=0;
+      SCR.forEach(b=>{
+        const biz=(_fbCache[b.brandId+'_screen_biz']||'').trim();
+        const price=(_fbCache[b.brandId+'_screen_price']||'').trim();
+        const infra=(_fbCache[b.brandId+'_screen_infra']||'').trim();
+        const rm=(_fbCache[b.brandId+'_screen_remark']||'').trim();
+        if(biz.includes('计划下线')||price.includes('计划下线')||infra.includes('计划下线')||rm.includes('下线'))offN++;
+        else if(biz==='会员占比超过50%'||price==='全场券'||rm.includes('经营规模')||(rm.includes('存活')&&!rm.includes('未存活')))keepN++;
+        else if(biz==='沟通确认中'||price==='沟通确认中'||infra==='沟通确认中')talkN++;
+        else otherN++;
+      });
+      function fbRows(items){return items.map(([k,v])=>`<tr><td style="padding:3px 8px">${k}</td><td style="padding:3px 8px" class="nc"><b>${v}</b></td></tr>`).join('')}
+      document.getElementById('scrFbSummary').innerHTML=`<details>
+        <summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--x6);margin-bottom:6px">📊 初步反馈汇总 ▾</summary>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:14px">
+          <div style="background:#fff;border-radius:8px;box-shadow:var(--s);padding:14px">
+            <div style="font-size:12px;font-weight:700;color:#b45852;margin-bottom:8px">经营模式（${bizBrands.length}个品牌）</div>
+            <table style="width:100%;font-size:11px">${fbRows(bizFb)}</table>
+          </div>
+          <div style="background:#fff;border-radius:8px;box-shadow:var(--s);padding:14px">
+            <div style="font-size:12px;font-weight:700;color:#b49252;margin-bottom:8px">货盘（${priceBrands.length}个品牌）</div>
+            <table style="width:100%;font-size:11px">${fbRows(priceFb)}</table>
+          </div>
+          <div style="background:#fff;border-radius:8px;box-shadow:var(--s);padding:14px">
+            <div style="font-size:12px;font-weight:700;color:#5a8aad;margin-bottom:8px">基建（${infraBrands.length}个品牌）</div>
+            <table style="width:100%;font-size:11px">${fbRows(infraFb)}</table>
+          </div>
+        </div>
+        <div style="background:#fff;border-radius:8px;box-shadow:var(--s);padding:14px">
+          <div style="font-size:12px;font-weight:700;color:var(--x7);margin-bottom:8px">综合决策分类</div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px">
+            <div><span style="color:var(--g);font-weight:700;font-size:20px">${keepN}</span> <span style="color:var(--x5)">有合理解释</span></div>
+            <div><span style="color:#dc2626;font-weight:700;font-size:20px">${offN}</span> <span style="color:var(--x5)">计划下线</span></div>
+            <div><span style="color:var(--o);font-weight:700;font-size:20px">${talkN}</span> <span style="color:var(--x5)">沟通确认中</span></div>
+            <div><span style="color:var(--x4);font-weight:700;font-size:20px">${otherN}</span> <span style="color:var(--x5)">其他/未明确</span></div>
+          </div>
+        </div>
+      </details>`;
+    }
   }
   window.renderScreen=renderScreen;
   // 先渲染一次，feedback加载完后再刷
@@ -485,8 +545,7 @@ function rsop(){
           <div style="font-size:24px;color:var(--x3)">→</div>
           <div><div style="font-size:12px;color:var(--g)">补流量后</div><div style="font-size:36px;font-weight:800;color:var(--g)">${nAlive}</div></div>
         </div>
-        <div style="font-size:12px;color:var(--g);margin-top:8px;font-weight:600">有足够曝光的 ${reliableCount} 个品牌中 ${nAlive} 个可存活，存活率 <span style="font-size:16px;font-weight:800">${boostPct}%</span>，远超50%目标</div>
-        <div style="font-size:11px;color:var(--o);margin-top:4px">另有 <b>${unreliable}</b> 个待验证品牌需公线尽快增加曝光测试</div>
+        <div style="font-size:12px;color:var(--g);margin-top:8px;font-weight:600">+${nAlive}个 · 有效曝光品牌存活率 <span style="font-size:16px;font-weight:800">${boostPct}%</span></div>
       </div>
       <div style="flex:1;min-width:240px;background:#fff;border-radius:10px;box-shadow:var(--s);padding:22px;position:relative;overflow:hidden">
         <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--g)"></div>
@@ -503,6 +562,7 @@ function rsop(){
         <div style="font-size:13px;color:var(--x5);font-weight:600;margin-bottom:14px">待验证品牌</div>
         <div style="font-size:36px;font-weight:800;color:var(--o)">${unreliable}</div>
         <div style="font-size:12px;color:var(--x6);margin-top:8px;line-height:1.6">日均老客尽曝UV < 5，当前无有效核销数据。<br>需要有老客曝光，才能验证核销率能否达到1%。</div>
+        <div style="margin-top:8px"><span style="font-size:9px;font-weight:600;background:#fff7ed;color:#c2410c;padding:2px 6px;border-radius:3px">需尽快推动制订曝光</span></div>
       </div>
     </div>
     <div style="margin-bottom:20px">
