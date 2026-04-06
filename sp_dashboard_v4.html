@@ -357,7 +357,7 @@ function rsop(){
         const infra=(_fbCache[b.brandId+'_screen_infra']||'').trim();
         const rm=(_fbCache[b.brandId+'_screen_remark']||'').trim();
         if(biz.includes('计划下线')||price.includes('计划下线')||infra.includes('计划下线')||rm.includes('下线')){offN++;offList.push(b.name)}
-        else if(biz==='会员占比超过50%'||price==='全场券'||rm.includes('经营规模')||(rm.includes('存活')&&!rm.includes('未存活'))){keepN++;keepList.push(b.name)}
+        else if(biz==='会员占比超过50%'||biz==='代金券投放中'||price==='全场券'||infra.includes('经营规模小')||rm.includes('经营规模')||(rm.includes('存活')&&!rm.includes('未存活'))){keepN++;keepList.push(b.name)}
         else if(biz==='沟通确认中'||price==='沟通确认中'||infra==='沟通确认中')talkN++;
         else{otherN++;otherList.push({name:b.name,rm:rm})}
       });
