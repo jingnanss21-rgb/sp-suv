@@ -1,0 +1,16 @@
+# 只部署看板页面
+*.py
+*.json
+*.pyc
+__pycache__/
+.workbuddy/
+_*.py
+_*.js
+*.backup*
+*.bak
+extract_xlsx.js
+fix_prev.js
+sp_dashboard_v3*.html
+sp_dashboard_v4_backup.html
+sp_survival_*.html
+template_v3*.html
