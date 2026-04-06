@@ -257,9 +257,9 @@ function rsop(){
   scrAssts.forEach(v=>{document.getElementById('scrAsst').innerHTML+=`<option value="${v}">${v}</option>`});
 
   const _scrFbOpts={
-    '经营模式':['会员占比超过50%','不接受代金券，计划下线','沟通确认中'],
+    '经营模式':['会员占比超过50%','代金券投放中','不接受代金券，计划下线','沟通确认中'],
     '货盘':['全场券','商家无法提供，计划下线','沟通确认中'],
-    '基建':['商家无法获取，计划下线','沟通确认中']
+    '基建':['经营规模小，1店<10笔合理','商家无法获取，计划下线','沟通确认中']
   };
   function scrSelect(brandId,brandName,issueType,fieldKey){
     const cur=_fbCache[brandId+'_'+fieldKey]||'';
