@@ -4,6 +4,17 @@
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--b:#2563eb;--b1:#dbeafe;--b2:#1e40af;--g:#059669;--g1:#d1fae5;--r:#dc2626;--r1:#fee2e2;--o:#d97706;--o1:#fef3c7;--x0:#f8fafc;--x1:#f1f5f9;--x2:#e2e8f0;--x3:#cbd5e1;--x4:#94a3b8;--x5:#64748b;--x6:#475569;--x7:#334155;--rd:8px;--s:0 1px 3px rgba(0,0,0,.07)}
 body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;background:#eef2f7;color:#1e293b;font-size:13px;line-height:1.5}
+
+#loginOverlay{position:fixed;top:0;left:0;right:0;bottom:0;background:#eef2f7;z-index:99999;display:flex;align-items:center;justify-content:center}
+#loginOverlay.hidden{display:none}
+.login-box{background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,.12);padding:36px 32px;width:320px;text-align:center}
+.login-box h2{font-size:16px;font-weight:700;margin-bottom:6px;color:#1e293b}
+.login-box p{font-size:11px;color:#94a3b8;margin-bottom:20px}
+.login-box input{width:100%;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;outline:none;margin-bottom:12px}
+.login-box input:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.login-box button{width:100%;padding:10px;border:none;border-radius:8px;background:#2563eb;color:#fff;font-size:14px;font-weight:600;cursor:pointer}
+.login-box button:hover{background:#1e40af}
+.login-box .err{color:#dc2626;font-size:11px;margin-top:8px;display:none}
 .hdr{background:linear-gradient(135deg,#0f172a,#1e3a5f 50%,#1e40af);color:#fff;padding:20px 24px 14px}.hdr h1{font-size:18px}.hdr p{font-size:11px;color:rgba(255,255,255,.5);margin-top:2px}
 .W{max-width:1600px;margin:0 auto;padding:0 16px 32px}
 .tabs{display:flex;margin:14px 0 0;background:#fff;border-radius:var(--rd) var(--rd) 0 0;overflow:hidden;box-shadow:var(--s)}.tab{flex:1;padding:11px;text-align:center;font-size:13px;font-weight:600;color:var(--x5);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent}.tab:hover{color:#1e293b;background:var(--x0)}.tab.on{color:var(--b);border-bottom-color:var(--b)}
@@ -71,6 +82,41 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
 .ins b{color:#0369a1}
 @media(max-width:900px){.sop-factors{grid-template-columns:1fr}.kg{grid-template-columns:repeat(2,1fr)}}
 </style></head><body>
+<div id="loginOverlay">
+  <div class="login-box">
+    <h2>🔐 访问验证</h2>
+    <p>请输入密码查看看板</p>
+    <input id="loginPwd" type="password" placeholder="请输入密码" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">确认</button>
+    <div class="err" id="loginErr">密码错误，请重试</div>
+  </div>
+</div>
+<script>
+(function(){
+  var HASH='98d80342ef162b964745f9c124df287ff224488b43eb648b6c368612598c60e9';
+  var KEY='sp_suv_auth';
+  var DAYS=7;
+  function check(){
+    var stored=localStorage.getItem(KEY);
+    if(!stored)return false;
+    try{var d=JSON.parse(stored);return d.h===HASH&&Date.now()<d.e}catch(e){return false}
+  }
+  if(check()){document.getElementById('loginOverlay').classList.add('hidden')}
+  window.doLogin=function(){
+    var pwd=document.getElementById('loginPwd').value;
+    crypto.subtle.digest('SHA-256',new TextEncoder().encode(pwd)).then(function(buf){
+      var h=Array.from(new Uint8Array(buf)).map(function(b){return b.toString(16).padStart(2,'0')}).join('');
+      if(h===HASH){
+        localStorage.setItem(KEY,JSON.stringify({h:HASH,e:Date.now()+DAYS*86400000}));
+        document.getElementById('loginOverlay').classList.add('hidden');
+      }else{
+        document.getElementById('loginErr').style.display='block';
+        document.getElementById('loginPwd').value='';
+      }
+    });
+  };
+})();
+</script>
 <div id="loading" style="position:fixed;top:0;left:0;right:0;bottom:0;background:#eef2f7;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column"><div style="font-size:16px;color:#475569;font-weight:600">🍜 加载中...</div><div style="font-size:11px;color:#94a3b8;margin-top:6px">正在渲染数据</div></div>
 <div class="hdr"><h1>🍜 餐饮服务商 · 运营看板</h1><p>数据 2026-04-02 · 周报 0325-0331 · v4.6</p></div>
 <div class="W">
