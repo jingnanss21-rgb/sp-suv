@@ -24,7 +24,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
 .sop-dot{position:absolute;left:-28px;top:2px;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;z-index:1}
 .sop-dot.dot-b{background:var(--b)}.sop-dot.dot-g{background:var(--g)}.sop-dot.dot-o{background:var(--o)}
 .sop-node h3{font-size:14px;font-weight:700;margin-bottom:4px}.sop-node .sn-sub{font-size:11px;color:var(--x5);margin-bottom:10px}
-.sop-factors{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.sop-factors{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .sf-card{background:var(--x0);border:1px solid var(--x2);border-radius:6px;padding:12px}
 .sf-card h5{font-size:12px;font-weight:700;margin-bottom:6px;color:var(--x7)}
 .sf-std{font-size:11px;color:var(--x6);line-height:1.6;margin-bottom:8px}
@@ -79,8 +79,8 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
 <div class="P on" id="t0">
 <div class="S"><div class="ST">🎯 整体目标</div><div class="kg" id="sopTgt"></div></div>
 <div class="S"><div class="ST">🔍 运营SOP</div><div class="sop-card" id="sopCard"></div></div>
-<div class="S"><div class="ST">📊 在线商户三要素扫描 <span style="font-size:11px;font-weight:400;color:var(--x4)">151个在线腰部餐饮品牌</span></div><div id="sopFactors"></div></div>
-<div class="S"><div class="ST">👥 老客基数排查 <span style="font-size:11px;font-weight:400;color:var(--x4)">← 三要素全达标但未存活的59个品牌</span></div><div id="sopCustPool"></div></div>
+<div class="S"><div class="ST">📊 在线商户四要素扫描 <span style="font-size:11px;font-weight:400;color:var(--x4)">${SOP.total_waist||'—'}个在线腰部餐饮品牌</span></div><div id="sopFactors"></div></div>
+<div class="S"><div class="ST">👥 老客基数排查 <span style="font-size:11px;font-weight:400;color:var(--x4)">← 四要素全达标但未存活的${SOP.factors_v4&&SOP.factors_v4.all_pass_not_alive||'—'}个品牌</span></div><div id="sopCustPool"></div></div>
 <div class="S"><div class="ST">🎯 达标但未存活品牌分析 <span style="font-size:11px;font-weight:400;color:var(--x4)">← 老客池子充足的50个品牌</span></div><div id="sopQuadrant"></div></div>
 <div class="S"><div class="ST">📈 补充流量提升测算 <span style="font-size:11px;font-weight:400;color:var(--x4)">← 基于象限C/D品牌</span></div><div id="sopBoost"></div></div>
 <div class="S"><div class="ST">📎 附录</div><div id="sopAppendix"></div></div>
@@ -176,8 +176,8 @@ function rsop(){
   // SOP timeline（不变）
   document.getElementById('sopCard').innerHTML=`<div class="sop-timeline">
     <div class="sop-node"><div class="sop-dot dot-b">1</div>
-      <h3>上线前 · 检查三要素</h3>
-      <div class="sn-sub">上线前完成引入质量把控，通过三要素的品牌上线直接参加置顶策略。若不符合三要素、需报备批准后上线。</div>
+      <h3>上线前 · 检查四要素</h3>
+      <div class="sn-sub">上线前完成引入质量把控，通过四要素的品牌上线直接参加置顶策略。若不符合四要素、需报备批准后上线。</div>
       <div class="sop-factors">
         <div class="sf-card"><h5>🏪 经营模式 <span style="font-size:9px;font-weight:400;background:var(--g1);color:var(--g);padding:1px 5px;border-radius:3px;margin-left:4px">行业</span></h5><div class="sf-std">小程序渗透率 ≥ <span class="sv">50%</span><br>或 会员交易占比 ≥ <span class="sv">50%</span></div></div>
         <div class="sf-card"><h5>💰 货盘价格力 <span style="font-size:9px;font-weight:400;background:var(--g1);color:var(--g);padding:1px 5px;border-radius:3px;margin-left:4px">行业</span></h5><div class="sf-std">价格力 ≥ <span class="sv">0</span><br>（不贵于抖音/美团竞品）</div></div>
@@ -187,7 +187,7 @@ function rsop(){
     </div>
     <div class="sop-node"><div class="sop-dot dot-g">2</div>
       <h3>上线后 · 关注三项指标</h3>
-      <div class="sn-sub">三要素具备的品牌上线后，动态监测以下三项指标，及时排查异常</div>
+      <div class="sn-sub">四要素具备的品牌上线后，动态监测以下三项指标，及时排查异常</div>
       <div class="sop-factors">
         <div class="sf-card"><h5>📊 存活率 <span style="font-size:9px;font-weight:400;background:var(--b1);color:var(--b);padding:1px 5px;border-radius:3px;margin-left:4px">公线</span><span style="font-size:9px;font-weight:400;background:var(--g1);color:var(--g);padding:1px 5px;border-radius:3px;margin-left:4px">行业</span></h5><div class="sf-std">日均全渠道核销PV / 日均交易笔数 ≥ <span class="sv">1%</span><br><span style="color:var(--x4);font-size:10px">存活率 ≥ 1% 即为存活</span></div></div>
         <div class="sf-card"><h5>📡 二选一老客流量 <span style="font-size:9px;font-weight:400;background:var(--b1);color:var(--b);padding:1px 5px;border-radius:3px;margin-left:4px">公线</span></h5><div class="sf-std">日均二选一老客尽曝UV / 日均交易笔数 ≥ <span class="sv">1</span><br><span style="color:var(--x4);font-size:10px">老客流量充分度 = 1:1</span></div></div>
@@ -196,7 +196,7 @@ function rsop(){
     </div>
   </div>`;
 
-  // === 三要素扫描 ===
+  // === 四要素扫描 ===
   const S=SOP;
   const fv4=S.factors_v4||{};
   function fCard(cat,metricDesc,n,total,color,followUp){
@@ -223,7 +223,7 @@ function rsop(){
       ${fCard('全达标','四要素均达标',fv4.all_pass,fv4.valid,'var(--b)','其中未存活 '+(S.cust_pool?S.cust_pool.total:S.quadrant.total)+'个 → 排查老客基数后进入象限分析')}
     </div>
     <div id="scrFbSummary" style="margin-top:12px"></div>
-    <!-- 三要素排查清单 -->
+    <!-- 四要素排查清单 -->
     <details style="margin-top:12px">
       <summary style="cursor:pointer;font-size:13px;font-weight:700;color:var(--x7);margin-bottom:8px">📋 四要素待排查商户清单（${(S.screen_brands||[]).length}个）▾</summary>
       <div style="margin-bottom:10px">
@@ -243,6 +243,7 @@ function rsop(){
         <th style="background:#5a8aad;color:#fff;min-width:130px">基建-商户号反馈</th>
         <th style="background:#6366f1;color:#fff;min-width:130px">基建-门店反馈</th>
         <th style="min-width:140px">0406反馈</th>
+        <th style="min-width:160px;background:#7c3aed;color:#fff">0407-0410反馈</th>
       </tr></thead><tbody></tbody></table></div>
       <div id="scrCnt" style="font-size:10px;color:var(--x4);margin-top:3px"></div>
     </details>
@@ -250,7 +251,7 @@ function rsop(){
       let rows='';dm.forEach(b=>{rows+='<tr><td style="padding:4px 8px;font-weight:600">'+b.name+'</td><td style="padding:4px 8px">'+(b.brandId||'—')+'</td><td style="padding:4px 8px">'+(b.sp||'—')+'</td><td style="padding:4px 8px">'+(b.owner||'—')+'</td><td style="padding:4px 8px">'+(b.assistant||'—')+'</td><td style="padding:4px 8px">'+(b.cat4||'—')+'</td><td style="padding:4px 8px">'+(b.isAlive===true?'<span class="bd b-ok">存活</span>':(b.isAlive===false?'<span class="bd b-d">未存活</span>':'—'))+'</td><td style="padding:4px 8px" class="nc">'+(b.storeCount!=null?b.storeCount:'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.dailyTx?b.dailyTx.toLocaleString():'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.txPerStore!=null?b.txPerStore:'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.miniApp!=null?b.miniApp+'%':'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.priceForce!=null?(b.priceForce>0?'+':'')+b.priceForce+'%':'—')+'</td></tr>'});
       return '<details style="margin-top:12px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--x4);margin-bottom:6px">⚠️ 小程序交易占比无数据品牌（'+dm.length+'个）— 待日报更新 ▾</summary><div class="tw"><table style="width:100%;font-size:11px;border-collapse:collapse"><thead><tr style="background:var(--x0)"><th style="padding:5px 8px;text-align:left">品牌</th><th style="padding:5px 8px">品牌ID</th><th style="padding:5px 8px">服务商</th><th style="padding:5px 8px">负责人</th><th style="padding:5px 8px">助理</th><th style="padding:5px 8px">业态</th><th style="padding:5px 8px">存活</th><th style="padding:5px 8px" class="nc">门店数</th><th style="padding:5px 8px" class="nc">日均交易</th><th style="padding:5px 8px" class="nc">1店几笔</th><th style="padding:5px 8px" class="nc">小程序占比</th><th style="padding:5px 8px" class="nc">价格力</th></tr></thead><tbody>'+rows+'</tbody></table></div></details>'})()}`;
 
-  // 三要素排查清单渲染
+  // 四要素排查清单渲染
   const SCR=S.screen_brands||[];
   // 填筛选下拉
   const scrSPs=[...new Set(SCR.map(b=>b.sp))].sort();
@@ -285,12 +286,18 @@ function rsop(){
     try{localStorage.setItem('scr_'+brandId+'_screen_remark',el.value)}catch(e){}
     flashSaved(el);
   }
+  function scrFb0410Change(el,brandId,brandName){
+    saveFeedback(brandId,brandName,'screen_fb0410',el.value);
+    try{localStorage.setItem('scr_'+brandId+'_screen_fb0410',el.value)}catch(e){}
+    flashSaved(el);
+  }
   function flashSaved(el){
     el.style.borderColor='#059669';el.style.boxShadow='0 0 0 2px #d1fae5';
     setTimeout(()=>{el.style.borderColor='';el.style.boxShadow=''},1200);
   }
   window.scrFbChange=scrFbChange;
   window.scrRemarkChange=scrRemarkChange;
+  window.scrFb0410Change=scrFb0410Change;
 
   function renderScreen(){
     const fSP=document.getElementById('scrSP').value;
@@ -315,6 +322,7 @@ function rsop(){
       }).join('');
       // 其他反馈从缓存恢复
       const remarkVal=_fbCache[b.brandId+'_screen_remark']||(()=>{try{return localStorage.getItem('scr_'+b.brandId+'_screen_remark')||''}catch(e){return''}})();
+      const fb0410Val=_fbCache[b.brandId+'_screen_fb0410']||(()=>{try{return localStorage.getItem('scr_'+b.brandId+'_screen_fb0410')||''}catch(e){return''}})();
 
       tb.innerHTML+=`<tr>
         <td style="text-align:left;font-weight:600">${b.name}</td>
@@ -332,6 +340,7 @@ function rsop(){
         <td>${b.issues.includes('基建-商户号')?scrSelect(b.brandId,b.name,'基建','screen_infra'):''}</td>
         <td>${b.issues.includes('基建-门店')?scrSelect(b.brandId,b.name,'门店','screen_store'):''}</td>
         <td><textarea class="rm" style="min-width:140px;font-size:12px;padding:4px 6px" placeholder="..." onblur="scrRemarkChange(this,'${b.brandId}','${b.name.replace(/'/g,"\\'")}')" onkeydown="if(event.key==='Enter'){event.preventDefault();scrRemarkChange(this,'${b.brandId}','${b.name.replace(/'/g,"\\'")}');this.blur()}" onclick="event.stopPropagation()">${remarkVal}</textarea></td>
+        <td><textarea class="rm" style="min-width:160px;font-size:12px;padding:4px 6px" placeholder="0407-0410反馈..." onblur="scrFb0410Change(this,'${b.brandId}','${b.name.replace(/'/g,"\\'")}')" onkeydown="if(event.key==='Enter'){event.preventDefault();scrFb0410Change(this,'${b.brandId}','${b.name.replace(/'/g,"\\'")}');this.blur()}" onclick="event.stopPropagation()">${fb0410Val}</textarea></td>
       </tr>`;
     });
     document.getElementById('scrCnt').textContent=fl.length+'/'+SCR.length+' 品牌';
@@ -430,7 +439,7 @@ function rsop(){
   cpOkRows+=`<tr style="font-weight:700;background:var(--x1)"><td>合计/均值</td><td></td><td></td><td></td><td></td><td class="nc">${sumDtx.toLocaleString()}</td><td></td><td class="nc" style="background:#dbeafe">${sumApp.toLocaleString()}</td><td class="nc" style="background:#dbeafe">${sumExp.toLocaleString()}</td><td class="nc" style="background:#dbeafe">${avgRate}%</td><td class="nc" style="background:#dbeafe">${sumUse.toFixed(0)}</td><td class="nc" style="background:#dbeafe">${avgEUR}%</td></tr>`;
 
   document.getElementById('sopCustPool').innerHTML=`
-    <div style="font-size:12px;color:var(--x6);margin-bottom:12px">三要素全达标但未存活的 <b>${CP.total}个</b> 品牌，排查老客基数是否支撑1:1曝光目标</div>
+    <div style="font-size:12px;color:var(--x6);margin-bottom:12px">四要素全达标但未存活的 <b>${CP.total}个</b> 品牌，排查老客基数是否支撑1:1曝光目标</div>
     <div style="font-size:11px;color:var(--x5);margin-bottom:14px">排查口径：二选一应曝老客UV（近7日高频+低频）/ 日均交易笔数 ≥ 1</div>
     <div style="display:flex;gap:14px;margin-bottom:14px">
       <div style="flex:1;background:#fff;border-radius:10px;box-shadow:var(--s);padding:18px;position:relative;overflow:hidden">
@@ -469,7 +478,7 @@ function rsop(){
   const qA=QS.A||{count:0},qB=QS.B||{count:0},qC=QS.C||{count:0},qD=QS.D||{count:0},qX=QS.X||{count:0};
 
   document.getElementById('sopQuadrant').innerHTML=`
-    <div style="font-size:12px;color:var(--x5);margin-bottom:16px">三要素全达标、老客池子充足但未存活的 <b style="color:var(--x7)">${Q.total}个</b> 品牌，按老客曝光充分度和曝光核销率分为四个象限：</div>
+    <div style="font-size:12px;color:var(--x5);margin-bottom:16px">四要素全达标、老客池子充足但未存活的 <b style="color:var(--x7)">${Q.total}个</b> 品牌，按老客曝光充分度和曝光核销率分为四个象限：</div>
     <div style="max-width:860px;margin:0 auto">
       <!-- 上半：曝光充足 → B(左,低核销) + A(右,高核销) -->
       <div style="display:flex">
@@ -672,14 +681,14 @@ function rsop(){
           <div style="display:flex;flex-direction:column;gap:0">
             <div style="${cs};min-height:120px">
               ${topBar('var(--g)')}
-              <div style="font-size:12px;color:var(--x5);margin-bottom:6px">三要素达标</div>
+              <div style="font-size:12px;color:var(--x5);margin-bottom:6px">四要素达标</div>
               <div style="font-size:32px;font-weight:800;color:var(--g)">${ZU.pass_count}</div>
             </div>
             <div style="${csB}">
               ${topBar('#b45852')}
               <div style="font-size:12px;color:#b45852;margin-bottom:6px">↓ 不达标</div>
               <div style="font-size:24px;font-weight:800;color:#b45852">${ZU.fail_count}</div>
-              <div style="font-size:10px;color:var(--x4);margin-top:4px">待排查三要素</div>
+              <div style="font-size:10px;color:var(--x4);margin-top:4px">待排查四要素</div>
             </div>
           </div>
           <div style="display:flex;flex-direction:column;gap:0">
@@ -704,7 +713,7 @@ function rsop(){
             </div>
           </div>
         </div>`
-        +(ZU.fail_brands&&ZU.fail_brands.length?'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:#b45852;margin-bottom:6px">↓ 三要素不达标（'+ZU.fail_count+'个）→ 待排查三要素 ▾</summary><div class="tw">'+tbl+thBase+'<tbody>'+ZU.fail_brands.map(baseRow).join('')+'</tbody></table></div></details>':'')
+        +(ZU.fail_brands&&ZU.fail_brands.length?'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:#b45852;margin-bottom:6px">↓ 四要素不达标（'+ZU.fail_count+'个）→ 待排查四要素 ▾</summary><div class="tw">'+tbl+thBase+'<tbody>'+ZU.fail_brands.map(baseRow).join('')+'</tbody></table></div></details>':'')
         +(ZU.pool_fail_brands&&ZU.pool_fail_brands.length?'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--o);margin-bottom:6px">↓ 老客基数不够（'+ZU.pool_fail+'个）→ 待确认罗盘规则 ▾</summary><div class="tw">'+tbl+thFlow+'<tbody>'+ZU.pool_fail_brands.map(flowRow).join('')+'</tbody></table></div></details>':'')
         +(ZU.pool_ok_brands&&ZU.pool_ok_brands.length?'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:#c2410c;margin-bottom:6px">→ 尽曝UV < 5（'+(ZU.pool_ok||0)+'个）→ 需公线尽快置顶 ▾</summary><div class="tw">'+tbl+thFlow+'<tbody>'+ZU.pool_ok_brands.map(flowRow).join('')+'</tbody></table></div></details>':'');
       })()}
