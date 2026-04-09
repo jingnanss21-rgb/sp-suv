@@ -191,7 +191,7 @@ function rsop(){
       <div class="sop-factors">
         <div class="sf-card"><h5>📊 存活率 <span style="font-size:9px;font-weight:400;background:var(--b1);color:var(--b);padding:1px 5px;border-radius:3px;margin-left:4px">公线</span><span style="font-size:9px;font-weight:400;background:var(--g1);color:var(--g);padding:1px 5px;border-radius:3px;margin-left:4px">行业</span></h5><div class="sf-std">日均全渠道核销PV / 日均交易笔数 ≥ <span class="sv">1%</span><br><span style="color:var(--x4);font-size:10px">存活率 ≥ 1% 即为存活</span></div></div>
         <div class="sf-card"><h5>📡 二选一老客流量 <span style="font-size:9px;font-weight:400;background:var(--b1);color:var(--b);padding:1px 5px;border-radius:3px;margin-left:4px">公线</span></h5><div class="sf-std">日均二选一老客尽曝UV / 日均交易笔数 ≥ <span class="sv">1</span><br><span style="color:var(--x4);font-size:10px">老客流量充分度 = 1:1</span></div></div>
-        <div class="sf-card"><h5>🏪 到店核销率 <span style="font-size:9px;font-weight:400;background:var(--g1);color:var(--g);padding:1px 5px;border-radius:3px;margin-left:4px">行业</span></h5><div class="sf-std">到店核销率 ≥ 餐饮腰部中位数 <span class="sv">${((S.alive_stats||{}).visitUseRate||{}).med||'—'}%</span><br><span style="color:var(--x4);font-size:10px">按月review，动态更新；低于中位数需排查核销体验</span></div></div>
+        <div class="sf-card"><h5>🏪 到店核销率 <span style="font-size:9px;font-weight:400;background:var(--g1);color:var(--g);padding:1px 5px;border-radius:3px;margin-left:4px">行业</span></h5><div class="sf-std">到店核销率 ≥ 餐饮腰部中位数 <span class="sv">${((SOP.alive_stats||{}).visitUseRate||{}).med||'—'}%</span><br><span style="color:var(--x4);font-size:10px">按月review，动态更新；低于中位数需排查核销体验</span></div></div>
       </div>
     </div>
   </div>`;
