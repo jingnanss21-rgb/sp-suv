@@ -229,8 +229,7 @@ function rsop(){
           <select id="scrSP" onchange="renderScreen()"><option value="">服务商</option></select>
           <select id="scrOwner" onchange="renderScreen()"><option value="">负责人</option></select>
           <select id="scrAsst" onchange="renderScreen()"><option value="">助理</option></select>
-          <select id="scrIssue" onchange="renderScreen()"><option value="">待排查问题</option><option value="经营模式">经营模式</option><option value="货盘">货盘</option><option value="基建">基建</option></select>
-          <select id="scrSC" onchange="renderScreen()"><option value="">门店完整度</option><option value="low">&lt;90%</option><option value="ok">≥90%</option><option value="null">无数据</option></select>
+          <select id="scrIssue" onchange="renderScreen()"><option value="">待排查问题</option><option value="经营模式">经营模式</option><option value="货盘">货盘</option><option value="基建">基建</option><option value="门店完整度">门店完整度&lt;90%</option></select>
           <input id="scrQ" type="text" placeholder="搜索品牌" oninput="renderScreen()" style="width:100px">
         </div>
       </div>
@@ -301,16 +300,13 @@ function rsop(){
     const fOwner=document.getElementById('scrOwner').value;
     const fAsst=document.getElementById('scrAsst').value;
     const fIssue=document.getElementById('scrIssue').value;
-    const fSC=document.getElementById('scrSC').value;
     const fQ=(document.getElementById('scrQ').value||'').toLowerCase();
     let fl=SCR.filter(b=>{
       if(fSP&&b.sp!==fSP)return false;
       if(fOwner&&b.owner!==fOwner)return false;
       if(fAsst&&b.assistant!==fAsst)return false;
-      if(fIssue&&!b.issues.includes(fIssue))return false;
-      if(fSC==='low'&&!(b.storeComplete!==null&&b.storeComplete<90))return false;
-      if(fSC==='ok'&&!(b.storeComplete!==null&&b.storeComplete>=90))return false;
-      if(fSC==='null'&&b.storeComplete!==null)return false;
+      if(fIssue==='门店完整度'){if(!(b.storeComplete!==null&&b.storeComplete<90))return false}
+      else if(fIssue&&!b.issues.includes(fIssue))return false;
       if(fQ&&!b.name.toLowerCase().includes(fQ)&&!(b.brandId||'').includes(fQ))return false;
       return true;
     });
