@@ -213,7 +213,7 @@ function mapBrand(r) {
   return {
     name: r.brand_name, brandId: r.brand_id, sp: r.sp_name,
     spMapped: r.sp_name, // 同 sp
-    statusManual: r.display_level==='ka'?'在线':r.status==='流失'?'流失':'在线', // 从 status 推断
+    statusManual: r.status||'在线', // 直接用跟进总表的人工状态
     statusDaily: r.status, tierManual: r.tier_human, tierDaily: r.tier,
     assistant: r.assistant, owner: r.owner, couponSP: r.coupon_sp,
     hasDailyData: r.daily_tx!=null && r.daily_tx>0,
@@ -228,7 +228,7 @@ function mapBrand(r) {
     bizOk: r.factor_biz, priceOk: r.factor_price,
     infraOk: r.factor_infra, storeOk: r.factor_store,
     trafficOk: r.survival_rate!=null ? r.survival_rate >= 5.8 : false,
-    onlineStatus: r.status==='流失'?'流失':(r.daily_tx!=null?'在线':'未更新'),
+    onlineStatus: r.status==='流失'?'流失':(r.daily_tx!=null&&r.daily_tx>0?'在线':'未更新'),
     // UV 字段
     hiAppUV: r.hi_app_uv_e21, loAppUV: r.lo_app_uv_e21,
     hiExpUV: r.hi_exp_uv_e21, loExpUV: r.lo_exp_uv_e21,
@@ -302,8 +302,7 @@ function enrichBrand(b) {
   }
   // 如果 statusDaily 是流失，statusManual 也是流失
   if (b.statusDaily==='流失') b.statusManual='流失';
-  else if (b.hasDailyData) b.statusManual='在线';
-  else b.statusManual='在线'; // 默认
+  // 不覆盖跟进总表的原始状态
 
   return b;
 }
@@ -324,6 +323,28 @@ function mapBC(r) {
   };
 }
 
+// activity_detail → acts 映射
+function mapAct(r) {
+  return {
+    brandName: r.brand_name, activityId: r.activity_id, activityName: r.activity_name,
+    couponName: r.coupon_name, couponDetail: r.coupon_detail, discountType: r.discount_type,
+    threshold: r.threshold, amount: r.amount, onlineDays: r.online_days,
+    priceForce: r.price_force, thresholdJudge: r.threshold_judge, thresholdVal: r.threshold_val,
+    brandAvgPrice: r.brand_avg_price,
+    expPV: r.exp_pv, claimPV: r.claim_pv, usePV: r.use_pv,
+    expUV: r.exp_uv, claimUV: r.claim_uv, useUV: r.use_uv,
+    dailyExpPV: r.daily_exp_pv, expClaimRate: r.exp_claim_rate,
+    claimUseRate: r.claim_use_rate, expUseRate: r.exp_use_rate, dailyUsePV: r.daily_use_pv,
+    hiAppRate: r.hi_app_rate, loAppRate: r.lo_app_rate,
+    afterExpClaim: r.after_exp_claim, afterClaimVisit: r.after_claim_visit,
+    visitUseRate: r.visit_use_rate, visitNoThreshold: r.visit_no_threshold,
+    visit7dNoThreshold: r.visit_7d_no_threshold, visit7dThreshold: r.visit_7d_threshold,
+    visitUseAvgPrice: r.visit_use_avg_price, visitNoUseAvgPrice: r.visit_no_use_avg_price,
+    visit7dUse: r.visit_7d_use, visit7dNoUse: r.visit_7d_no_use,
+    isSP: r.is_sp, spName: r.sp_name, expValid: r.exp_valid, useValid: r.use_valid, tier: r.tier
+  };
+}
+
 // 静态配置（服务商概览 & 总目标）
 const SPS_CONFIG = {"企迈": {"name": "企迈", "type": "SaaS服务商", "owner": "warm", "target": 180.0, "brands": ["大米先生", "呷哺呷哺", "沪上阿姨", "霸王茶姬", "茉莉奶白", "茶理宜世", "益禾堂", "爷爷不泡茶", "阿水大杯茶", "周黑鸭", "茉酸奶", "85度C", "加减", "谷田稻香", "柠檬向右", "朱大叔柠檬茶", "宝藏绿洲", "英歌魂", "牛男手造披萨", "茶精灵", "茶米有言", "新佳美", "NOWWA挪瓦咖啡", "LINLEE", "李华泽", "酸奶罐罐", "至尊比萨", "陈文鼎", "百分茶", "茶救星球", "犟骨头", "树夏", "萃春疯", "小咖咖啡", "比星咖啡", "苍井寿司", "东方墨蘭", "三号椰", "正谈炸鸡", "稻状元", "阿杏饭团", "雾鲜雾鲜", "C位牛男", "柠檬7", "好运椰", "裕莲茶楼", "老盐季", "万方圆", "枫蓝", "同仁四季椰子鸡", "田一町", "SUPERYEAH", "诺杯·茉莉鲜奶茶", "世家堂凉茶", "御蝶坊", "小女当家", "大满糖", "DAVIDS 大维饮品", "SOMETHING FOR", "森茶", "一杯潮茶", "鸡王盐焗食品", "一叶觅山", "芋田田", "百分大众果汁冰", "小宠制菓", "周友秀", "甜甜撞茶", "友茶", "馬伍旺", "tingzi", "菲尔雪", "指饮茶饮", "丘大叔", "牧场能量", "LELECHA", "茯灵记", "甄茶", "HUN 混果汁", "心研茶", "肥汁米蘭", "窑鸡王", "蒙自源", "三只熊披萨", "八珍王", "初茶", "可斯克", "茶满方庭", "小金金手作", "山山家", "梨园梅派", "炖物24章", "子情贝诺", "VINKO小厨", "越南咖啡"]}, "天财商龙": {"name": "天财商龙", "type": "SaaS服务商", "owner": "小雪", "target": 180.0, "brands": ["回水镇", "转转热卤", "珮姐老火锅", "GAGA", "喜家德", "馬記永", "朴大叔", "COMMUNE", "陶陶居", "鲜芋仙", "滋粥楼小馆", "山东老家", "鼎大丰", "阳阳中国饭", "海岛说·椰子鸡火锅", "争鲜寿司", "小六汤包", "醉面", "肉串汪", "悦享麦合", "渝姐老火锅", "味莊茶餐厅", "Grande A'moo", "半亩田", "赛维利亚", "御之宴", "酒煮江湖", "最云味·宣威菜", "一哥靓汤", "绍和兴宽汤细面", "金典银峰老鹅馆", "大榕树下凤厨", "崐三腔", "五口灶下饭小炒大王", "黄花滩永新菜", "王妈妈", "岚鲸鮨", "天津大圆碗食品有限公司", "黔蘑菇", "1886汽车餐厅", "津门桥头堡", "阿强家川菜", "爱碗亭", "蘑界", "好吃先生辣椒炒肉", "肘子酥", "苏焰", "涮福记", "煲仔皇", "羊灼记", "李小太烧烤", "陈家味庄", "堂吉诃德", "大肆撸串", "梨花牛肉汤饭", "武圣羊汤", "麻辣空间清油火锅", "玖玖餐饮（韩味园）", "湘间田舍", "红荔村", "菲滋", "许爷剁椒鱼头", "爱伲牛肉", "爱尔牛奶/爱尒牛奶", "南流江畔", "小龙坎火锅", "壹加壹（City1+1pizza）", "胜香旺老柳州螺蛳粉", "叶派", "天怡興百年蒸饺", "椒爱", "一心烧鸟屋", "仓桥家", "一哥和宴", "峰峰菜馆", "美奈小馆", "湘一回辣椒炒肉", "NORU无规", "番疆", "山野西北", "民谣集", "点众餐饮/比萨拉姆", "ONE SMILE", "乡悦天下", "亚马逊海鲜自助", "鑫帝金喜", "楠城湘"]}, "盈动易象": {"name": "盈动易象", "type": "SaaS服务商", "owner": "小雪", "target": 10.0, "brands": ["好好咖啡", "不咫", "啡芽", "周茉ZHOUMO", "大地小禾", "珀森咖啡", "perhaps coffee", "诺园茶", "挽风甜点", "棠小芯的辅食店", "大咖茶", "NINE●咖啡三明治", "胡漓HOORAY", "每草堂", "淼今日煲"]}, "银豹": {"name": "银豹", "type": "SaaS服务商", "owner": "振哥", "target": 20.0, "brands": ["芝卷卷", "FARCHON菲颂", "捞佰吉", "果老师", "此间咖啡小红帽三明治", "曼爱时光", "鲜果小铺", "迎途商超", "猫的饼干", "魏姑娘", "婴味辅食", "Hi-Moomuse生活（餐桌蛋白生活馆）", "灵晓宝肉夹馍", "大豫人家", "啵达", "恬恬夏雪", "流金牧场", "明气", "Q一族", "焙心面包"]}, "全来店": {"name": "全来店", "type": "SaaS服务商", "owner": "小蛇", "target": 50.0, "brands": ["农畉LONFOOD", "牛扒先生", "及第粉JDF", "阿赛小面", "柠见", "淘蛙", "MACCACOFFEE摩卡咖啡", "汉拿山烤肉", "玖宴淮扬菜", "A餐吧", "美颐美", "金戈戈", "记香来", "德洲汉堡", "穗烨居", "一品焖锅", "小城渔家", "匠人牛品", "水墨田塬", "食必居SBJ", "西琳姑娘", "嘟嘟泰国小馆", "小然同學.台灣食堂", "觅小鲜", "必胜基", "夏日玛莉", "妈妈甜", "米国煲仔饭", "狮头牌自助点餐+"]}, "FLIPOS": {"name": "FLIPOS", "type": "SaaS服务商", "owner": "warm", "target": 20.0, "brands": ["泽田Ze-Tian", "CFINE初饭新轻餐", "bulubulu 轻养食堂"]}, "奥琦玮": {"name": "奥琦玮", "type": "SaaS服务商", "owner": "小雪", "target": 10.0, "brands": ["嘉和一品粥"]}, "美团": {"name": "美团", "type": "SaaS服务商", "owner": "振哥、小蛇", "target": 260.0, "brands": ["克茗冰室", "兵立王", "三两粉", "KUMO KUMO", "袁小饺", "味千拉麺", "柠季", "莫沫南路", "Yogurtday", "潮风堂", "糖叙", "霸碗", "袁记云饺", "700CC", "茶话弄", "Yes Lemon就是柠·手打柠檬茶", "永民手作", "麻六记", "拌侠客", "楼下酸奶", "宜味客", "喜喜点心", "潮蹄", "啊爆柠檬茶"]}, "有好": {"name": "有好", "type": "SaaS服务商", "owner": "振哥", "target": 8.0, "brands": ["大弗兰", "苏晓玥", "老碗会"]}, "食亨": {"name": "食亨", "type": "SaaS服务商", "owner": "振哥", "target": 2.0, "brands": ["满巍明", "小鱼号酸菜鱼"]}, "扫呗": {"name": "扫呗", "type": "经营服务商", "owner": "振哥、小蛇", "target": 10.0, "brands": ["枣木牌烤鸭", "三品王"]}, "乐世微广": {"name": "乐世微广", "type": "经营服务商", "owner": "振哥、小蛇", "target": 8.0, "brands": ["大龙燚火锅"]}, "米雅": {"name": "米雅", "type": "经营服务商", "owner": "振哥、小蛇", "target": 2.0, "brands": ["粒上皇", "紫燕百味鸡"]}, "收钱吧": {"name": "收钱吧", "type": "经营服务商", "owner": "振哥、小蛇", "target": 10.0, "brands": ["川海丰尚", "老门框爆肚涮肉", "潮汕粿条汤粉（海文店）", "栖水兰亭·影院足道·疗愈SPA"]}, "自研": {"name": "自研", "type": "经营服务商", "owner": "振哥、小蛇", "target": 30.0, "brands": ["麦悠悠养身小馆", "四个朋友", "面包新语", "喜乳酪", "泸溪河", "幸福西饼", "张亮麻辣烫", "尊宝", "巴黎贝甜", "半天妖", "蛙来哒", "探鱼", "蔡澜点心", "太二", "杨国福", "小铁24h自助台球", "谈小娱", "优剪", "八喜冰淇淋蛋糕"]}, "其他": {"name": "其他", "type": "—", "owner": "—", "target": 0, "brands": ["茶瀑布"]}};
 const TOTAL_TARGET = 800;
@@ -338,15 +359,16 @@ async function loadAll() {
     if (!latestDate) throw new Error('brand_snapshot 表无数据');
 
     // 2. 并行拉取所有数据
-    const [brandRows, bcRows, sopRows, spRows] = await Promise.all([
+    const [brandRows, bcRows, sopRows, spRows, actRows] = await Promise.all([
       supaFetch('brand_snapshot', `data_date=eq.${latestDate}&order=brand_id`),
       supaFetch('brand_channel', `data_date=eq.${latestDate}&order=brand_id`),
       supaFetch('sop_snapshot', `data_date=eq.${latestDate}&limit=1`),
-      supaFetch('sp_info', 'order=sp_name')
+      supaFetch('sp_info', 'order=sp_name'),
+      supaFetch('activity_detail', `data_date=eq.${latestDate}&order=brand_name,activity_id`)
     ]);
 
     document.getElementById('loading').querySelector('div:last-child').textContent=
-      `已获取 ${brandRows.length} 个品牌 · 正在渲染`;
+      `已获取 ${brandRows.length} 个品牌 · ${actRows.length} 个活动 · 正在渲染`;
 
     // 3. 映射 & 计算衍生字段
     const brands = brandRows.map(r => enrichBrand(mapBrand(r)));
@@ -419,7 +441,7 @@ async function loadAll() {
       },
       sop: sop,
       bc: bc,
-      acts: [] // 活动明细暂时为空，待 acts 表建好后补充
+      acts: actRows.map(mapAct) // 活动明细，从 activity_detail 表加载
     };
 
     return D;
