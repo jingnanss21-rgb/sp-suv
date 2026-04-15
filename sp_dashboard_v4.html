@@ -70,9 +70,9 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
 .ins{background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border:1px solid #bae6fd;border-radius:var(--rd);padding:14px 16px;margin:14px 0;font-size:12px;color:#0c4a6e;line-height:1.7}
 .ins b{color:#0369a1}
 @media(max-width:900px){.sop-factors{grid-template-columns:1fr}.kg{grid-template-columns:repeat(2,1fr)}}
-</style></head><body>
+</style></head><body><div style="position:fixed;top:8px;right:16px;z-index:999;background:var(--bg,#fff);padding:4px 8px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.1)"><select id="dateSelector" style="padding:4px;border:1px solid #ddd;border-radius:4px;font-size:12px"></select></div>
 <div id="loading" style="position:fixed;top:0;left:0;right:0;bottom:0;background:#eef2f7;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column"><div style="font-size:16px;color:#475569;font-weight:600">🍜 加载中...</div><div style="font-size:11px;color:#94a3b8;margin-top:6px">正在渲染数据</div></div>
-<div class="hdr"><h1>🍜 餐饮服务商 · 运营看板</h1><p id="hdrDateInfo" style="margin:0;line-height:1.6"></p></div>
+<div class="hdr"><h1>🍜 餐饮服务商 · 运营看板</h1><p>数据 2026-04-14 · 周报 0402-0408 · v5.0</p></div>
 <div class="W">
 <div class="tabs"><button class="tab on" onclick="stab(0)">📋 运营SOP</button><button class="tab" onclick="stab(1)">📊 服务商&品牌明细</button><button class="tab" onclick="stab(2)">🔄 基础转化</button></div>
 
@@ -142,41 +142,23 @@ const SUPA_URL='https://wiyarxoivfmkneumfmbl.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndpeWFyeG9pdmZta25ldW1mbWJsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzOTExMDYsImV4cCI6MjA5MDk2NzEwNn0.jo1GoR3ZuFv2HFZcVoOKpVb19SBUIHZL3EoR266njU4';
 const supa=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
 // 加载已有反馈
-// 反馈缓存（从 Supabase 实时拉取，不再硬编码）
-const _fbCache={};
+const _fbCache={"18495_screen_fb0410":"4/10 考虑代金券方案，下周给答复","19193_screen_fb0410":"4/10沟通代金券方案和基建未回复","19193_screen_biz":"代金券投放中","19095_screen_fb0410":"0410品牌确认中，下午给答复，已回复","19095_screen_biz":"会员占比超过50%","18496_screen_fb0410":"4/10客成找品牌确认中","9992_screen_fb0410":"4/9沟通代金券方案，未回复","7865_screen_fb0410":"4/10：会员占比40%左右；门店处理中，下周完成","5048_screen_fb0410":"4/9：会员占比21%；品牌配合意愿度高，建议不下线、轻运营","8184_screen_fb0410":"4/10：会员占比超50%，品牌已经在沟通商户号超管确认中，4.14前录完","7333_screen_fb0410":"4/10：已重新催促品牌，品牌表示最近忙，4.13前处理完","2813_screen_fb0410":"4/13前：商户号全部授权完成；会员占比<40%，品牌配合意愿度高，建议不下线、轻运营","7623_screen_fb0410":"4/9：未回复，计划4/13操作下线","17282_screen_fb0410":"4/10：品牌商户号已经录入完整 4/9：品牌在确认重新录入中","5269_screen_fb0410":"4/9：全国2个商户号，均已授权完成","5705_screen_fb0410":"4/9：品牌反馈堂食单量少，不计划继续运营投放计划——4/10操作下线（已操作下线）","10923_screen_fb0410":"4/10：已跟品牌沟通切换代金券，品牌同意，下周操作","10923_screen_biz":"代金券投放中","9384_screen_fb0410":"4/9：会员占比20-23%，品牌一直有宣导门店引导用户扫小程序注册会员，支持用户出示付款码时就可以识别会员身份，进行券资产抵扣；品牌配合意愿度高，建议不下线、轻运营","18138_screen_fb0410":"4/10：品牌已补充录入","9262_screen_fb0410":"品牌已下线","8440_screen_fb0410":"会员占比57%","18235_screen_fb0410":"4/10：公线门店不准，已修改","16577_screen_fb0410":"4/9：会员占比60%","11519_screen_fb0410":"4/9：会员占比75%，商户号品牌正在关联确认中","7072_screen_fb0410":"4/10：会员占比45%左右，门店会积极引导顾客注册小程序会员","16708_screen_fb0410":"4/10：品牌未回复，非top800","8573_screen_fb0410":"4/9：会员占比89.05%，品牌100家门店都用4个商户号收款，商户号最晚4/15前完成","18045_screen_fb0410":"品牌只有1家门店","17279_screen_fb0410":"品牌无在投放活动，已下线","16995_screen_fb0410":"该品牌只有2家门店，均上传成功","15630_screen_fb0410":"品牌无在投放活动，已下线","18918_screen_fb0410":"4.9：会员占比52.96%；门店已提交上传；","18802_screen_fb0410":"4.10：品牌未回复","18323_screen_fb0410":"4.10：品牌未回复","18224_screen_fb0410":"4.10：已同步品牌转代金券，但未回复","18171_screen_fb0410":"4.10：品牌未回复","17117_screen_fb0410":"4.9：还有一家门店无法上传的原因是poi被占用，这个需要内部处理，已反馈处理中","11425_screen_fb0410":"4.10：品牌只投放深圳地区的门店，剩余门店正在上传中","9992_screen_biz":"代金券投放中","10597_screen_infra":"经营规模小，1店<10笔合理","1403_screen_fb0410":"品牌已下线","11092_screen_fb0410":"品牌已下线","9262_screen_store":"商家无法上传，计划下线","3699_screen_store":"商家无法上传，计划下线","11092_screen_store":"商家无法上传，计划下线","18138_screen_store":"沟通确认中","10597_screen_fb0410":"4/10：会员占比7%，会要求门店店员引导用户注册会员的，主要是小程序扫码引导注册；已沟通代金券，品牌内部确认中；商户号已完成（全国一个商户号），门店上传进行中（当前已经89%）","18357_screen_remark":"会员占比29.91%，代金券沟通中","18235_screen_store":"公线真实门店不准需修正","16708_screen_infra":"沟通确认中","7865_screen_store":"沟通确认中","10923_screen_remark":"全场称重菜品9折；4/8：询问品牌未回复","17282_screen_remark":"按本周内完成所有优化","8440_screen_remark":"9.9元经典凉茶系列任选兑换券（全渠道最优）","18224_screen_remark":"会员占比45%，代金券沟通中，暂时观察看到店核销","5048_screen_biz":"沟通确认中","6827_screen_fb0410":"4/10：品牌预计今日处理完毕","8573_screen_remark":"整单73折","8069_screen_fb0410":"4/10：会员占比56%，已沟通全场7折券，具体更换货盘时间需到4/14确认","8914_screen_fb0410":"4/9：会员占比30%+，下沉门店较多；品牌配合意愿度高，建议不下线、轻运营","18540_screen_fb0410":"4/10：会员占比15%，目前门店有两个系统，其中还有一半是没切换到企迈系统的，所以只上传了切换到企迈系统的门店信息（200家）；品牌配合意愿度高，建议不下线、轻运营","8914_screen_biz":"沟通确认中","5660_screen_fb0410":"4/9：会员占比40%+；商户号已完成商户号关联（品牌反馈，在营业的门店商户号有134家，已关联的商户号有189家-闭店的也关联了-沟通删除中），商户号只有4家没关联（已催超管确认）","5705_screen_biz":"不接受代金券，计划下线","8069_screen_remark":"历史优先上线全场券，仅能提供全场饮品95折；本周内沟通更低折扣货盘","7333_screen_remark":"按本周内完成所有优化工作推进","18540_screen_store":"沟通确认中","18540_screen_biz":"沟通确认中","2248_screen_fb0410":"4/10品牌已经处理完毕","10597_screen_store":"沟通确认中","5173_screen_fb0410":"4/9：品牌未回复会员占比，计划4/13操作下线","2813_screen_biz":"沟通确认中","18715_screen_remark":"1、品牌侧：多次沟通，无法提供全场券；2、3月遇到“在非券可用城市曝光，导致客诉”问题，对平台信任感下降。","18715_screen_fb0410":"4/13：已下线","2813_screen_remark":"按本周内完成所有优化","7623_screen_store":"商家无法上传，计划下线","5173_screen_biz":"沟通确认中","5269_screen_remark":"按本周内完成所有优化","16594_screen_remark":"整单75折，之前存活较好，近期未存活","19495_screen_biz":"沟通确认中","19495_screen_fb0410":"会员占比40%，代金券他们需内部沟通提报","11981_screen_fb0410":"会员占比只有26%，代金券他们需内部沟通提报，短时间没法给答复","11304_screen_fb0410":"正在把其余门店补齐","13297_screen_fb0410":"沟通中，美抖都是单品，并没有代金券","13593_screen_fb0410":"会员占比超50%","11601_screen_fb0410":"会员占比超50%","2250_screen_fb0410":"会员占比超50%","9536_screen_fb0410":"货盘他们内部评估下，担忧再降低门店接受度不高","5801_screen_biz":"沟通确认中","18207_screen_store":"沟通确认中","18207_screen_fb0410":"与品牌沟通确认了，正在补齐","13650_screen_fb0410":"正在补齐门店","18051_screen_fb0410":"品牌已补全门店，正在审核当中","11461_screen_fb0410":"会员占比11.74%，门店店员会指引消费者在消费前先注册会员，且目前品牌在与服务商沟通展码路径","2459_screen_remark":"品牌反馈品牌小程序交易属性低，几乎都是到店核销，且会员占比45%-50%，且门店会引导用户注册会员","3088_screen_fb0410":"已流失","18383_screen_fb0410":"会员占比1.9%，银豹商户","16576_screen_fb0410":"会员交易占比3.6%，银豹商户","18481_screen_fb0410":"品牌反馈他们只能录入成都地区的门店且成都地区的门店已全部录入","18279_screen_fb0410":"品牌目前未回复","13388_screen_fb0410":"品牌目前未回复","16553_screen_fb0410":"商户号超管未授权已让服务商销售跟进，会员占比数据品牌目前未导出","16453_screen_fb0410":"品牌未回复","3688_screen_fb0410":"品牌未回复","16934_screen_fb0410":"品牌未回复","18302_screen_fb0410":"品牌未回复","17263_screen_fb0410":"1，商户号超管未授权，已催促服务商销售跟进。2.会员占比20.53%，西快行业","16585_screen_fb0410":"怀疑是小程序注册会员路径有问题，已在服务商后台重新设置了指引小程序会员注册的路径，可以先观察一个月","7157_screen_store":"沟通确认中","18570_screen_store":"沟通确认中","11211_screen_store":"公线真实门店不准需修正","18890_screen_fb0410":"0410未回复","9384_screen_biz":"沟通确认中","8573_screen_price":"全场券","13650_screen_store":"沟通确认中","5705_screen_infra":"沟通确认中","8069_screen_biz":"会员占比超过50%","1575_screen_remark":"稳定存活","19012_screen_infra":"经营规模小，1店<10笔合理","19012_screen_fb0410":"会员交易占比：18.86%；品牌目前是银行支付通道，暂时没法绑定交易连接名片","19012_screen_biz":"代金券投放中","19012_screen_remark":"会员占比18.86%，代金券模式确认参与；微信商户号已绑全，但是大量支付走银联","18918_screen_biz":"会员占比超过50%","19193_screen_remark":"会员占比14.81%，代金券沟通中；商户号门店确认中","18564_screen_remark":"商户号门店确认中","18492_screen_remark":"会员占比品牌出差暂时无法确认；商户号门店确认中","18492_screen_infra":"基建沟通中","11532_screen_price":"沟通确认中","16686_screen_fb0410":"货盘为无门槛立减3元，是目前该品牌跑的最好的货盘","18703_screen_fb0410":"1，满10-2的活动=8折，美团也是8折代金券。2，Q一族3.1元立减券，限制的品类是13元-3.1=9.9兑换，其他平台有同样单品的活动为11.9兑换。3，未录入的门店已重新录入","18495_screen_remark":"会员占比26.14%，代金券沟通中","18136_screen_biz":"会员占比超过50%","18045_screen_store":"公线真实门店不准需修正","16995_screen_store":"公线真实门店不准需修正","18570_screen_fb0410":"1，其余未录入门店已新增在审核中   ","18495_screen_biz":"沟通确认中","11211_screen_fb0410":"该品牌所有参与活动的门店已全部录入，且一共有240家门店，其余未录入的门店因品牌近期在更换总部账号目前无法录入","5801_screen_store":"沟通确认中","7192_screen_fb0410":"品牌公司近期在大量变更微信商户号，摇一摇工作需要等变更完成后再进行下一步处理","17172_screen_fb0410":"尾部，且仅一家","18564_screen_biz":"会员占比超过50%","18057_screen_fb0410":"品牌无在投放活动，已下线","18044_screen_fb0410":"尾部，且仅一家","18220_screen_fb0410":"尾部，且仅一家","16872_screen_fb0410":"尾部，且仅一家","17172_screen_store":"公线真实门店不准需修正","18044_screen_store":"公线真实门店不准需修正","18220_screen_store":"公线真实门店不准需修正","17117_screen_biz":"会员占比超过50%","16872_screen_store":"公线真实门店不准需修正","16704_screen_biz":"会员占比超过50%","5801_screen_fb0410":"美团商户，目前走的商家券形式，计划切换为商品券，门店到时候集中在美团后台录入","19194_screen_fb0410":"商家未回复","17397_screen_fb0410":"尾部，且商户今天上传未上传的门店","18115_screen_fb0410":"已更新，新的门店在审核中","4619_screen_fb0410":"已流失","19192_screen_fb0410":"尾部","17395_screen_fb0410":"品牌已下线","16619_screen_fb0410":"品牌已下线","11762_screen_fb0410":"品牌已下线","2459_screen_fb0410":"品牌新开了门店，目前品牌在询问服务商新开的门店是会自动同步上传还是需要手动录入","3699_screen_fb0410":"品牌已下线","3050_screen_fb0410":"每个区域的负责人不同，也只清楚自己区域的情况，当前群内对接只有深圳、北广佛、长沙区域","3050_screen_store":"沟通确认中","3050_screen_infra":"沟通确认中","11304_screen_store":"沟通确认中","18496_screen_biz":"会员占比超过50%","7157_screen_fb0410":"1，货盘问题：再与克茗进一步谈更加优惠的货盘    2，品牌反馈一共39家店已全部录入还有两家1月23日已登记地图审核催办表格但一直未处理","8184_screen_biz":"会员占比超过50%","2913_screen_fb0410":"门店正在沟通中，线下的真实门店以面包为主，摇一摇的适用门店是蛋糕，线下门店很少","1403_screen_store":"商家无法上传，计划下线","13593_screen_biz":"会员占比超过50%","18278_screen_store":"公线真实门店不准需修正","18278_screen_fb0410":"总共三家，已全部录入完成","18564_screen_infra":"基建沟通中","18366_screen_fb0410":"品牌反馈所有门店都已录入完成","18454_screen_fb0410":"还有一家门店品牌不参与摇一摇，已联系品牌录入","18357_screen_biz":"不接受代金券，计划下线","17380_screen_fb0410":"1，上线初期品牌已提供给其他品牌的供货价为88折，而微信摇优惠的优惠为85折，优于其他平台。2，目前其他平台活动均已下线","17380_screen_remark":"上线时品牌方已提供给其他平台的供货价为88折，提供微信摇一摇的折扣是85折","15390_screen_fb0410":"1，门店问题由于该品牌只有12家店开通了美团会员功能模块所以只能录入12家门店，经核实12家门店已全部录入成功了","18703_screen_store":"沟通确认中","18696_screen_remark":"品牌仅支持线上下单，无线下收款场景，且已绑定小程序由于目前该品牌公域订单偏高所有导致小程序交易数据偏低","18481_screen_biz":"会员占比超过50%","18051_screen_store":"沟通确认中","18481_screen_store":"沟通确认中","18051_screen_biz":"沟通确认中","18696_screen_infra":"经营规模小，1店<10笔合理","11981_screen_biz":"沟通确认中","18492_screen_fb0410":"品牌不愿提供会员占比数据","18713_screen_fb0410":"品牌不愿提供会员占比数据","18454_screen_store":"沟通确认中","19141_screen_fb0410":"品牌实际只有一家门店，已经录入完成","17474_screen_fb0410":"品牌实际只有一家门店，已经录入完成","19141_screen_store":"公线真实门店不准需修正","2913_screen_store":"沟通确认中","18366_screen_store":"公线真实门店不准需修正","11206_screen_store":"商家无法上传，计划下线","19012_screen_store":"公线真实门店不准需修正","18357_screen_fb0410":"会员交易占比：26.91%","11206_screen_fb0410":"品牌内部有变动，摇一摇活动暂不上线","18907_screen_fb0410":"品牌不愿提供会员占比数据","7157_screen_price":"全场券","16607_screen_fb0410":"品牌摇一摇需要暂停","16934_screen_biz":"沟通确认中","18302_screen_store":"沟通确认中","17474_screen_store":"公线真实门店不准需修正","16607_screen_store":"商家无法上传，计划下线","18302_screen_biz":"沟通确认中","18136_screen_remark":"经和品牌核实，该品牌仅支持堂食且堂食大部分均为小程序付款，只有当订单有存疑时才会使用pos机收款","18564_screen_fb0410":"会员交易占比：55.27%；商户号品牌已经补入，在联系超管确认中","17282_screen_biz":"会员占比超过50%","18696_screen_fb0410":"1，商户号问题：因品牌仅有线上交易且已绑定小程序。2，关于小程序渗透问题品牌反馈目前他们业态目前公域订单量会比较多所以导致小程序交易比较少","15441_screen_fb0410":"经与品牌核实所有的交易均进入总的收款商户号且该商户号已绑定","16686_screen_price":"全场券","12175_screen_remark":"小程序交易占比数据异常，无人自助场景，小程序渗透高于50%","9384_screen_remark":"全场满25-10元；","3252_screen_remark":"切换API投放中（品牌回复慢）","10597_screen_remark":"按本周内完成所有优化工作推进","12126_screen_remark":"全场满10-5元","11519_screen_remark":"整单8折","16577_screen_remark":"波动存活","3252_screen_price":"商家无法提供，计划下线","3252_screen_biz":"不接受代金券，计划下线","18525_screen_remark":"按本周内完成所有优化工作推进：4.8已沟通品牌未回复","9992_screen_remark":"整单8.8折","8914_screen_remark":"整单75折，近期未存活，周内沟通新增0元券或低价单品券","5048_screen_remark":"1.诺杯鲜奶茶系列5折券\n2.诺杯东方茉莉中杯7.9元券","7072_screen_remark":"全场满15-2元","8440_screen_biz":"会员占比超过50%","5660_screen_remark":"按本周内完成所有优化工作推进","18540_screen_remark":"整单86折","2248_screen_remark":"按本周内完成所有优化工作推进","18541_screen_biz":"会员占比超过50%","18243_screen_biz":"会员占比超过50%","2908_screen_biz":"会员占比超过50%","12175_screen_infra":"经营规模小，1店<10笔合理","15441_screen_infra":"经营规模小，1店<10笔合理","2070_screen_biz":"代金券投放中","12175_screen_biz":"沟通确认中","16553_screen_infra":"沟通确认中","15390_screen_biz":"沟通确认中","18696_screen_biz":"沟通确认中","13297_screen_biz":"会员占比超过50%","11601_screen_biz":"会员占比超过50%","2250_screen_biz":"会员占比超过50%","11461_screen_biz":"沟通确认中","18703_screen_price":"全场券","18383_screen_infra":"沟通确认中","19194_screen_biz":"沟通确认中","18703_screen_biz":"沟通确认中","18383_screen_biz":"沟通确认中","18570_screen_biz":"沟通确认中","13388_screen_biz":"沟通确认中","16576_screen_biz":"沟通确认中","11211_screen_biz":"沟通确认中","4801_screen_biz":"会员占比超过50%","11532_screen_biz":"沟通确认中","18907_screen_biz":"沟通确认中","18713_screen_biz":"沟通确认中","18802_screen_biz":"沟通确认中","18224_screen_biz":"沟通确认中","18323_screen_biz":"沟通确认中","18171_screen_biz":"沟通确认中","18492_screen_biz":"沟通确认中","13610_screen_biz":"会员占比超过50%","19193_screen_infra":"沟通确认中","18918_screen_price":"全场券","18360_screen_price":"全场券","10947_screen_price":"全场券","10668_screen_remark":"切换API投放中（品牌回复慢）","7865_screen_remark":"1.全场满15-3元券\n2.全场8折券","6827_screen_remark":"全场单杯68折","8184_screen_remark":"整单75折","3743_screen_remark":"全场单杯75折","5173_screen_remark":"整单88折","1565_screen_remark":"波动存活","11519_screen_infra":"沟通确认中","10668_screen_infra":"沟通确认中","18525_screen_infra":"沟通确认中","13297_screen_price":"全场券","5048_screen_infra":"沟通确认中","8573_screen_infra":"沟通确认中","8184_screen_infra":"沟通确认中","6827_screen_infra":"沟通确认中","7192_screen_price":"全场券","17380_screen_price":"全场券","17550_screen_price":"全场券","9536_screen_price":"全场券","18352_screen_remark":"存活商户，1店4核","18352_screen_biz":"会员占比超过50%","16553_screen_biz":"沟通确认中","16453_screen_biz":"沟通确认中","5660_screen_infra":"沟通确认中","8069_screen_price":"沟通确认中","3688_screen_infra":"沟通确认中","7333_screen_infra":"沟通确认中","17263_screen_infra":"沟通确认中","18279_screen_biz":"沟通确认中","2248_screen_infra":"沟通确认中","3688_screen_biz":"沟通确认中","17263_screen_biz":"沟通确认中","16585_screen_biz":"沟通确认中","18715_screen_price":"商家无法提供，计划下线","2813_screen_infra":"沟通确认中","17282_screen_infra":"沟通确认中","5269_screen_infra":"沟通确认中","16577_screen_biz":"会员占比超过50%","10668_screen_biz":"会员占比超过50%","18525_screen_biz":"沟通确认中","7865_screen_biz":"会员占比超过50%","7072_screen_biz":"会员占比超过50%","8573_screen_biz":"会员占比超过50%","5660_screen_biz":"会员占比超过50%","3743_screen_biz":"会员占比超过50%","12126_screen_biz":"会员占比超过50%","16594_screen_biz":"会员占比超过50%","2908_screen_remark":"波动存活","1565_screen_biz":"会员占比超过50%","1575_screen_biz":"会员占比超过50%"};
 async function loadFeedback(){
-  try{
-    const resp = await fetch(`${SUPA_URL}/rest/v1/brand_feedback?select=*&order=updated_at.desc`, {
-      headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer '+SUPA_KEY }
-    });
-    if(resp.ok){
-      const data = await resp.json();
-      if(data) data.forEach(r=>{const k=r.brand_id+'_'+r.field_name;_fbCache[k]=r.field_value});
-    }
-  }catch(e){console.warn('loadFeedback error:',e.message)}
-  _fbLoaded=true;
-  if(typeof renderScreen==='function')renderScreen();
+  _fbLoaded=true;if(typeof renderScreen==='function')renderScreen();
+  const{data}=await supa.from('brand_feedback').select('*').order('updated_at',{ascending:false});
+  if(data)data.forEach(r=>{const k=r.brand_id+'_'+r.field_name;_fbCache[k]=r.field_value});
 }
 async function saveFeedback(brandId,brandName,field,value){
   _fbCache[brandId+'_'+field]=value;
-  const hdrs = { 'apikey': SUPA_KEY, 'Authorization': 'Bearer '+SUPA_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' };
   try{
-    // 先删除旧记录
-    await fetch(`${SUPA_URL}/rest/v1/brand_feedback?brand_id=eq.${encodeURIComponent(String(brandId))}&field_name=eq.${encodeURIComponent(field)}`, {
-      method: 'DELETE', headers: hdrs
-    });
-    // 有值则插入新记录
+    await supa.from('brand_feedback').delete().eq('brand_id',String(brandId)).eq('field_name',field);
     if(value){
-      await fetch(`${SUPA_URL}/rest/v1/brand_feedback`, {
-        method: 'POST', headers: hdrs,
-        body: JSON.stringify({brand_id:String(brandId),brand_name:brandName,field_name:field,field_value:value})
-      });
+      await supa.from('brand_feedback').insert({brand_id:String(brandId),brand_name:brandName,field_name:field,field_value:value});
     }
-  }catch(e){console.error('saveFeedback error:',e.message)}
+  }catch(e){alert('saveFeedback exception: '+e.message)}
 }
 let _fbLoaded=false;
-// 反馈数据预加载（与动态数据加载并行）
-loadFeedback().then(()=>{_fbLoaded=true;try{if(typeof rbt==='function')rbt()}catch(e){};try{if(window.renderScreen)renderScreen()}catch(e){};setTimeout(autoResizeAll,200)}).catch(e=>{console.warn('loadFeedback failed:',e)});
+loadFeedback().then(()=>{_fbLoaded=true;try{rbt()}catch(e){};try{if(window.renderScreen)renderScreen()}catch(e){};setTimeout(autoResizeAll,200)});
 
 // textarea自动撑高
 function autoResize(el){el.style.height='auto';el.style.height=el.scrollHeight+'px'}
@@ -185,280 +167,147 @@ document.addEventListener('input',e=>{if(e.target.matches('textarea.rm'))autoRes
 document.addEventListener('focus',e=>{if(e.target.matches('textarea.rm'))autoResize(e.target)},true);
 
 
-// ===== Supabase Dynamic Loader =====
-// SUPA_URL / SUPA_KEY 已在上方反馈模块定义，此处复用
 
-async function supaFetch(table, params='', limit=2000) {
-  const sep = params ? '&' : '';
-  const url = `${SUPA_URL}/rest/v1/${table}?${params}${sep}limit=${limit}`;
-  const resp = await fetch(url, {
-    headers: {
-      'apikey': SUPA_KEY,
-      'Authorization': 'Bearer '+SUPA_KEY,
-      'Range': `0-${limit-1}`
+async function loadDashboardData(targetDate) {
+  const headers = {'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY};
+
+  async function fetchJSON(table, params) {
+    const url = SUPA_URL + '/rest/v1/' + table + '?' + params + '&limit=1000';
+    const resp = await fetch(url, {headers});
+    return resp.json();
+  }
+
+  async function fetchAllParallel(table, params, pageSize) {
+    pageSize = pageSize || 1000;
+    const countResp = await fetch(
+      SUPA_URL + '/rest/v1/' + table + '?' + params + '&limit=1',
+      {headers: {...headers, 'Prefer': 'count=exact', 'Range': '0-0'}}
+    );
+    const cr = countResp.headers.get('Content-Range') || '';
+    const total = parseInt(cr.split('/')[1]) || 0;
+    if (total === 0) return [];
+    const pages = Math.ceil(total / pageSize);
+    const promises = [];
+    for (let i = 0; i < pages; i++) {
+      const u = SUPA_URL + '/rest/v1/' + table + '?' + params + '&limit=' + pageSize + '&offset=' + (i * pageSize);
+      promises.push(fetch(u, {headers}).then(r => r.json()));
     }
+    return (await Promise.all(promises)).flat();
+  }
+
+  if (!targetDate) {
+    const dates = await fetchJSON('brand_snapshot', 'select=data_date&order=data_date.desc&limit=1');
+    if (!dates.length) throw new Error('brand_snapshot 中无数据');
+    targetDate = dates[0].data_date;
+  }
+
+  const [snapshots, channels, spInfos, sopRows] = await Promise.all([
+    fetchJSON('brand_snapshot', 'data_date=eq.' + targetDate + '&select=*'),
+    fetchJSON('brand_channel', 'data_date=eq.' + targetDate + '&select=*'),
+    fetchJSON('sp_info', 'select=*'),
+    fetchJSON('sop_snapshot', 'data_date=eq.' + targetDate + '&select=*'),
+  ]);
+
+  const spSummary = {};
+  spInfos.forEach(s => {
+    spSummary[s.sp_name] = {name: s.sp_name, type: s.sp_type, owner: s.owner, target: s.target, brands: s.brands || []};
   });
-  if (!resp.ok) throw new Error(`Supabase ${table}: ${resp.status}`);
-  return resp.json();
-}
 
-// 获取最新日期
-async function getLatestDate(table, dateCol='data_date') {
-  const rows = await supaFetch(table, `select=${dateCol}&order=${dateCol}.desc&limit=1`);
-  return rows.length ? rows[0][dateCol] : null;
-}
-
-// snake_case → camelCase 映射
-function mapBrand(r) {
-  return {
-    name: r.brand_name, brandId: r.brand_id, sp: r.sp_name,
-    spMapped: r.sp_name, // 同 sp
-    statusManual: r.status||'在线', // 直接用跟进总表的人工状态
-    statusDaily: r.status, tierManual: r.tier_human, tierDaily: r.tier,
-    assistant: r.assistant, owner: r.owner, couponSP: r.coupon_sp,
-    hasDailyData: r.daily_tx!=null && r.daily_tx>0,
-    cat2: r.category, cat4: r.sub_category,
-    survivalRate: r.survival_rate, isAlive: r.is_alive,
-    priceForce: r.price_force, miniApp: r.mini_app,
-    txPerStore: r.tx_per_store, storeComplete: r.store_complete,
-    storeCount: r.store_count, visitUseRate: r.visit_use_rate,
-    e21Ratio: r.e21_ratio, expPv: r.exp_pv, claimPv: r.claim_pv, usePv: r.use_pv,
-    dailyTx: r.daily_tx, expClaimRate: r.exp_claim_rate,
-    claimUseRate: r.claim_use_rate, expUseRate: r.exp_use_rate,
-    bizOk: r.factor_biz, priceOk: r.factor_price,
-    infraOk: r.factor_infra, storeOk: r.factor_store,
-    trafficOk: r.survival_rate!=null ? r.survival_rate >= 5.8 : false,
-    onlineStatus: r.status==='流失'?'流失':(r.daily_tx!=null&&r.daily_tx>0?'在线':'未更新'),
-    // UV 字段
-    hiAppUV: r.hi_app_uv_e21, loAppUV: r.lo_app_uv_e21,
-    hiExpUV: r.hi_exp_uv_e21, loExpUV: r.lo_exp_uv_e21,
-    hiAppUV_all: r.hi_app_uv_all, loAppUV_all: r.lo_app_uv_all,
-    hiExpUV_all: r.hi_exp_uv_all, loExpUV_all: r.lo_exp_uv_all,
-    hiRate_uv: r.hi_rate_e21, loRate_uv: r.lo_rate_e21,
-    // 渠道转化字段（Supabase 有）
-    biz_exp_w: r.biz_exp_w, biz_use_d: r.biz_use_d,
-    f2f_exp_w: r.f2f_exp_w, f2f_use_d: r.f2f_use_d,
-    fix_exp_w: r.fix_exp_w, fix_use_d: r.fix_use_d,
-    nb_exp_w: r.nb_exp_w, nb_use_d: r.nb_use_d,
-    zfyl_exp_w: r.zfyl_exp_w, zfyl_use_d: r.zfyl_use_d,
-    online_days: r.online_days, act_count: r.act_count,
-    display_level: r.display_level
-  };
-}
-
-// 计算衍生字段
-function enrichBrand(b) {
-  // e21AppUV_7d = hiAppUV + loAppUV (二选一渠道)
-  b.e21AppUV_7d = (b.hiAppUV||0) + (b.loAppUV||0);
-  // allAppUV_7d = hiAppUV_all + loAppUV_all (全渠道)
-  b.allAppUV_7d = (b.hiAppUV_all||0) + (b.loAppUV_all||0);
-  b.allExpUV_7d = (b.hiExpUV_all||0) + (b.loExpUV_all||0);
-  b.totalAppUV = b.e21AppUV_7d;
-  b.totalExpUV = (b.hiExpUV||0) + (b.loExpUV||0);
-  // hiRate_pv 跟 hiRate_uv 一致
-  b.hiRate_pv = b.hiRate_uv;
-  b.loRate_pv = b.loRate_uv;
-  // custAppRate = 尽曝/应曝 (二选一渠道)
-  b.custAppRate = b.e21AppUV_7d>0 ? b.totalExpUV / b.e21AppUV_7d : null;
-  // dailyExpUV
-  b.dailyExpUV = b.totalExpUV!=null ? b.totalExpUV / 7 : null;
-  // dailyTx_precise = dailyTx (已经是精确值)
-  b.dailyTx_precise = b.dailyTx;
-  // e21_use_daily: 二选一渠道核销 = biz_use_d + f2f_use_d + fix_use_d
-  const e21UseD = (b.biz_use_d||0) + (b.f2f_use_d||0) + (b.fix_use_d||0);
-  b.e21_use_daily = e21UseD;
-  // all_use_daily = usePv (日均全渠道核销)
-  b.all_use_daily = b.usePv||0;
-  // other_use_daily = all - e21
-  b.other_use_daily = (b.all_use_daily||0) - e21UseD;
-  // custTxRatio = (日均交易 - 日均核销)*10000 / 日均交易*10000 ...
-  // 实际是 expPerStore
-  if (b.storeCount && b.storeCount>0) {
-    b.expPerStore = b.totalExpUV!=null ? Math.round(b.totalExpUV / b.storeCount) : null;
-    b.custAppPerStore = b.e21AppUV_7d>0 ? parseFloat((b.e21AppUV_7d / b.storeCount / 7).toFixed(1)) : null;
-  } else {
-    b.expPerStore = null;
-    b.custAppPerStore = null;
-  }
-  // e21EUR_daily: 二选一曝光核销率 (日)
-  const e21ExpD = ((b.biz_exp_w||0) + (b.f2f_exp_w||0) + (b.fix_exp_w||0)) * 10000;
-  b.e21EUR_daily = e21ExpD>0 ? e21UseD / e21ExpD : null;
-  // e21EUR = expUseRate of e21 channel (from brand_channel, will be filled later)
-  // e21ExpRatio: 二选一曝光占整体
-  const allExpD = b.expPv ? b.expPv*10000 : 0;
-  b.e21ExpRatio = allExpD>0 ? parseFloat((e21ExpD / allExpD * 100).toFixed(1)) : null;
-  // custTxRatio (核销占交易的百分比)
-  b.custTxRatio = b.dailyTx && b.dailyTx>0 ? (b.all_use_daily / (b.dailyTx*10000)) * 100 : null;
-  // _dr 不再需要（旧版原始数据行），设为空对象
-  b._dr = {};
-  b.daily_cat2 = b.cat2;
-  b.daily_tier = b.tierDaily;
-  b.daily_online_days = b.online_days;
-  b.daily_online = b.hasDailyData ? '1' : '<NA>';
-  // statusManual 需要特殊处理：根据 display_level 推断
-  const dl = b.display_level;
-  if (dl) {
-    b.tierManual = dl==='ka'?'KA':dl==='waist'?'腰部':'尾部';
-  }
-  // 如果 statusDaily 是流失，statusManual 也是流失
-  if (b.statusDaily==='流失') b.statusManual='流失';
-  // 不覆盖跟进总表的原始状态
-
-  return b;
-}
-
-// brand_channel → bc 映射
-function mapBC(r) {
-  return {
-    name: r.brand_name, brandId: r.brand_id, cat4: r.cat4||r.sub_category,
-    sp: r.sp, tier: r.tier, alive: r.is_alive,
-    dailyTx: r.daily_tx,
-    dExpW: r.d_exp_w, dClaimW: r.d_claim_w, dUse: r.d_use,
-    expClaimR: r.exp_claim_r, claimUseR: r.claim_use_r, expUseR: r.exp_use_r,
-    e21ExpW: r.e21_exp_w, e21Use: r.e21_use, e21EUR: r.e21_eur,
-    nbExpW: r.nb_exp_w, nbUse: r.nb_use, nbEUR: r.nb_eur,
-    payExpW: r.pay_exp_w, payUse: r.pay_use, payEUR: r.pay_eur,
-    hiR: r.hi_r, loR: r.lo_r,
-    wExp: r.w_exp||null // 环比（如果有）
-  };
-}
-
-// activity_detail → acts 映射
-function mapAct(r) {
-  return {
-    brandName: r.brand_name, activityId: r.activity_id, activityName: r.activity_name,
-    couponName: r.coupon_name, couponDetail: r.coupon_detail, discountType: r.discount_type,
-    threshold: r.threshold, amount: r.amount, onlineDays: r.online_days,
-    priceForce: r.price_force, thresholdJudge: r.threshold_judge, thresholdVal: r.threshold_val,
-    brandAvgPrice: r.brand_avg_price,
-    expPV: r.exp_pv, claimPV: r.claim_pv, usePV: r.use_pv,
-    expUV: r.exp_uv, claimUV: r.claim_uv, useUV: r.use_uv,
-    dailyExpPV: r.daily_exp_pv, expClaimRate: r.exp_claim_rate,
-    claimUseRate: r.claim_use_rate, expUseRate: r.exp_use_rate, dailyUsePV: r.daily_use_pv,
-    hiAppRate: r.hi_app_rate, loAppRate: r.lo_app_rate,
-    afterExpClaim: r.after_exp_claim, afterClaimVisit: r.after_claim_visit,
-    visitUseRate: r.visit_use_rate, visitNoThreshold: r.visit_no_threshold,
-    visit7dNoThreshold: r.visit_7d_no_threshold, visit7dThreshold: r.visit_7d_threshold,
-    visitUseAvgPrice: r.visit_use_avg_price, visitNoUseAvgPrice: r.visit_no_use_avg_price,
-    visit7dUse: r.visit_7d_use, visit7dNoUse: r.visit_7d_no_use,
-    isSP: r.is_sp, spName: r.sp_name, expValid: r.exp_valid, useValid: r.use_valid, tier: r.tier
-  };
-}
-
-// 静态配置（服务商概览 & 总目标）
-const SPS_CONFIG = {"企迈": {"name": "企迈", "type": "SaaS服务商", "owner": "warm", "target": 180.0, "brands": ["大米先生", "呷哺呷哺", "沪上阿姨", "霸王茶姬", "茉莉奶白", "茶理宜世", "益禾堂", "爷爷不泡茶", "阿水大杯茶", "周黑鸭", "茉酸奶", "85度C", "加减", "谷田稻香", "柠檬向右", "朱大叔柠檬茶", "宝藏绿洲", "英歌魂", "牛男手造披萨", "茶精灵", "茶米有言", "新佳美", "NOWWA挪瓦咖啡", "LINLEE", "李华泽", "酸奶罐罐", "至尊比萨", "陈文鼎", "百分茶", "茶救星球", "犟骨头", "树夏", "萃春疯", "小咖咖啡", "比星咖啡", "苍井寿司", "东方墨蘭", "三号椰", "正谈炸鸡", "稻状元", "阿杏饭团", "雾鲜雾鲜", "C位牛男", "柠檬7", "好运椰", "裕莲茶楼", "老盐季", "万方圆", "枫蓝", "同仁四季椰子鸡", "田一町", "SUPERYEAH", "诺杯·茉莉鲜奶茶", "世家堂凉茶", "御蝶坊", "小女当家", "大满糖", "DAVIDS 大维饮品", "SOMETHING FOR", "森茶", "一杯潮茶", "鸡王盐焗食品", "一叶觅山", "芋田田", "百分大众果汁冰", "小宠制菓", "周友秀", "甜甜撞茶", "友茶", "馬伍旺", "tingzi", "菲尔雪", "指饮茶饮", "丘大叔", "牧场能量", "LELECHA", "茯灵记", "甄茶", "HUN 混果汁", "心研茶", "肥汁米蘭", "窑鸡王", "蒙自源", "三只熊披萨", "八珍王", "初茶", "可斯克", "茶满方庭", "小金金手作", "山山家", "梨园梅派", "炖物24章", "子情贝诺", "VINKO小厨", "越南咖啡"]}, "天财商龙": {"name": "天财商龙", "type": "SaaS服务商", "owner": "小雪", "target": 180.0, "brands": ["回水镇", "转转热卤", "珮姐老火锅", "GAGA", "喜家德", "馬記永", "朴大叔", "COMMUNE", "陶陶居", "鲜芋仙", "滋粥楼小馆", "山东老家", "鼎大丰", "阳阳中国饭", "海岛说·椰子鸡火锅", "争鲜寿司", "小六汤包", "醉面", "肉串汪", "悦享麦合", "渝姐老火锅", "味莊茶餐厅", "Grande A'moo", "半亩田", "赛维利亚", "御之宴", "酒煮江湖", "最云味·宣威菜", "一哥靓汤", "绍和兴宽汤细面", "金典银峰老鹅馆", "大榕树下凤厨", "崐三腔", "五口灶下饭小炒大王", "黄花滩永新菜", "王妈妈", "岚鲸鮨", "天津大圆碗食品有限公司", "黔蘑菇", "1886汽车餐厅", "津门桥头堡", "阿强家川菜", "爱碗亭", "蘑界", "好吃先生辣椒炒肉", "肘子酥", "苏焰", "涮福记", "煲仔皇", "羊灼记", "李小太烧烤", "陈家味庄", "堂吉诃德", "大肆撸串", "梨花牛肉汤饭", "武圣羊汤", "麻辣空间清油火锅", "玖玖餐饮（韩味园）", "湘间田舍", "红荔村", "菲滋", "许爷剁椒鱼头", "爱伲牛肉", "爱尔牛奶/爱尒牛奶", "南流江畔", "小龙坎火锅", "壹加壹（City1+1pizza）", "胜香旺老柳州螺蛳粉", "叶派", "天怡興百年蒸饺", "椒爱", "一心烧鸟屋", "仓桥家", "一哥和宴", "峰峰菜馆", "美奈小馆", "湘一回辣椒炒肉", "NORU无规", "番疆", "山野西北", "民谣集", "点众餐饮/比萨拉姆", "ONE SMILE", "乡悦天下", "亚马逊海鲜自助", "鑫帝金喜", "楠城湘"]}, "盈动易象": {"name": "盈动易象", "type": "SaaS服务商", "owner": "小雪", "target": 10.0, "brands": ["好好咖啡", "不咫", "啡芽", "周茉ZHOUMO", "大地小禾", "珀森咖啡", "perhaps coffee", "诺园茶", "挽风甜点", "棠小芯的辅食店", "大咖茶", "NINE●咖啡三明治", "胡漓HOORAY", "每草堂", "淼今日煲"]}, "银豹": {"name": "银豹", "type": "SaaS服务商", "owner": "振哥", "target": 20.0, "brands": ["芝卷卷", "FARCHON菲颂", "捞佰吉", "果老师", "此间咖啡小红帽三明治", "曼爱时光", "鲜果小铺", "迎途商超", "猫的饼干", "魏姑娘", "婴味辅食", "Hi-Moomuse生活（餐桌蛋白生活馆）", "灵晓宝肉夹馍", "大豫人家", "啵达", "恬恬夏雪", "流金牧场", "明气", "Q一族", "焙心面包"]}, "全来店": {"name": "全来店", "type": "SaaS服务商", "owner": "小蛇", "target": 50.0, "brands": ["农畉LONFOOD", "牛扒先生", "及第粉JDF", "阿赛小面", "柠见", "淘蛙", "MACCACOFFEE摩卡咖啡", "汉拿山烤肉", "玖宴淮扬菜", "A餐吧", "美颐美", "金戈戈", "记香来", "德洲汉堡", "穗烨居", "一品焖锅", "小城渔家", "匠人牛品", "水墨田塬", "食必居SBJ", "西琳姑娘", "嘟嘟泰国小馆", "小然同學.台灣食堂", "觅小鲜", "必胜基", "夏日玛莉", "妈妈甜", "米国煲仔饭", "狮头牌自助点餐+"]}, "FLIPOS": {"name": "FLIPOS", "type": "SaaS服务商", "owner": "warm", "target": 20.0, "brands": ["泽田Ze-Tian", "CFINE初饭新轻餐", "bulubulu 轻养食堂"]}, "奥琦玮": {"name": "奥琦玮", "type": "SaaS服务商", "owner": "小雪", "target": 10.0, "brands": ["嘉和一品粥"]}, "美团": {"name": "美团", "type": "SaaS服务商", "owner": "振哥、小蛇", "target": 260.0, "brands": ["克茗冰室", "兵立王", "三两粉", "KUMO KUMO", "袁小饺", "味千拉麺", "柠季", "莫沫南路", "Yogurtday", "潮风堂", "糖叙", "霸碗", "袁记云饺", "700CC", "茶话弄", "Yes Lemon就是柠·手打柠檬茶", "永民手作", "麻六记", "拌侠客", "楼下酸奶", "宜味客", "喜喜点心", "潮蹄", "啊爆柠檬茶"]}, "有好": {"name": "有好", "type": "SaaS服务商", "owner": "振哥", "target": 8.0, "brands": ["大弗兰", "苏晓玥", "老碗会"]}, "食亨": {"name": "食亨", "type": "SaaS服务商", "owner": "振哥", "target": 2.0, "brands": ["满巍明", "小鱼号酸菜鱼"]}, "扫呗": {"name": "扫呗", "type": "经营服务商", "owner": "振哥、小蛇", "target": 10.0, "brands": ["枣木牌烤鸭", "三品王"]}, "乐世微广": {"name": "乐世微广", "type": "经营服务商", "owner": "振哥、小蛇", "target": 8.0, "brands": ["大龙燚火锅"]}, "米雅": {"name": "米雅", "type": "经营服务商", "owner": "振哥、小蛇", "target": 2.0, "brands": ["粒上皇", "紫燕百味鸡"]}, "收钱吧": {"name": "收钱吧", "type": "经营服务商", "owner": "振哥、小蛇", "target": 10.0, "brands": ["川海丰尚", "老门框爆肚涮肉", "潮汕粿条汤粉（海文店）", "栖水兰亭·影院足道·疗愈SPA"]}, "自研": {"name": "自研", "type": "经营服务商", "owner": "振哥、小蛇", "target": 30.0, "brands": ["麦悠悠养身小馆", "四个朋友", "面包新语", "喜乳酪", "泸溪河", "幸福西饼", "张亮麻辣烫", "尊宝", "巴黎贝甜", "半天妖", "蛙来哒", "探鱼", "蔡澜点心", "太二", "杨国福", "小铁24h自助台球", "谈小娱", "优剪", "八喜冰淇淋蛋糕"]}, "其他": {"name": "其他", "type": "—", "owner": "—", "target": 0, "brands": ["茶瀑布"]}};
-const TOTAL_TARGET = 800;
-
-async function loadAll() {
-  try {
-    document.getElementById('loading').querySelector('div:first-child').textContent='🍜 加载中...';
-    document.getElementById('loading').querySelector('div:last-child').textContent='正在从数据库获取数据';
-
-    // 1. 获取最新日期
-    const latestDate = await getLatestDate('brand_snapshot');
-    if (!latestDate) throw new Error('brand_snapshot 表无数据');
-
-    // 2. 并行拉取所有数据
-    const [brandRows, bcRows, sopRows, spRows, actRows] = await Promise.all([
-      supaFetch('brand_snapshot', `data_date=eq.${latestDate}&order=brand_id`),
-      supaFetch('brand_channel', `data_date=eq.${latestDate}&order=brand_id`),
-      supaFetch('sop_snapshot', `data_date=eq.${latestDate}&limit=1`),
-      supaFetch('sp_info', 'order=sp_name'),
-      supaFetch('activity_detail', `data_date=eq.${latestDate}&order=brand_name,activity_id`)
-    ]);
-
-    document.getElementById('loading').querySelector('div:last-child').textContent=
-      `已获取 ${brandRows.length} 个品牌 · ${actRows.length} 个活动 · 正在渲染`;
-
-    // 3. 映射 & 计算衍生字段
-    const brands = brandRows.map(r => enrichBrand(mapBrand(r)));
-    const bc = bcRows.map(mapBC);
-    
-    // 4. 用 brand_channel 的 e21EUR 补充到 brands
-    const bcMap = {};
-    bc.forEach(b => { bcMap[b.brandId] = b; });
-    brands.forEach(b => {
-      const ch = bcMap[b.brandId];
-      if (ch) {
-        if (b.e21EUR == null) b.e21EUR = ch.e21EUR;
-      }
-    });
-
-    // 5. SOP
-    let sop = {};
-    if (sopRows.length && sopRows[0].sop_data) {
-      sop = typeof sopRows[0].sop_data === 'string' ?
-        JSON.parse(sopRows[0].sop_data) : sopRows[0].sop_data;
-    }
-    // 补充 SOP 中可能缺失的字段（前端需要但 Supabase 不存储的）
-    if (!sop.alive_factors) sop.alive_factors = sop.alive_stats||{};
-    if (!sop.dead_factors) sop.dead_factors = sop.dead_stats||{};
-    if (!sop.all_factors) sop.all_factors = {};
-    if (!sop.scale) sop.scale = {alive:{},dead:{}};
-
-    // 6. 日期信息
-    const dateStr = latestDate.replace(/^\d{4}-/,'').replace(/-/g,'');
-    
-    // 6.1 自动推算周报日期范围（日报日期对应的上一个完整周: 周四~周三）
-    const dd = new Date(latestDate);
-    const dow = dd.getDay(); // 0=Sun
-    const daysToLastWed = ((dow + 4) % 7) || 7; // 距上一个周三(周报结束日)的天数
-    const lastWed = new Date(dd); lastWed.setDate(dd.getDate() - daysToLastWed);
-    const lastThu = new Date(lastWed); lastThu.setDate(lastWed.getDate() - 6);
-    const fmt2 = d => String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
-    const weeklyRange = fmt2(lastThu) + '-' + fmt2(lastWed);
-
-    // 6.2 动态计算 boost_by_cat（Supabase sop_data 中没有此字段）
-    const qResults = (sop.quadrant && sop.quadrant.results) || [];
-    if (sop.quadrant && !sop.quadrant.boost_by_cat && qResults.length > 0) {
-      const catMap = {};
-      // 先统计当前各类目存活数（从品牌数据）
-      brands.filter(b => b.tierManual==='腰部' && b.statusManual==='在线').forEach(b => {
-        const c = b.cat4 || '未知';
-        if (!catMap[c]) catMap[c] = {cat:c, cur_alive:0, new_alive:0, cur_all:0, new_all:0};
-        if (b.isAlive) catMap[c].cur_alive++;
-      });
-      // 再从 quadrant results 统计 new_alive 和核销
-      qResults.forEach(r => {
-        const c = r.cat4 || '未知';
-        if (!catMap[c]) catMap[c] = {cat:c, cur_alive:0, new_alive:0, cur_all:0, new_all:0};
-        catMap[c].cur_all += (r.cur_all||0);
-        catMap[c].new_all += (r.new_all||0);
-        if (r.new_alive) catMap[c].new_alive++;
-      });
-      sop.quadrant.boost_by_cat = Object.values(catMap);
-    }
-
-    // 7. 构造 D 对象（兼容原有渲染逻辑）
-    const D = {
-      final: {
-        dataDate: latestDate,
-        dailyDate: dateStr,
-        weeklyDateRange: weeklyRange,
-        spSummary: SPS_CONFIG,
-        brands: brands,
-        totalTarget: TOTAL_TARGET
-      },
-      sop: sop,
-      bc: bc,
-      acts: actRows.map(mapAct) // 活动明细，从 activity_detail 表加载
+  const brands = snapshots.map(s => {
+    const hiApp=s.hi_app_uv_e21||0, loApp=s.lo_app_uv_e21||0, hiExp=s.hi_exp_uv_e21||0, loExp=s.lo_exp_uv_e21||0;
+    const hiAppAll=s.hi_app_uv_all||0, loAppAll=s.lo_app_uv_all||0, hiExpAll=s.hi_exp_uv_all||0, loExpAll=s.lo_exp_uv_all||0;
+    const e21AppUV7d=hiApp+loApp, totalExpUV=hiExp+loExp, dailyExpUV=totalExpUV/7;
+    const bizUse=s.biz_use_d||0, f2fUse=s.f2f_use_d||0, fixUse=s.fix_use_d||0;
+    const e21UseDly=bizUse+f2fUse+fixUse, allUseDly=s.use_pv||0, otherUseDly=Math.max(0,allUseDly-e21UseDly);
+    const bizExp=s.biz_exp_w||0, f2fExp=s.f2f_exp_w||0, fixExp=s.fix_exp_w||0, e21ExpW=bizExp+f2fExp+fixExp;
+    const sc=s.store_count||0, dTx=s.daily_tx, dTxAbs=(dTx||0)*10000, expPv=s.exp_pv;
+    return {
+      name:s.brand_name, brandId:s.brand_id, sp:s.sp_name||'', spMapped:s.sp_name||'',
+      statusManual:s.status||'', tierManual:s.tier_human||s.tier||'', tierDaily:s.tier||'',
+      assistant:s.assistant||'', owner:s.owner||'', couponSP:s.coupon_sp||'',
+      hasDailyData:s.daily_tx!=null, cat2:s.category||'', cat4:s.sub_category||'',
+      displayLevel:s.display_level||'other',
+      survivalRate:s.survival_rate, isAlive:s.is_alive, priceForce:s.price_force,
+      miniApp:s.mini_app, txPerStore:s.tx_per_store, storeComplete:s.store_complete,
+      storeCount:s.store_count, visitUseRate:s.visit_use_rate, e21Ratio:s.e21_ratio,
+      expPv:s.exp_pv, claimPv:s.claim_pv, usePv:s.use_pv, dailyTx:s.daily_tx,
+      expClaimRate:s.exp_claim_rate, claimUseRate:s.claim_use_rate, expUseRate:s.exp_use_rate,
+      bizOk:s.factor_biz, priceOk:s.factor_price, infraOk:s.factor_infra, trafficOk:s.factor_store,
+      biz_expW:s.biz_exp_w, biz_useD:s.biz_use_d, f2f_expW:s.f2f_exp_w, f2f_useD:s.f2f_use_d,
+      fix_expW:s.fix_exp_w, fix_useD:s.fix_use_d, nb_expW:s.nb_exp_w, nb_useD:s.nb_use_d,
+      zfyl_expW:s.zfyl_exp_w, zfyl_useD:s.zfyl_use_d,
+      hiAppUV:hiApp, loAppUV:loApp, hiExpUV:hiExp, loExpUV:loExp,
+      hiAppUV_all:hiAppAll, loAppUV_all:loAppAll, hiExpUV_all:hiExpAll, loExpUV_all:loExpAll,
+      hiRate_uv:hiApp>0?hiExp/hiApp:0, loRate_uv:loApp>0?loExp/loApp:0,
+      hiRate_pv:s.hi_rate_e21!=null?s.hi_rate_e21/100:null,
+      loRate_pv:s.lo_rate_e21!=null?s.lo_rate_e21/100:null,
+      e21AppUV_7d:e21AppUV7d, allAppUV_7d:hiAppAll+loAppAll, allExpUV_7d:hiExpAll+loExpAll,
+      totalAppUV:e21AppUV7d, totalExpUV:totalExpUV, dailyExpUV:dailyExpUV,
+      e21_use_daily:e21UseDly, all_use_daily:allUseDly, other_use_daily:otherUseDly,
+      custAppRate:e21AppUV7d>0&&dTxAbs>0?e21AppUV7d/7/dTxAbs:0,
+      custTxRatio:dTxAbs>0?(e21AppUV7d/7)/dTxAbs*100:0,
+      expPerStore:sc>0&&e21ExpW>0?e21ExpW*10000/sc:null,
+      e21EUR_daily:dailyExpUV>0?e21UseDly/dailyExpUV:null,
+      e21EUR:dailyExpUV>0?(e21UseDly/dailyExpUV)*100:null,
+      e21ExpRatio:expPv>0?e21ExpW/expPv*100:null,
+      custAppPerStore:sc>0?e21AppUV7d/7/sc:null,
+      dailyTx_precise:dTx,
+      daily_cat2:s.category||'', daily_tier:s.tier||'',
+      daily_online_days:s.online_days, daily_online:s.online_days!=null&&s.online_days>0,
+      statusDaily:s.online_days!=null&&s.online_days>0?'在线':'在线待确认',
+      onlineStatus:s.online_days!=null&&s.online_days>0?'在线':'在线待确认',
+      _dr:s,
     };
+  });
 
-    return D;
-  } catch (err) {
-    console.error('加载失败:', err);
-    document.getElementById('loading').querySelector('div:first-child').textContent='❌ 加载失败';
-    document.getElementById('loading').querySelector('div:last-child').textContent=err.message;
-    throw err;
+  const bc = channels.map(c => ({
+    name:c.brand_name, brandId:c.brand_id, cat4:c.cat4||'', sp:c.sp||'', tier:c.tier||'',
+    alive:c.is_alive||false, dailyTx:c.daily_tx,
+    dExpW:c.d_exp_w, dClaimW:c.d_claim_w, dUse:c.d_use,
+    expClaimR:c.exp_claim_r, claimUseR:c.claim_use_r, expUseR:c.exp_use_r,
+    e21ExpW:c.e21_exp_w, e21Use:c.e21_use, e21EUR:c.e21_eur,
+    nbExpW:c.nb_exp_w, nbUse:c.nb_use, nbEUR:c.nb_eur,
+    payExpW:c.pay_exp_w, payUse:c.pay_use, payEUR:c.pay_eur,
+    hiR:c.hi_r, loR:c.lo_r,
+  }));
+
+  function mapAct(a) {
+    return {
+      brandName:a.brand_name, activityId:a.activity_id, activityName:a.activity_name,
+      couponName:a.coupon_name, couponDetail:a.coupon_detail||'', discountType:a.discount_type||'',
+      threshold:a.threshold, amount:a.amount, onlineDays:a.online_days,
+      priceForce:a.price_force, thresholdJudge:a.threshold_judge||'',
+      thresholdVal:a.threshold_val, brandAvgPrice:a.brand_avg_price,
+      expPV:a.exp_pv, claimPV:a.claim_pv, usePV:a.use_pv,
+      expUV:a.exp_uv, claimUV:a.claim_uv, useUV:a.use_uv,
+      dailyExpPV:a.daily_exp_pv, expClaimRate:a.exp_claim_rate,
+      claimUseRate:a.claim_use_rate, expUseRate:a.exp_use_rate, dailyUsePV:a.daily_use_pv,
+      isSP:a.is_sp||'', spName:a.sp_name||'', expValid:a.exp_valid||'',
+      useValid:a.use_valid||'', tier:a.tier||'',
+      hiAppRate:null, loAppRate:null, afterExpClaim:null, afterClaimVisit:null,
+      visitUseRate:null, visitNoThreshold:null, visit7dNoThreshold:null, visit7dThreshold:null,
+      visitUseAvgPrice:null, visitNoUseAvgPrice:null, visit7dUse:null, visit7dNoUse:null,
+    };
   }
+
+  const sop = sopRows.length > 0 ? sopRows[0].sop_data : {};
+
+  const D = {
+    final: {dataDate:targetDate, totalTarget:800, spSummary:spSummary, brands:brands},
+    sop: sop, bc: bc, acts: [], _actsLoaded: false,
+    loadActivities: async function() {
+      if (this._actsLoaded) return this.acts;
+      const raw = await fetchAllParallel('activity_detail', 'select=*');
+      this.acts = raw.map(mapAct);
+      this._actsLoaded = true;
+      return this.acts;
+    },
+  };
+  return D;
 }
 
-// 启动
-loadAll().then(data => {
-  window.D = data;
-const F=D.final,BS=F.brands,SPS=F.spSummary,SOP=D.sop,BC=D.bc,ACTS=D.acts;
-document.getElementById('hdrDateInfo').innerHTML='品牌数据：'+(F.dailyDate||F.dataDate)+' · 门店及活动数据：'+(F.weeklyDateRange||'—');
-const W=BS.filter(b=>b.tierManual==='腰部'),KA=BS.filter(b=>b.tierManual==='KA');
+var F,BS,SPS,SOP,BC,ACTS,W,KA,actByBrand={};
+
 function V(v,s){if(v==null)return'—';return v+(s||'')}
 function Nw(v){if(v==null)return'—';return v>=1000?(v/1000).toFixed(0)+'k':v<0.01&&v>0?v.toFixed(3):v.toFixed(1)}
 function N(v){if(!v&&v!==0)return'—';if(Math.abs(v)>=10000)return(v/10000).toFixed(1)+'万';if(Math.abs(v)>=1000)return(v/1000).toFixed(1)+'k';return Math.round(v)}
@@ -624,14 +473,14 @@ function rsop(){
       if(fSP&&b.sp!==fSP)return false;
       if(fOwner&&b.owner!==fOwner)return false;
       if(fAsst&&b.assistant!==fAsst)return false;
-      if(fIssue&&!(b.issues||[]).includes(fIssue))return false;
+      if(fIssue&&!b.issues.includes(fIssue))return false;
       if(fQ&&!b.name.toLowerCase().includes(fQ)&&!(b.brandId||'').includes(fQ))return false;
       return true;
     });
     const tb=document.querySelector('#scrTbl tbody');
     tb.innerHTML='';
     fl.forEach(b=>{
-      const issues=(b.issues||[]).map(i=>{
+      const issues=b.issues.map(i=>{
         const colors={'经营模式':'#b45852','货盘':'#b49252','基建-商户号':'#5a8aad','基建-门店':'#6366f1'};
         return`<span style="display:inline-block;font-size:9px;font-weight:600;padding:1px 5px;border-radius:3px;background:${colors[i]}20;color:${colors[i]};margin:1px 2px">${i}</span>`;
       }).join('');
@@ -650,10 +499,10 @@ function rsop(){
         <td class="nc">${b.priceForce!=null?(b.priceForce>0?'+':'')+b.priceForce+'%':'—'}</td>
         <td class="nc" style="color:${b.storeComplete!=null&&b.storeComplete<90?'var(--r)':'inherit'};font-weight:${b.storeComplete!=null&&b.storeComplete<90?'700':'400'}">${b.storeComplete!=null?b.storeComplete+'%':'—'}</td>
         <td>${issues}</td>
-        <td>${(b.issues||[]).includes('经营模式')?scrSelect(b.brandId,b.name,'经营模式','screen_biz'):''}</td>
-        <td>${(b.issues||[]).includes('货盘')?scrSelect(b.brandId,b.name,'货盘','screen_price'):''}</td>
-        <td>${(b.issues||[]).includes('基建-商户号')?scrSelect(b.brandId,b.name,'基建','screen_infra'):''}</td>
-        <td>${(b.issues||[]).includes('基建-门店')?scrSelect(b.brandId,b.name,'门店','screen_store'):''}</td>
+        <td>${b.issues.includes('经营模式')?scrSelect(b.brandId,b.name,'经营模式','screen_biz'):''}</td>
+        <td>${b.issues.includes('货盘')?scrSelect(b.brandId,b.name,'货盘','screen_price'):''}</td>
+        <td>${b.issues.includes('基建-商户号')?scrSelect(b.brandId,b.name,'基建','screen_infra'):''}</td>
+        <td>${b.issues.includes('基建-门店')?scrSelect(b.brandId,b.name,'门店','screen_store'):''}</td>
         <td><textarea class="rm" style="min-width:140px;font-size:12px;padding:4px 6px" placeholder="..." onblur="scrRemarkChange(this,'${b.brandId}','${b.name.replace(/'/g,"\\'")}')" onkeydown="if(event.key==='Enter'){event.preventDefault();scrRemarkChange(this,'${b.brandId}','${b.name.replace(/'/g,"\\'")}');this.blur()}" onclick="event.stopPropagation()">${remarkVal}</textarea></td>
         <td><textarea class="rm" style="min-width:160px;font-size:12px;padding:4px 6px" placeholder="0407-0410反馈..." onblur="scrFb0410Change(this,'${b.brandId}','${b.name.replace(/'/g,"\\'")}')" onkeydown="if(event.key==='Enter'){event.preventDefault();scrFb0410Change(this,'${b.brandId}','${b.name.replace(/'/g,"\\'")}');this.blur()}" onclick="event.stopPropagation()">${fb0410Val}</textarea></td>
       </tr>`;
@@ -662,10 +511,10 @@ function rsop(){
     // 反馈汇总
     if(_fbLoaded){
       const bizC={},priceC={},infraC={};
-      const bizBrands=SCR.filter(b=>(b.issues||[]).includes('经营模式'));
-      const priceBrands=SCR.filter(b=>(b.issues||[]).includes('货盘'));
-      const infraBrands=SCR.filter(b=>(b.issues||[]).includes('基建-商户号'));
-      const storeBrands=SCR.filter(b=>(b.issues||[]).includes('基建-门店'));
+      const bizBrands=SCR.filter(b=>b.issues.includes('经营模式'));
+      const priceBrands=SCR.filter(b=>b.issues.includes('货盘'));
+      const infraBrands=SCR.filter(b=>b.issues.includes('基建-商户号'));
+      const storeBrands=SCR.filter(b=>b.issues.includes('基建-门店'));
       function countFb(brands,field){
         const c={};
         brands.forEach(b=>{
@@ -1122,7 +971,7 @@ function rsop(){
         const tbl='<table style="width:100%;font-size:11px;border-collapse:collapse">';
         const thBase='<thead><tr style="background:var(--x0)"><th style="padding:5px 8px;text-align:left">品牌</th><th style="padding:5px 8px">品牌ID</th><th style="padding:5px 8px">服务商</th><th style="padding:5px 8px">负责人</th><th style="padding:5px 8px">业态</th><th style="padding:5px 8px" class="nc">门店数</th><th style="padding:5px 8px" class="nc">日均交易(w)</th><th style="padding:5px 8px" class="nc">1店几笔</th><th style="padding:5px 8px" class="nc">小程序占比</th><th style="padding:5px 8px" class="nc">价格力</th><th style="padding:5px 8px">待排查问题</th></tr></thead>';
         const thFlow='<thead><tr style="background:var(--x0)"><th style="padding:5px 8px;text-align:left">品牌</th><th style="padding:5px 8px">品牌ID</th><th style="padding:5px 8px">服务商</th><th style="padding:5px 8px">负责人</th><th style="padding:5px 8px">业态</th><th style="padding:5px 8px" class="nc">门店数</th><th style="padding:5px 8px" class="nc">日均交易(w)</th><th style="padding:5px 8px" class="nc">1店几笔</th><th style="padding:5px 8px" class="nc">小程序占比</th><th style="padding:5px 8px" class="nc">价格力</th><th style="padding:5px 8px" class="nc">日均曝光(w)</th><th style="padding:5px 8px" class="nc">日均尽曝UV</th><th style="padding:5px 8px" class="nc">7日应曝UV</th></tr></thead>';
-        function issSpan(b){return (b.issues||[]).map(i=>'<span style="display:inline-block;font-size:9px;font-weight:600;padding:1px 4px;border-radius:3px;background:'+({'经营模式':'#b4585220','货盘':'#b4925220','基建':'#5a8aad20'}[i]||'#eee')+';color:'+({'经营模式':'#b45852','货盘':'#b49252','基建':'#5a8aad'}[i]||'#666')+';margin:1px">'+i+'</span>').join('')}
+        function issSpan(b){return b.issues.map(i=>'<span style="display:inline-block;font-size:9px;font-weight:600;padding:1px 4px;border-radius:3px;background:'+({'经营模式':'#b4585220','货盘':'#b4925220','基建':'#5a8aad20'}[i]||'#eee')+';color:'+({'经营模式':'#b45852','货盘':'#b49252','基建':'#5a8aad'}[i]||'#666')+';margin:1px">'+i+'</span>').join('')}
         function baseRow(b){return '<tr><td style="padding:4px 8px;font-weight:600">'+b.name+'</td><td style="padding:4px 8px">'+(b.brandId||'—')+'</td><td style="padding:4px 8px">'+(b.sp||'—')+'</td><td style="padding:4px 8px">'+(b.owner||'—')+'</td><td style="padding:4px 8px">'+(b.cat4||'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.storeCount!=null?b.storeCount:'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.dailyTx!=null?b.dailyTx+'w':'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.txPerStore!=null?b.txPerStore:'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.miniApp!=null?b.miniApp+'%':'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.priceForce!=null?(b.priceForce>0?'+':'')+b.priceForce+'%':'—')+'</td><td style="padding:4px 8px">'+issSpan(b)+'</td></tr>'}
         function flowRow(b){return '<tr><td style="padding:4px 8px;font-weight:600">'+b.name+'</td><td style="padding:4px 8px">'+(b.brandId||'—')+'</td><td style="padding:4px 8px">'+(b.sp||'—')+'</td><td style="padding:4px 8px">'+(b.owner||'—')+'</td><td style="padding:4px 8px">'+(b.cat4||'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.storeCount!=null?b.storeCount:'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.dailyTx!=null?b.dailyTx+'w':'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.txPerStore!=null?b.txPerStore:'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.miniApp!=null?b.miniApp+'%':'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.priceForce!=null?(b.priceForce>0?'+':'')+b.priceForce+'%':'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.expPvW||'—')+'</td><td style="padding:4px 8px" class="nc">'+b.dailyExpUV+'</td><td style="padding:4px 8px" class="nc">'+(b.e21AppUV7d||'—')+'</td></tr>'}
         const cs='background:#fff;border-radius:10px;box-shadow:var(--s);padding:18px;position:relative;overflow:hidden';
@@ -1203,7 +1052,65 @@ s+='</tbody></table>';tb.innerHTML+=`<tr class="act-detail"><td colspan="27" sty
 document.getElementById('cCnt').textContent=fl.length+'/'+BC.length+' 品牌 · '+ACTS.length+' 活动'}
 
 function stab(i){document.querySelectorAll('.tab').forEach((b,j)=>{b.classList.toggle('on',j===i)});document.querySelectorAll('.P').forEach((c,j)=>{c.classList.toggle('on',j===i)})}
-(function(){const ss=[...new Set(BS.map(b=>b.spMapped))].sort();['fSP','cSP'].forEach(id=>{const s=document.getElementById(id);ss.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o)})});[...new Set(BS.map(b=>b.owner).filter(Boolean))].sort().forEach(v=>{document.getElementById('fOwner').innerHTML+=`<option value="${v}">${v}</option>`});[...new Set(BS.map(b=>b.assistant).filter(Boolean))].sort().forEach(v=>{document.getElementById('fAsst').innerHTML+=`<option value="${v}">${v}</option>`});const catCnt={};BS.forEach(b=>{const c=b.cat4;if(c){catCnt[c]=(catCnt[c]||0)+1}});const cats=Object.keys(catCnt).filter(c=>catCnt[c]>=3).sort();['fCat','cCat'].forEach(id=>{const s=document.getElementById(id);cats.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v+' ('+catCnt[v]+')';s.appendChild(o)})});rsop();rov();rbt();rconv();document.getElementById('loading').style.display='none'})();
 
-}).catch(e => { console.error(e); });
+
+async function initDashboard(targetDate) {
+  try {
+    const D = await loadDashboardData(targetDate);
+
+    F=D.final,BS=F.brands,SPS=F.spSummary,SOP=D.sop,BC=D.bc,ACTS=D.acts;
+W=BS.filter(b=>b.tierManual==='腰部'),KA=BS.filter(b=>b.tierManual==='KA');
+    actByBrand={}; ACTS.forEach(function(a){var n=a.brandName;if(!actByBrand[n])actByBrand[n]=[];actByBrand[n].push(a)});
+const ss=[...new Set(BS.map(b=>b.spMapped))].sort();['fSP','cSP'].forEach(id=>{const s=document.getElementById(id);ss.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o)})});[...new Set(BS.map(b=>b.owner).filter(Boolean))].sort().forEach(v=>{document.getElementById('fOwner').innerHTML+=`<option value="${v}">${v}</option>`});[...new Set(BS.map(b=>b.assistant).filter(Boolean))].sort().forEach(v=>{document.getElementById('fAsst').innerHTML+=`<option value="${v}">${v}</option>`});const catCnt={};BS.forEach(b=>{const c=b.cat4;if(c){catCnt[c]=(catCnt[c]||0)+1}});const cats=Object.keys(catCnt).filter(c=>catCnt[c]>=3).sort();['fCat','cCat'].forEach(id=>{const s=document.getElementById(id);cats.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v+' ('+catCnt[v]+')';s.appendChild(o)})});rsop();rov();rbt();rconv();document.getElementById('loading').style.display='none'
+
+    // ── Tab2 延迟加载 activity_detail ──
+    const tabBtns = document.querySelectorAll('.tab');
+    if (tabBtns.length >= 3) {
+      let actsLoadedForUI = false;
+      tabBtns[2].addEventListener('click', async function() {
+        if (!actsLoadedForUI) {
+          actsLoadedForUI = true;
+          const le = document.getElementById('loading');
+          if (le) { le.style.display = 'flex'; }
+          const freshActs = await D.loadActivities();
+          ACTS.length = 0; ACTS.push.apply(ACTS, freshActs);
+          if (typeof actByBrand !== 'undefined') {
+            Object.keys(actByBrand).forEach(function(k){delete actByBrand[k]});
+            ACTS.forEach(function(a){var n=a.brandName;if(!actByBrand[n])actByBrand[n]=[];actByBrand[n].push(a)});
+          }
+          if (le) le.style.display = 'none';
+          if (typeof rconv === 'function') rconv();
+        }
+      });
+    }
+
+    // ── 日期选择器 ──
+    var dateSelect = document.getElementById('dateSelector');
+    if (dateSelect) {
+      var headers = {'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY};
+      var resp = await fetch(SUPA_URL + '/rest/v1/brand_snapshot?select=data_date&order=data_date.desc&limit=30', {headers: headers});
+      var allDates = await resp.json();
+      var seen = {};
+      allDates.forEach(function(d) {
+        if (!seen[d.data_date]) {
+          seen[d.data_date] = true;
+          var opt = document.createElement('option');
+          opt.value = d.data_date; opt.textContent = d.data_date;
+          dateSelect.appendChild(opt);
+        }
+      });
+      dateSelect.onchange = function() {
+        document.getElementById('loading').style.display = 'flex';
+        initDashboard(dateSelect.value);
+      };
+    }
+
+  } catch (err) {
+    console.error('Dashboard load error:', err);
+    var le = document.getElementById('loading');
+    if (le) le.innerHTML = '<div style="color:red;padding:40px;text-align:center">数据加载失败: ' + err.message + '<br><br><small>请检查网络连接后刷新页面</small></div>';
+  }
+}
+initDashboard();
+
 </script></body></html>
