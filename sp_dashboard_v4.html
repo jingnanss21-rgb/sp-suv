@@ -74,7 +74,7 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
 <div id="loading" style="position:fixed;top:0;left:0;right:0;bottom:0;background:#eef2f7;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column"><div style="font-size:16px;color:#475569;font-weight:600">🍜 加载中...</div><div style="font-size:11px;color:#94a3b8;margin-top:6px">正在渲染数据</div></div>
 <div class="hdr"><h1>🍜 餐饮服务商 · 运营看板</h1><p>数据 2026-04-14 · 周报 0402-0408 · v5.0</p></div>
 <div class="W">
-<div class="tabs"><button class="tab on" onclick="stab(0)">📋 运营SOP</button><button class="tab" onclick="stab(1)">📊 服务商&品牌明细</button><button class="tab" onclick="stab(2)">🔄 基础转化</button></div>
+<div class="tabs"><button class="tab on" onclick="stab(0)">📋 运营SOP</button><button class="tab" onclick="stab(1)">📊 要素检查明细</button><button class="tab" onclick="stab(2)">🔄 活动转化明细</button></div>
 
 <div class="P on" id="t0">
 <div class="S"><div class="ST">🎯 整体目标</div><div class="kg" id="sopTgt"></div></div>
@@ -113,7 +113,7 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
 
 <div class="P" id="t2">
 <div style="font-size:10px;color:var(--x5);margin:8px 0">日均数据。曝光(w万) 核销(绝对值)。点击展开活动，占比=活动÷品牌整体。</div>
-<div class="fb"><span class="fl">筛选</span><select id="cSP" onchange="rconv()"><option value="">服务商</option></select><select id="cCat" onchange="rconv()"><option value="">类目</option></select><select id="cTier" onchange="rconv()"><option value="">分层</option><option value="KA">KA</option><option value="腰部">腰部</option><option value="尾部">尾部</option></select><select id="cAlive" onchange="rconv()"><option value="">全部</option><option value="1">存活</option><option value="0">未存活</option></select><input id="cQ" type="text" placeholder="搜索品牌" oninput="rconv()" style="width:100px"></div>
+<div class="fb"><span class="fl">筛选</span><select id="cSP" onchange="rconv()"><option value="">服务商</option></select><select id="cCat" onchange="rconv()"><option value="">类目</option></select><select id="cTier" onchange="rconv()"><option value="">分层</option><option value="KA">KA</option><option value="腰部">腰部</option><option value="尾部">尾部</option></select><select id="cAlive" onchange="rconv()"><option value="">全部</option><option value="1">存活</option><option value="0">未存活</option></select><input id="cQ" type="text" placeholder="搜索品牌" oninput="rconv()" style="width:100px"><button onclick="exportActCSV()" style="margin-left:8px;padding:4px 12px;background:var(--p);color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:11px">📥 导出活动CSV</button></div>
 <div class="tw"><table id="cTbl"><thead>
 <tr><th rowspan="2" style="width:24px"></th><th rowspan="2" onclick="csrt('name')">品牌⇅</th><th rowspan="2">品牌ID</th><th rowspan="2" onclick="csrt('cat4')">类目⇅</th><th rowspan="2" onclick="csrt('sp')">服务商⇅</th><th rowspan="2" onclick="csrt('tier')">分层⇅</th><th rowspan="2">存活</th><th rowspan="2" class="nc" onclick="csrt('dailyTx')">日均交易(w)⇅</th>
 <th class="nc" colspan="5" style="background:var(--x6);color:#fff;text-align:center">整体</th>
@@ -1038,8 +1038,8 @@ tb.innerHTML+=`<tr><td><b>${b.name}</b></td><td>${b.brandId||'—'}</td><td>${b.
 
 let curCS=null,csD=1;function csrt(f){if(curCS===f)csD*=-1;else{curCS=f;csD=1};rconv()}
 function tgact(el){const next=el.closest('tr').nextElementSibling;if(next&&next.classList.contains('act-detail')){next.classList.toggle('show');const btn=el.querySelector('.xb');if(btn){const n=btn.dataset.n;btn.textContent=next.classList.contains('show')?'收起':n+'个活动'}}}
-function rconv(){const fSP=document.getElementById('cSP').value,fCat=document.getElementById('cCat').value,fTier=document.getElementById('cTier').value,fA=document.getElementById('cAlive').value,fQ=document.getElementById('cQ').value.toLowerCase();
-let fl=BC.filter(b=>{if(fSP&&b.sp!==fSP)return false;if(fCat&&b.cat4!==fCat)return false;if(fTier&&b.tier!==fTier)return false;if(fA==='1'&&b.alive!==true)return false;if(fA==='0'&&b.alive!==false)return false;if(fQ&&!b.name.toLowerCase().includes(fQ))return false;return true});
+function rconv(){var _dlMap={};BS.forEach(function(b){_dlMap[b.brandId]=b.displayLevel||'other'});const fSP=document.getElementById('cSP').value,fCat=document.getElementById('cCat').value,fTier=document.getElementById('cTier').value,fA=document.getElementById('cAlive').value,fQ=document.getElementById('cQ').value.toLowerCase();
+let fl=BC.filter(b=>{if((_dlMap[b.brandId]||'other')==='ka_self')return false;if(fSP&&b.sp!==fSP)return false;if(fCat&&b.cat4!==fCat)return false;if(fTier&&b.tier!==fTier)return false;if(fA==='1'&&b.alive!==true)return false;if(fA==='0'&&b.alive!==false)return false;if(fQ&&!b.name.toLowerCase().includes(fQ))return false;return true});
 fl.sort((a,b)=>{if(a.dExpW==null&&b.dExpW!=null)return 1;if(b.dExpW==null&&a.dExpW!=null)return -1;return 0});
 if(curCS)fl.sort((a,b)=>{let av=a[curCS],bv=b[curCS];if(av==null)return 1;if(bv==null)return -1;if(typeof av==='string')return csD*av.localeCompare(bv);return csD*(av-bv)});else fl.sort((a,b)=>{if(a.dUse==null)return 1;if(b.dUse==null)return -1;return(b.dUse||0)-(a.dUse||0)});
 const tb=document.querySelector('#cTbl tbody');tb.innerHTML='';
@@ -1049,6 +1049,32 @@ if(acts.length){acts.sort((a,b)=>(b.expPV||0)-(a.expPV||0));const bE=ae*10000,bU
 acts.forEach(a=>{const ap=a.expPV||0,au2=a.usePV||0;s+=`<tr><td style="padding:3px 5px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${a.activityName||''}">${a.activityName||'—'}</td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${a.couponName||''}">${a.couponName||'—'}</td><td class="nc">${a.onlineDays||'—'}</td><td class="nc">${a.threshold!=null?a.threshold:'—'}</td><td class="nc">${a.amount!=null?a.amount:'—'}</td><td class="nc">${a.priceForce!=null?a.priceForce:'—'}</td><td>${a.thresholdJudge||'—'}</td><td class="nc">${N(ap)}</td><td class="nc"><b>${bE?Pct(ap,bE):'—'}</b></td><td class="nc">${N(a.claimPV)}</td><td class="nc">${N(au2)}</td><td class="nc"><b>${bU?Pct(au2,bU):'—'}</b></td><td class="nc">${a.expClaimRate!=null?P(a.expClaimRate):'—'}</td><td class="nc">${a.claimUseRate!=null?P(a.claimUseRate):'—'}</td><td class="nc">${a.expUseRate!=null?P(a.expUseRate):'—'}</td><td class="nc">${a.visitUseRate!=null?P(a.visitUseRate):'—'}</td><td class="nc">${a.hiAppRate!=null?P(a.hiAppRate):'—'}</td><td class="nc">${a.loAppRate!=null?P(a.loAppRate):'—'}</td></tr>`});
 s+='</tbody></table>';tb.innerHTML+=`<tr class="act-detail"><td colspan="27" style="padding:3px 5px 5px;background:var(--x0)"><div style="max-height:300px;overflow-y:auto">${s}</div></td></tr>`}});
 document.getElementById('cCnt').textContent=fl.length+'/'+BC.length+' 品牌 · '+ACTS.length+' 活动'}
+
+
+function exportActCSV(){
+  var _dlMap={};BS.forEach(function(b){_dlMap[b.brandId]=b.displayLevel||'other'});
+  var fSP=document.getElementById('cSP').value,fCat=document.getElementById('cCat').value,fQ=document.getElementById('cQ').value.toLowerCase();
+  var fl=BC.filter(function(b){
+    if((_dlMap[b.brandId]||'other')==='ka_self')return false;
+    if(fSP&&b.sp!==fSP)return false;
+    if(fCat&&b.cat4!==fCat)return false;
+    if(fQ&&!b.name.toLowerCase().includes(fQ))return false;
+    return true;
+  });
+  var brandNames={};fl.forEach(function(b){brandNames[b.name]=true});
+  var acts=ACTS.filter(function(a){return brandNames[a.brandName]});
+  if(!acts.length){alert('当前筛选无活动数据');return}
+  var cols=['品牌','活动ID','活动名称','券名称','优惠门槛','优惠金额','在线天数','价格力','门槛判定','累计曝光PV','累计领取PV','累计核销PV','日均曝光PV','曝光领取率','领取核销率','曝光核销率','日均核销PV'];
+  var keys=['brandName','activityId','activityName','couponName','threshold','amount','onlineDays','priceForce','thresholdJudge','expPV','claimPV','usePV','dailyExpPV','expClaimRate','claimUseRate','expUseRate','dailyUsePV'];
+  var csv='\uFEFF'+cols.join(',')+'\n';
+  acts.forEach(function(a){
+    csv+=keys.map(function(k){var v=a[k];if(v==null)return'';v=String(v);if(v.indexOf(',')>=0||v.indexOf('"')>=0||v.indexOf('\n')>=0)v='"'+v.replace(/"/g,'""')+'"';return v}).join(',')+'\n';
+  });
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');a.href=url;a.download='activity_detail_'+new Date().toISOString().slice(0,10)+'.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+}
 
 function stab(i){document.querySelectorAll('.tab').forEach((b,j)=>{b.classList.toggle('on',j===i)});document.querySelectorAll('.P').forEach((c,j)=>{c.classList.toggle('on',j===i)})}
 
