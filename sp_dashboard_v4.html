@@ -376,12 +376,42 @@ async function loadAll() {
     // 6. 日期信息
     const dateStr = latestDate.replace(/^\d{4}-/,'').replace(/-/g,'');
     
+    // 6.1 自动推算周报日期范围（日报日期对应的上一个完整周: 周四~周三）
+    const dd = new Date(latestDate);
+    const dow = dd.getDay(); // 0=Sun
+    const daysToLastWed = ((dow + 4) % 7) || 7; // 距上一个周三(周报结束日)的天数
+    const lastWed = new Date(dd); lastWed.setDate(dd.getDate() - daysToLastWed);
+    const lastThu = new Date(lastWed); lastThu.setDate(lastWed.getDate() - 6);
+    const fmt2 = d => String(d.getMonth()+1).padStart(2,'0') + String(d.getDate()).padStart(2,'0');
+    const weeklyRange = fmt2(lastThu) + '-' + fmt2(lastWed);
+
+    // 6.2 动态计算 boost_by_cat（Supabase sop_data 中没有此字段）
+    const qResults = (sop.quadrant && sop.quadrant.results) || [];
+    if (sop.quadrant && !sop.quadrant.boost_by_cat && qResults.length > 0) {
+      const catMap = {};
+      // 先统计当前各类目存活数（从品牌数据）
+      brands.filter(b => b.tierManual==='腰部' && b.statusManual==='在线').forEach(b => {
+        const c = b.cat4 || '未知';
+        if (!catMap[c]) catMap[c] = {cat:c, cur_alive:0, new_alive:0, cur_all:0, new_all:0};
+        if (b.isAlive) catMap[c].cur_alive++;
+      });
+      // 再从 quadrant results 统计 new_alive 和核销
+      qResults.forEach(r => {
+        const c = r.cat4 || '未知';
+        if (!catMap[c]) catMap[c] = {cat:c, cur_alive:0, new_alive:0, cur_all:0, new_all:0};
+        catMap[c].cur_all += (r.cur_all||0);
+        catMap[c].new_all += (r.new_all||0);
+        if (r.new_alive) catMap[c].new_alive++;
+      });
+      sop.quadrant.boost_by_cat = Object.values(catMap);
+    }
+
     // 7. 构造 D 对象（兼容原有渲染逻辑）
     const D = {
       final: {
         dataDate: latestDate,
         dailyDate: dateStr,
-        weeklyDateRange: '—', // TODO: 从 sop_data 或 meta 获取
+        weeklyDateRange: weeklyRange,
         spSummary: SPS_CONFIG,
         brands: brands,
         totalTarget: TOTAL_TARGET
