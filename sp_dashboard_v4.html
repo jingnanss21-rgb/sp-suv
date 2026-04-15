@@ -226,7 +226,8 @@ function mapBrand(r) {
     dailyTx: r.daily_tx, expClaimRate: r.exp_claim_rate,
     claimUseRate: r.claim_use_rate, expUseRate: r.exp_use_rate,
     bizOk: r.factor_biz, priceOk: r.factor_price,
-    infraOk: r.factor_infra, trafficOk: r.factor_store,
+    infraOk: r.factor_infra, storeOk: r.factor_store,
+    trafficOk: r.survival_rate!=null ? r.survival_rate >= 5.8 : false,
     onlineStatus: r.status==='流失'?'流失':(r.daily_tx!=null?'在线':'未更新'),
     // UV 字段
     hiAppUV: r.hi_app_uv_e21, loAppUV: r.lo_app_uv_e21,
@@ -257,8 +258,8 @@ function enrichBrand(b) {
   // hiRate_pv 跟 hiRate_uv 一致
   b.hiRate_pv = b.hiRate_uv;
   b.loRate_pv = b.loRate_uv;
-  // custAppRate
-  b.custAppRate = b.allAppUV_7d>0 ? b.totalExpUV / b.allAppUV_7d : null;
+  // custAppRate = 尽曝/应曝 (二选一渠道)
+  b.custAppRate = b.e21AppUV_7d>0 ? b.totalExpUV / b.e21AppUV_7d : null;
   // dailyExpUV
   b.dailyExpUV = b.totalExpUV!=null ? b.totalExpUV / 7 : null;
   // dailyTx_precise = dailyTx (已经是精确值)
