@@ -75,7 +75,7 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
   <select id="dateSelector" style="padding:4px;border:1px solid var(--b2);border-radius:4px;font-size:12px"></select>
 </div>
 <div id="loading" style="position:fixed;top:0;left:0;right:0;bottom:0;background:#eef2f7;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column"><div style="font-size:16px;color:#475569;font-weight:600">🍜 加载中...</div><div style="font-size:11px;color:#94a3b8;margin-top:6px">正在渲染数据</div></div>
-<div class="hdr"><h1>🍜 餐饮服务商 · 运营看板</h1><p>数据 2026-04-15 · 周报 0409-0415 · v5.0</p></div>
+<div class="hdr"><h1>🍜 餐饮服务商 · 运营看板</h1><p>数据 2026-04-13 · 周报 0407-0413 · v5.0</p></div>
 <div class="W">
 <div class="tabs"><button class="tab on" onclick="stab(0)">📋 运营SOP</button><button class="tab" onclick="stab(1)">📊 服务商&品牌明细</button><button class="tab" onclick="stab(2)">🔄 基础转化</button></div>
 
@@ -177,7 +177,7 @@ function N(v){if(!v&&v!==0)return'—';if(Math.abs(v)>=10000)return(v/10000).toF
 function WOW(v){if(v==null)return'—';return'<span class="'+(v>=0?'up':'dn')+'">'+(v>0?'+':'')+v+'%</span>'}
 function P(v){if(v==null)return'—';return(v*100).toFixed(1)+'%'}
 function Pct(n,d){if(!n||!d||d===0)return'—';return(n/d*100).toFixed(1)+'%'}
-actByBrand ={};(ACTS||[]).forEach(a=>{const n=a.brandName;if(!actByBrand[n])actByBrand[n]=[];actByBrand[n].push(a)});
+actByBrand ={};ACTS.forEach(a=>{const n=a.brandName;if(!actByBrand[n])actByBrand[n]=[];actByBrand[n].push(a)});
 function quadDetail(id){const el=document.getElementById(id);if(el)el.style.display=el.style.display==='none'?'block':'none'}
 
 function rsop(){
@@ -834,7 +834,7 @@ function rsop(){
         const tbl='<table style="width:100%;font-size:11px;border-collapse:collapse">';
         const thBase='<thead><tr style="background:var(--x0)"><th style="padding:5px 8px;text-align:left">品牌</th><th style="padding:5px 8px">品牌ID</th><th style="padding:5px 8px">服务商</th><th style="padding:5px 8px">负责人</th><th style="padding:5px 8px">业态</th><th style="padding:5px 8px" class="nc">门店数</th><th style="padding:5px 8px" class="nc">日均交易(w)</th><th style="padding:5px 8px" class="nc">1店几笔</th><th style="padding:5px 8px" class="nc">小程序占比</th><th style="padding:5px 8px" class="nc">价格力</th><th style="padding:5px 8px">待排查问题</th></tr></thead>';
         const thFlow='<thead><tr style="background:var(--x0)"><th style="padding:5px 8px;text-align:left">品牌</th><th style="padding:5px 8px">品牌ID</th><th style="padding:5px 8px">服务商</th><th style="padding:5px 8px">负责人</th><th style="padding:5px 8px">业态</th><th style="padding:5px 8px" class="nc">门店数</th><th style="padding:5px 8px" class="nc">日均交易(w)</th><th style="padding:5px 8px" class="nc">1店几笔</th><th style="padding:5px 8px" class="nc">小程序占比</th><th style="padding:5px 8px" class="nc">价格力</th><th style="padding:5px 8px" class="nc">日均曝光(w)</th><th style="padding:5px 8px" class="nc">日均尽曝UV</th><th style="padding:5px 8px" class="nc">7日应曝UV</th></tr></thead>';
-        function issSpan(b){return (b.issues||[]).map(i=>'<span style="display:inline-block;font-size:9px;font-weight:600;padding:1px 4px;border-radius:3px;background:'+({'经营模式':'#b4585220','货盘':'#b4925220','基建':'#5a8aad20'}[i]||'#eee')+';color:'+({'经营模式':'#b45852','货盘':'#b49252','基建':'#5a8aad'}[i]||'#666')+';margin:1px">'+i+'</span>').join('')}
+        function issSpan(b){return b.issues.map(i=>'<span style="display:inline-block;font-size:9px;font-weight:600;padding:1px 4px;border-radius:3px;background:'+({'经营模式':'#b4585220','货盘':'#b4925220','基建':'#5a8aad20'}[i]||'#eee')+';color:'+({'经营模式':'#b45852','货盘':'#b49252','基建':'#5a8aad'}[i]||'#666')+';margin:1px">'+i+'</span>').join('')}
         function baseRow(b){return '<tr><td style="padding:4px 8px;font-weight:600">'+b.name+'</td><td style="padding:4px 8px">'+(b.brandId||'—')+'</td><td style="padding:4px 8px">'+(b.sp||'—')+'</td><td style="padding:4px 8px">'+(b.owner||'—')+'</td><td style="padding:4px 8px">'+(b.cat4||'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.storeCount!=null?b.storeCount:'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.dailyTx!=null?b.dailyTx+'w':'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.txPerStore!=null?b.txPerStore:'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.miniApp!=null?b.miniApp+'%':'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.priceForce!=null?(b.priceForce>0?'+':'')+b.priceForce+'%':'—')+'</td><td style="padding:4px 8px">'+issSpan(b)+'</td></tr>'}
         function flowRow(b){return '<tr><td style="padding:4px 8px;font-weight:600">'+b.name+'</td><td style="padding:4px 8px">'+(b.brandId||'—')+'</td><td style="padding:4px 8px">'+(b.sp||'—')+'</td><td style="padding:4px 8px">'+(b.owner||'—')+'</td><td style="padding:4px 8px">'+(b.cat4||'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.storeCount!=null?b.storeCount:'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.dailyTx!=null?b.dailyTx+'w':'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.txPerStore!=null?b.txPerStore:'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.miniApp!=null?b.miniApp+'%':'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.priceForce!=null?(b.priceForce>0?'+':'')+b.priceForce+'%':'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.expPvW||'—')+'</td><td style="padding:4px 8px" class="nc">'+b.dailyExpUV+'</td><td style="padding:4px 8px" class="nc">'+(b.e21AppUV7d||'—')+'</td></tr>'}
         const cs='background:#fff;border-radius:10px;box-shadow:var(--s);padding:18px;position:relative;overflow:hidden';
@@ -1303,4 +1303,4 @@ W=BS.filter(b=>b.tierManual==='腰部'),KA=BS.filter(b=>b.tierManual==='KA');
 }
 /*__V5_INIT_END__*/
 
-initDashboard("2026-04-15");</script></body></html>
+initDashboard("2026-04-13");</script></body></html>
