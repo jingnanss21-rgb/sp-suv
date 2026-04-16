@@ -177,7 +177,7 @@ function N(v){if(!v&&v!==0)return'—';if(Math.abs(v)>=10000)return(v/10000).toF
 function WOW(v){if(v==null)return'—';return'<span class="'+(v>=0?'up':'dn')+'">'+(v>0?'+':'')+v+'%</span>'}
 function P(v){if(v==null)return'—';return(v*100).toFixed(1)+'%'}
 function Pct(n,d){if(!n||!d||d===0)return'—';return(n/d*100).toFixed(1)+'%'}
-actByBrand ={};ACTS.forEach(a=>{const n=a.brandName;if(!actByBrand[n])actByBrand[n]=[];actByBrand[n].push(a)});
+actByBrand ={};(ACTS||[]).forEach(a=>{const n=a.brandName;if(!actByBrand[n])actByBrand[n]=[];actByBrand[n].push(a)});
 function quadDetail(id){const el=document.getElementById(id);if(el)el.style.display=el.style.display==='none'?'block':'none'}
 
 function rsop(){
