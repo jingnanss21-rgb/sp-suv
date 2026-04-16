@@ -1213,7 +1213,6 @@ async function initDashboard(targetDate) {
     console.log('[v5] initDashboard start', targetDate);
     D = await loadDashboardData(targetDate);
     console.log('[v5] loadDashboardData returned, brands=', (D && D.final && D.final.brands) ? D.final.brands.length : 0);
-    var _dd=D.final.dataDate,_ds=new Date(_dd+'T00:00:00'),_de=new Date(_ds);_de.setDate(_de.getDate()-6);var _wl=('0'+(_de.getMonth()+1)).slice(-2)+('0'+_de.getDate()).slice(-2)+'-'+('0'+(_ds.getMonth()+1)).slice(-2)+('0'+_ds.getDate()).slice(-2);var _hdrP=document.querySelector('.hdr p');if(_hdrP)_hdrP.textContent='\u6570\u636e '+_dd+' \u00b7 \u5468\u62a5 '+_wl+' \u00b7 v5.0';
     F=D.final,BS=F.brands,SPS=F.spSummary,SOP=D.sop,BC=D.bc,ACTS=D.acts;
 W=BS.filter(b=>b.tierManual==='腰部'),KA=BS.filter(b=>b.tierManual==='KA');
     console.log('[v5] bindings assigned (F, BS, SOP, BC, ACTS, W, KA, actByBrand)');
