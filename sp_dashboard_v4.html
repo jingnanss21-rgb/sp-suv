@@ -482,7 +482,7 @@ function rsop(){
     const tb=document.querySelector('#scrTbl tbody');
     tb.innerHTML='';
     fl.forEach(b=>{
-      const issues=b.issues.map(i=>{
+      const issues=(b.issues||[]).map(i=>{
         const colors={'经营模式':'#b45852','货盘':'#b49252','基建-商户号':'#5a8aad','基建-门店':'#6366f1'};
         return`<span style="display:inline-block;font-size:9px;font-weight:600;padding:1px 5px;border-radius:3px;background:${colors[i]}20;color:${colors[i]};margin:1px 2px">${i}</span>`;
       }).join('');
