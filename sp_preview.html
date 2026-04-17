@@ -407,6 +407,7 @@ function rsop(){
         <th style="background:#6366f1;color:#fff;min-width:130px">基建-门店反馈</th>
         <th style="min-width:140px">0406反馈</th>
         <th style="min-width:160px;background:#7c3aed;color:#fff">0407-0410反馈</th>
+        <th style="min-width:160px;background:#0d9488;color:#fff">0412-0417反馈</th>
       </tr></thead><tbody></tbody></table></div>
       <div id="scrCnt" style="font-size:10px;color:var(--x4);margin-top:3px"></div>
     </details>
@@ -454,6 +455,11 @@ function rsop(){
     try{localStorage.setItem('scr_'+brandId+'_screen_fb0410',el.value)}catch(e){}
     flashSaved(el);
   }
+  function scrFb0417Change(el,brandId,brandName){
+    saveFeedback(brandId,brandName,'screen_fb0417',el.value);
+    try{localStorage.setItem('scr_'+brandId+'_screen_fb0417',el.value)}catch(e){}
+    flashSaved(el);
+  }
   function flashSaved(el){
     el.style.borderColor='#059669';el.style.boxShadow='0 0 0 2px #d1fae5';
     setTimeout(()=>{el.style.borderColor='';el.style.boxShadow=''},1200);
@@ -461,6 +467,7 @@ function rsop(){
   window.scrFbChange=scrFbChange;
   window.scrRemarkChange=scrRemarkChange;
   window.scrFb0410Change=scrFb0410Change;
+  window.scrFb0417Change=scrFb0417Change;
 
   function renderScreen(){
     const fSP=document.getElementById('scrSP').value;
@@ -486,6 +493,7 @@ function rsop(){
       // 其他反馈从缓存恢复
       const remarkVal=_fbCache[b.brandId+'_screen_remark']||(()=>{try{return localStorage.getItem('scr_'+b.brandId+'_screen_remark')||''}catch(e){return''}})();
       const fb0410Val=_fbCache[b.brandId+'_screen_fb0410']||(()=>{try{return localStorage.getItem('scr_'+b.brandId+'_screen_fb0410')||''}catch(e){return''}})();
+      const fb0417Val=_fbCache[b.brandId+'_screen_fb0417']||(()=>{try{return localStorage.getItem('scr_'+b.brandId+'_screen_fb0417')||''}catch(e){return''}})();
 
       tb.innerHTML+=`<tr>
         <td style="text-align:left;font-weight:600;position:sticky;left:0;z-index:1;background:#fff">${b.name}</td>
@@ -504,6 +512,7 @@ function rsop(){
         <td>${b.issues.includes('基建-门店')?scrSelect(b.brandId,b.name,'门店','screen_store'):''}</td>
         <td><textarea class="rm" style="min-width:140px;font-size:12px;padding:4px 6px" placeholder="..." onblur="scrRemarkChange(this,'${b.brandId}','${b.name.replace(/'/g,"\\'")}')" onkeydown="if(event.key==='Enter'){event.preventDefault();scrRemarkChange(this,'${b.brandId}','${b.name.replace(/'/g,"\\'")}');this.blur()}" onclick="event.stopPropagation()">${remarkVal}</textarea></td>
         <td><textarea class="rm" style="min-width:160px;font-size:12px;padding:4px 6px" placeholder="0407-0410反馈..." onblur="scrFb0410Change(this,'${b.brandId}','${b.name.replace(/'/g,"\\'")}')" onkeydown="if(event.key==='Enter'){event.preventDefault();scrFb0410Change(this,'${b.brandId}','${b.name.replace(/'/g,"\\'")}');this.blur()}" onclick="event.stopPropagation()">${fb0410Val}</textarea></td>
+        <td><textarea class="rm" style="min-width:160px;font-size:12px;padding:4px 6px" placeholder="0412-0417反馈..." onblur="scrFb0417Change(this,'${b.brandId}','${b.name.replace(/'/g,"\\'")}')" onkeydown="if(event.key==='Enter'){event.preventDefault();scrFb0417Change(this,'${b.brandId}','${b.name.replace(/'/g,"\\'")}');this.blur()}" onclick="event.stopPropagation()">${fb0417Val}</textarea></td>
       </tr>`;
     });
     document.getElementById('scrCnt').textContent=fl.length+'/'+SCR.length+' 品牌';
@@ -647,7 +656,7 @@ function rsop(){
       const _progRules={'经营模式':{'screen_biz':['沟通确认中','已沟通，整改中','已沟通，未回复']},'货盘':{'screen_price':['沟通确认中','已沟通，整改中','已沟通，未回复']},'基建-商户号':{'screen_infra':['沟通确认中','基建沟通中','已沟通，整改中','已沟通，未回复']},'基建-门店':{'screen_store':['沟通确认中','已沟通，整改中','已沟通，未回复']}};
       function classifyBrand(b){
         const bid=b.brandId,vals={};
-        ['screen_biz','screen_price','screen_infra','screen_store','screen_remark','screen_fb0410'].forEach(k=>vals[k]=(_fbCache[bid+'_'+k]||'').trim());
+        ['screen_biz','screen_price','screen_infra','screen_store','screen_remark','screen_fb0410','screen_fb0417'].forEach(k=>vals[k]=(_fbCache[bid+'_'+k]||'').trim());
         // 只有下拉选项精确匹配 _offRules 才算 offline，备注里的关键词不算
         const issueMap={'screen_biz':'经营模式','screen_price':'货盘','screen_infra':'基建-商户号','screen_store':'基建-门店'};
         const details={};let hasAnyIssue=false;
