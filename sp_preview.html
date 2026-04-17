@@ -722,8 +722,8 @@ function rsop(){
       function _issueKeepCount(issue){return keepB.filter(b=>{const d=brandDetails[b.brandId]||{};return d[issue]==='keep'}).length}
       function _issueProgCount(issue){return (progB.concat(nofbB)).filter(b=>(b.issues||[]).includes(issue)).length}
       function _spGrp(bs){const m={};bs.forEach(b=>{const s=b.sp||'未知';if(!m[s])m[s]=[];m[s].push(b)});return Object.entries(m).sort((a,b)=>b[1].length-a[1].length)}
+      // 普通Tab面板（待跟进用）
       function _buildTabPanel(prefix,tabs,dataFn,accentColor,borderColor){
-        const _fkMap={'经营模式':'screen_biz','货盘':'screen_price','基建-商户号':'screen_infra','基建-门店':'screen_store'};
         let h='<div style="display:flex;gap:0;border-bottom:1px solid '+borderColor+';background:#fff">';
         tabs.forEach((iss,i)=>{const bs=dataFn(iss);const n=bs.length;h+='<div onclick="document.querySelectorAll(\'.'+(prefix)+'p\').forEach(p=>p.style.display=\'none\');document.getElementById(\''+(prefix)+i+'\').style.display=\'block\';document.querySelectorAll(\'.'+(prefix)+'t\').forEach(t=>{t.style.borderBottomColor=\'transparent\';t.style.fontWeight=\'400\';t.style.color=\'#64748b\'});this.style.borderBottomColor=\''+accentColor+'\';this.style.fontWeight=\'600\';this.style.color=\''+accentColor+'\'" class="'+(prefix)+'t" style="flex:1;padding:10px 12px;text-align:center;font-size:12px;color:'+(i===0?accentColor:'#64748b')+';cursor:pointer;border-bottom:2px solid '+(i===0?accentColor:'transparent')+';font-weight:'+(i===0?'600':'400')+'">'+iss+'<span style="font-weight:700;font-size:14px;display:block;margin-top:2px">'+n+'</span></div>'});
         h+='</div>';
@@ -741,6 +741,44 @@ function rsop(){
         });
         return h;
       }
+      // 可保留Tab面板（带二级原因Tab）
+      function _buildKeepTabPanel(prefix,tabs,accentColor,borderColor){
+        const _fkMap={'经营模式':'screen_biz','货盘':'screen_price','基建-商户号':'screen_infra','基建-门店':'screen_store'};
+        // 先算每个要素的品牌数（品牌维度，和卡片一致）
+        let h='<div style="display:flex;gap:0;border-bottom:1px solid '+borderColor+';background:#fff">';
+        tabs.forEach((iss,i)=>{const n=_issueKeepCount(iss);h+='<div onclick="document.querySelectorAll(\'.'+(prefix)+'p\').forEach(p=>p.style.display=\'none\');document.getElementById(\''+(prefix)+i+'\').style.display=\'block\';document.querySelectorAll(\'.'+(prefix)+'t\').forEach(t=>{t.style.borderBottomColor=\'transparent\';t.style.fontWeight=\'400\';t.style.color=\'#64748b\'});this.style.borderBottomColor=\''+accentColor+'\';this.style.fontWeight=\'600\';this.style.color=\''+accentColor+'\'" class="'+(prefix)+'t" style="flex:1;padding:10px 12px;text-align:center;font-size:12px;color:'+(i===0?accentColor:'#64748b')+';cursor:pointer;border-bottom:2px solid '+(i===0?accentColor:'transparent')+';font-weight:'+(i===0?'600':'400')+'">'+iss+'<span style="font-weight:700;font-size:14px;display:block;margin-top:2px">'+n+'</span></div>'});
+        h+='</div>';
+        tabs.forEach((iss,i)=>{
+          const fk=_fkMap[iss];const keepRuleVals=(_keepRules[iss]||{})[fk]||[];
+          // 找到该要素下可保留的品牌和原因
+          const matched=[];keepB.forEach(b=>{const d=brandDetails[b.brandId]||{};if(d[iss]==='keep'){const v=(_fbCache[b.brandId+'_'+fk]||'').trim();matched.push({b:b,reason:v||'备注可保留'})}});
+          // 按原因分组
+          const byReason={};matched.forEach(({b,reason})=>{if(!byReason[reason])byReason[reason]=[];byReason[reason].push(b)});
+          const reasons=Object.entries(byReason).sort((a,b)=>b[1].length-a[1].length);
+          h+='<div id="'+(prefix)+i+'" class="'+(prefix)+'p" style="display:'+(i===0?'block':'none')+';background:#fff">';
+          if(!reasons.length){h+='<div style="font-size:12px;color:#94a3b8;padding:12px 20px">暂无数据</div>'}
+          else{
+            // 二级原因Tab
+            const subPfx=prefix+'s'+i+'_';
+            h+='<div style="display:flex;gap:0;border-bottom:1px solid #e2e8f0;background:#fafafa;padding:0 8px">';
+            reasons.forEach(([reason,bs],j)=>{h+='<div onclick="document.querySelectorAll(\'.'+(subPfx)+'p\').forEach(p=>p.style.display=\'none\');document.getElementById(\''+(subPfx)+j+'\').style.display=\'block\';document.querySelectorAll(\'.'+(subPfx)+'t\').forEach(t=>{t.style.borderBottomColor=\'transparent\';t.style.fontWeight=\'400\';t.style.color=\'#94a3b8\'});this.style.borderBottomColor=\''+accentColor+'\';this.style.fontWeight=\'500\';this.style.color=\'#065f46\'" class="'+(subPfx)+'t" style="padding:8px 12px;font-size:11px;color:'+(j===0?'#065f46':'#94a3b8')+';cursor:pointer;border-bottom:2px solid '+(j===0?accentColor:'transparent')+';font-weight:'+(j===0?'500':'400')+';white-space:nowrap">'+reason+' <b>'+bs.length+'</b></div>'});
+            h+='</div>';
+            reasons.forEach(([reason,bs],j)=>{
+              const groups=_spGrp(bs);
+              h+='<div id="'+(subPfx)+j+'" class="'+(subPfx)+'p" style="display:'+(j===0?'block':'none')+';padding:12px 20px;max-height:260px;overflow-y:auto">';
+              groups.forEach(([sp,arr])=>{
+                h+='<div style="border-bottom:1px solid #f1f5f9;padding:6px 0"><div style="font-size:13px;font-weight:600;color:#475569;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:'+accentColor+';display:inline-block"></span>'+sp+' <span style="font-size:11px;color:#94a3b8;font-weight:400">('+arr.length+')</span></div>';
+                h+='<div style="padding-left:20px;display:flex;flex-wrap:wrap;gap:4px 16px">';
+                arr.forEach(b=>{h+='<span style="font-size:12px;color:#64748b;padding:2px 0">'+b.name+'</span>'});
+                h+='</div></div>';
+              });
+              h+='</div>';
+            });
+          }
+          h+='</div>';
+        });
+        return h;
+      }
       const mEl=document.getElementById('sopMatrix');
       if(mEl){
         const dims=[{name:'经营模式',low:fv4.mini_low,std:'小程序占比<50%'},{name:'货盘',low:fv4.price_low,std:'价格力<0'},{name:'基建-商户号',low:fv4.txps_low,std:'1店几笔<10'},{name:'基建-门店',low:fv4.store_low,std:'门店完整度<90%'}];
@@ -752,31 +790,25 @@ function rsop(){
         mH+='<div style="padding:14px 8px;border-bottom:2px solid #e2e8f0"></div>';
         dims.forEach(d=>{mH+='<div style="padding:14px 8px;text-align:center;font-size:13px;font-weight:600;color:#dc2626;background:#fef2f2;border-bottom:2px solid #e2e8f0">'+d.name+'<div style="font-size:10px;color:#94a3b8;font-weight:400;margin-top:2px">'+d.std+'</div></div>'});
         mH+='<div style="padding:14px 8px;text-align:center;font-size:13px;font-weight:600;color:#059669;background:#ecfdf5;border-bottom:2px solid #e2e8f0;border-radius:0 8px 0 0">全达标<div style="font-size:10px;color:#94a3b8;font-weight:400;margin-top:2px">四要素全部合格</div></div>';
-        // Row 1
         mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 10px;font-size:13px;font-weight:600;border-right:2px solid #e2e8f0;min-height:90px;background:#f8fafc;color:#475569"><span style="font-size:18px">📋</span>系统统计</div>';
         dims.forEach(d=>{mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px;min-height:90px;border-bottom:1px solid #f1f5f9;border-right:1px solid #f1f5f9"><div style="font-size:28px;font-weight:700;color:#dc2626">'+d.low+'</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">不达标</div></div>'});
         mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px;min-height:90px;background:#f8fafc;border-left:2px solid #e2e8f0;border-bottom:1px solid #f1f5f9"><div style="font-size:28px;font-weight:700;color:#475569">'+fv4.all_pass+'</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">占比 '+(fv4.valid?Math.round(fv4.all_pass/fv4.valid*100):0)+'%</div></div>';
         mH+='<div style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;padding:2px 0;color:#cbd5e1;font-size:14px;gap:6px"><span>⬇</span><span>⬇</span><span>⬇</span><span>⬇</span><span>⬇</span></div>';
-        // Row 2
         const humanPass=keepB.length;const effectivePass=fv4.all_pass+humanPass;
         mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 10px;font-size:13px;font-weight:600;border-right:2px solid #e2e8f0;min-height:90px;background:#f0fdf4;color:#059669"><span style="font-size:18px">✅</span>可保留<span style="font-size:10px;color:#6ee7b7;font-weight:400">人工打标</span></div>';
         dims.forEach(d=>{const kn=_issueKeepCount(d.name);mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px;min-height:90px;border-bottom:1px solid #f1f5f9;border-right:1px solid #f1f5f9"><div style="font-size:28px;font-weight:700;color:#059669">'+kn+'</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">可保留</div></div>'});
         mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px;min-height:90px;background:#ecfdf5;border-left:2px solid #e2e8f0;border-bottom:1px solid #f1f5f9"><div style="font-size:28px;font-weight:700;color:#059669">'+effectivePass+'</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">占比 '+(fv4.valid?Math.round(effectivePass/fv4.valid*100):0)+'%</div><div style="font-size:11px;font-weight:600;margin-top:4px;padding:1px 8px;border-radius:10px;background:#dcfce7;color:#16a34a">↑ +'+humanPass+'</div></div>';
         mH+='</div>';
-        // 可保留折叠
+        // 可保留折叠（二级原因Tab）
         if(keepB.length){
           mH+='<div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:0 0 12px 12px;overflow:hidden;margin-top:-1px">';
           mH+='<div onclick="var p=this.nextElementSibling;p.style.display=p.style.display===\'none\'?\'block\':\'none\';this.querySelector(\'.ke-arrow\').textContent=p.style.display===\'none\'?\'▸ 展开\':\'▾ 收起\'" style="display:flex;align-items:center;justify-content:space-between;padding:10px 20px;cursor:pointer;border-bottom:1px solid #a7f3d0" onmouseover="this.style.background=\'#d1fae5\'" onmouseout="this.style.background=\'transparent\'">';
           mH+='<div style="font-size:13px;font-weight:600;color:#065f46">✅ 展开查看可保留详情</div>';
           mH+='<div class="ke-arrow" style="font-size:12px;color:#94a3b8">▸ 展开</div></div>';
           mH+='<div style="display:none">';
-          mH+=_buildTabPanel('kp',_factors,iss=>{
-            const fk=_fkMap[iss];const vals=(_keepRules[iss]||{})[fk]||[];
-            return keepB.filter(b=>{const v=(_fbCache[b.brandId+'_'+fk]||'').trim();return vals.includes(v)});
-          },'#059669','#a7f3d0');
+          mH+=_buildKeepTabPanel('kp',_factors,'#059669','#a7f3d0');
           mH+='</div></div>';
         }
-        // 箭头
         mH+='<div style="display:flex;align-items:center;justify-content:center;padding:4px 0;color:#cbd5e1;font-size:14px;gap:6px;margin:4px 0"><span>⬇</span><span>⬇</span><span>⬇</span><span>⬇</span><span>⬇</span></div>';
         // Row 3
         mH+='<div style="display:grid;grid-template-columns:110px repeat(4,1fr) 1.2fr;gap:0">';
