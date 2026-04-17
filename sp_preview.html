@@ -836,6 +836,12 @@ function rsop(){
           mH+='</div>';
         }
         mH+='</div>';
+        // 统计口径说明
+        mH+='<div style="margin-top:12px;padding:10px 16px;background:#f8fafc;border-radius:8px;font-size:11px;color:#64748b;line-height:1.8">';
+        mH+='<span style="font-weight:600;color:#475569">📌 统计口径说明：</span>';
+        mH+='不达标维度按<b>问题维度</b>统计，同一品牌可能有多个不达标要素，因此各列之和 ≥ 不达标品牌总数；';
+        mH+='达标汇总按<b>品牌维度</b>统计，四要素均达标（含人工确认）的品牌才计入。';
+        mH+='</div>';
         mEl.innerHTML=mH;
       }
       document.getElementById('scrFunnel').innerHTML='';
