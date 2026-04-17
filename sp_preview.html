@@ -718,8 +718,9 @@ function rsop(){
       
       // === 矩阵渲染 + 跟进明细 ===
       const _scrLen=(S.screen_brands||[]).length;
-      function _issueKeepCount(issue){return keepB.filter(b=>{const d=brandDetails[b.brandId]||{};return d[issue]==='keep'}).length}
-      function _issueProgCount(issue){return (progB.concat(nofbB)).filter(b=>(b.issues||[]).includes(issue)).length}
+      // 问题维度统计：不管品牌最终分类，只看该要素的反馈是否匹配规则
+      function _issueKeepCount(issue){return SCR.filter(b=>{const d=brandDetails[b.brandId]||{};return d[issue]==='keep'}).length}
+      function _issueProgCount(issue){return SCR.filter(b=>{const d=brandDetails[b.brandId]||{};return d[issue]==='progress'||d[issue]==='nofb'}).length}
       function _spGrp(bs){const m={};bs.forEach(b=>{const s=b.sp||'未知';if(!m[s])m[s]=[];m[s].push(b)});return Object.entries(m).sort((a,b)=>b[1].length-a[1].length)}
       // 普通Tab面板（待跟进用）
       function _buildTabPanel(prefix,tabs,dataFn,accentColor,borderColor){
@@ -749,8 +750,8 @@ function rsop(){
         h+='</div>';
         tabs.forEach((iss,i)=>{
           const fk=_fkMap[iss];const keepRuleVals=(_keepRules[iss]||{})[fk]||[];
-          // 找到该要素下可保留的品牌和原因
-          const matched=[];keepB.forEach(b=>{const d=brandDetails[b.brandId]||{};if(d[iss]==='keep'){const v=(_fbCache[b.brandId+'_'+fk]||'').trim();matched.push({b:b,reason:v||'备注可保留'})}});
+          // 找到该要素下可保留的品牌和原因（问题维度：从所有SCR品牌中找）
+          const matched=[];SCR.forEach(b=>{const d=brandDetails[b.brandId]||{};if(d[iss]==='keep'){const v=(_fbCache[b.brandId+'_'+fk]||'').trim();matched.push({b:b,reason:v||'备注可保留'})}});
           // 按原因分组
           const byReason={};matched.forEach(({b,reason})=>{if(!byReason[reason])byReason[reason]=[];byReason[reason].push(b)});
           const reasons=Object.entries(byReason).sort((a,b)=>b[1].length-a[1].length);
