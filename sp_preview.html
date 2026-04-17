@@ -722,85 +722,85 @@ function rsop(){
       function _issueKeepCount(issue){return keepB.filter(b=>{const d=brandDetails[b.brandId]||{};return d[issue]==='keep'}).length}
       function _issueProgCount(issue){return (progB.concat(nofbB)).filter(b=>(b.issues||[]).includes(issue)).length}
       function _spGrp(bs){const m={};bs.forEach(b=>{const s=b.sp||'未知';if(!m[s])m[s]=[];m[s].push(b)});return Object.entries(m).sort((a,b)=>b[1].length-a[1].length)}
+      function _buildTabPanel(prefix,tabs,dataFn,accentColor,borderColor){
+        const _fkMap={'经营模式':'screen_biz','货盘':'screen_price','基建-商户号':'screen_infra','基建-门店':'screen_store'};
+        let h='<div style="display:flex;gap:0;border-bottom:1px solid '+borderColor+';background:#fff">';
+        tabs.forEach((iss,i)=>{const bs=dataFn(iss);const n=bs.length;h+='<div onclick="document.querySelectorAll(\'.'+(prefix)+'p\').forEach(p=>p.style.display=\'none\');document.getElementById(\''+(prefix)+i+'\').style.display=\'block\';document.querySelectorAll(\'.'+(prefix)+'t\').forEach(t=>{t.style.borderBottomColor=\'transparent\';t.style.fontWeight=\'400\';t.style.color=\'#64748b\'});this.style.borderBottomColor=\''+accentColor+'\';this.style.fontWeight=\'600\';this.style.color=\''+accentColor+'\'" class="'+(prefix)+'t" style="flex:1;padding:10px 12px;text-align:center;font-size:12px;color:'+(i===0?accentColor:'#64748b')+';cursor:pointer;border-bottom:2px solid '+(i===0?accentColor:'transparent')+';font-weight:'+(i===0?'600':'400')+'">'+iss+'<span style="font-weight:700;font-size:14px;display:block;margin-top:2px">'+n+'</span></div>'});
+        h+='</div>';
+        tabs.forEach((iss,i)=>{
+          const bs=dataFn(iss);const groups=_spGrp(bs);
+          h+='<div id="'+(prefix)+i+'" class="'+(prefix)+'p" style="display:'+(i===0?'block':'none')+';padding:12px 20px;background:#fff;max-height:300px;overflow-y:auto">';
+          if(!groups.length){h+='<div style="font-size:12px;color:#94a3b8;padding:8px 0">暂无数据</div>'}
+          groups.forEach(([sp,arr])=>{
+            h+='<div style="border-bottom:1px solid #f1f5f9;padding:8px 0"><div style="font-size:13px;font-weight:600;color:#475569;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:'+accentColor+';display:inline-block"></span>'+sp+' <span style="font-size:11px;color:#94a3b8;font-weight:400">('+arr.length+')</span></div>';
+            h+='<div style="padding-left:20px;display:flex;flex-wrap:wrap;gap:4px 16px">';
+            arr.forEach(b=>{h+='<span style="font-size:12px;color:#64748b;padding:2px 0">'+b.name+'</span>'});
+            h+='</div></div>';
+          });
+          h+='</div>';
+        });
+        return h;
+      }
       const mEl=document.getElementById('sopMatrix');
       if(mEl){
         const dims=[{name:'经营模式',low:fv4.mini_low,std:'小程序占比<50%'},{name:'货盘',low:fv4.price_low,std:'价格力<0'},{name:'基建-商户号',low:fv4.txps_low,std:'1店几笔<10'},{name:'基建-门店',low:fv4.store_low,std:'门店完整度<90%'}];
+        const _fkMap={'经营模式':'screen_biz','货盘':'screen_price','基建-商户号':'screen_infra','基建-门店':'screen_store'};
+        const _factors=['经营模式','货盘','基建-商户号','基建-门店'];
         let mH='<div style="background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);padding:20px;overflow-x:auto">';
         mH+='<div style="display:grid;grid-template-columns:110px repeat(4,1fr) 1.2fr;gap:0"><div></div><div style="grid-column:2/6;text-align:center;font-size:11px;color:#dc2626;font-weight:600;padding:6px 0">⚠️ 不达标维度</div><div style="text-align:center;font-size:11px;color:#059669;font-weight:600;padding:6px 0">✅ 达标汇总</div></div>';
         mH+='<div style="display:grid;grid-template-columns:110px repeat(4,1fr) 1.2fr;gap:0">';
         mH+='<div style="padding:14px 8px;border-bottom:2px solid #e2e8f0"></div>';
         dims.forEach(d=>{mH+='<div style="padding:14px 8px;text-align:center;font-size:13px;font-weight:600;color:#dc2626;background:#fef2f2;border-bottom:2px solid #e2e8f0">'+d.name+'<div style="font-size:10px;color:#94a3b8;font-weight:400;margin-top:2px">'+d.std+'</div></div>'});
         mH+='<div style="padding:14px 8px;text-align:center;font-size:13px;font-weight:600;color:#059669;background:#ecfdf5;border-bottom:2px solid #e2e8f0;border-radius:0 8px 0 0">全达标<div style="font-size:10px;color:#94a3b8;font-weight:400;margin-top:2px">四要素全部合格</div></div>';
+        // Row 1
         mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 10px;font-size:13px;font-weight:600;border-right:2px solid #e2e8f0;min-height:90px;background:#f8fafc;color:#475569"><span style="font-size:18px">📋</span>系统统计</div>';
         dims.forEach(d=>{mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px;min-height:90px;border-bottom:1px solid #f1f5f9;border-right:1px solid #f1f5f9"><div style="font-size:28px;font-weight:700;color:#dc2626">'+d.low+'</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">不达标</div></div>'});
         mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px;min-height:90px;background:#f8fafc;border-left:2px solid #e2e8f0;border-bottom:1px solid #f1f5f9"><div style="font-size:28px;font-weight:700;color:#475569">'+fv4.all_pass+'</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">占比 '+(fv4.valid?Math.round(fv4.all_pass/fv4.valid*100):0)+'%</div></div>';
         mH+='<div style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;padding:2px 0;color:#cbd5e1;font-size:14px;gap:6px"><span>⬇</span><span>⬇</span><span>⬇</span><span>⬇</span><span>⬇</span></div>';
+        // Row 2
         const humanPass=keepB.length;const effectivePass=fv4.all_pass+humanPass;
         mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 10px;font-size:13px;font-weight:600;border-right:2px solid #e2e8f0;min-height:90px;background:#f0fdf4;color:#059669"><span style="font-size:18px">✅</span>可保留<span style="font-size:10px;color:#6ee7b7;font-weight:400">人工打标</span></div>';
         dims.forEach(d=>{const kn=_issueKeepCount(d.name);mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px;min-height:90px;border-bottom:1px solid #f1f5f9;border-right:1px solid #f1f5f9"><div style="font-size:28px;font-weight:700;color:#059669">'+kn+'</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">可保留</div></div>'});
         mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px;min-height:90px;background:#ecfdf5;border-left:2px solid #e2e8f0;border-bottom:1px solid #f1f5f9"><div style="font-size:28px;font-weight:700;color:#059669">'+effectivePass+'</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">占比 '+(fv4.valid?Math.round(effectivePass/fv4.valid*100):0)+'%</div><div style="font-size:11px;font-weight:600;margin-top:4px;padding:1px 8px;border-radius:10px;background:#dcfce7;color:#16a34a">↑ +'+humanPass+'</div></div>';
-        mH+='<div style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;padding:2px 0;color:#cbd5e1;font-size:14px;gap:6px"><span>⬇</span><span>⬇</span><span>⬇</span><span>⬇</span><span>⬇</span></div>';
+        mH+='</div>';
+        // 可保留折叠
+        if(keepB.length){
+          mH+='<div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:0 0 12px 12px;overflow:hidden;margin-top:-1px">';
+          mH+='<div onclick="var p=this.nextElementSibling;p.style.display=p.style.display===\'none\'?\'block\':\'none\';this.querySelector(\'.ke-arrow\').textContent=p.style.display===\'none\'?\'▸ 展开\':\'▾ 收起\'" style="display:flex;align-items:center;justify-content:space-between;padding:10px 20px;cursor:pointer;border-bottom:1px solid #a7f3d0" onmouseover="this.style.background=\'#d1fae5\'" onmouseout="this.style.background=\'transparent\'">';
+          mH+='<div style="font-size:13px;font-weight:600;color:#065f46">✅ 展开查看可保留详情</div>';
+          mH+='<div class="ke-arrow" style="font-size:12px;color:#94a3b8">▸ 展开</div></div>';
+          mH+='<div style="display:none">';
+          mH+=_buildTabPanel('kp',_factors,iss=>{
+            const fk=_fkMap[iss];const vals=(_keepRules[iss]||{})[fk]||[];
+            return keepB.filter(b=>{const v=(_fbCache[b.brandId+'_'+fk]||'').trim();return vals.includes(v)});
+          },'#059669','#a7f3d0');
+          mH+='</div></div>';
+        }
+        // 箭头
+        mH+='<div style="display:flex;align-items:center;justify-content:center;padding:4px 0;color:#cbd5e1;font-size:14px;gap:6px;margin:4px 0"><span>⬇</span><span>⬇</span><span>⬇</span><span>⬇</span><span>⬇</span></div>';
+        // Row 3
+        mH+='<div style="display:grid;grid-template-columns:110px repeat(4,1fr) 1.2fr;gap:0">';
         const followAll=progB.length+nofbB.length;
         mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 10px;font-size:13px;font-weight:600;border-right:2px solid #e2e8f0;min-height:90px;background:#fffbeb;color:#d97706"><span style="font-size:18px">🔄</span>继续跟进</div>';
         dims.forEach(d=>{const pn=_issueProgCount(d.name);mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px;min-height:90px;border-bottom:1px solid #f1f5f9;border-right:1px solid #f1f5f9;background:#fffbeb"><div style="font-size:28px;font-weight:700;color:#d97706">'+pn+'</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">待跟进</div></div>'});
         mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px;min-height:90px;background:#fffbeb;border-left:2px solid #e2e8f0;border-bottom:1px solid #f1f5f9"><div style="font-size:28px;font-weight:700;color:#d97706">'+followAll+'</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">品牌待跟进</div></div>';
         mH+='</div>';
-        // 可保留折叠
-        if(keepB.length){
-          const _fkMap={'经营模式':'screen_biz','货盘':'screen_price','基建-商户号':'screen_infra','基建-门店':'screen_store'};
-          mH+='<div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:0 0 12px 12px;overflow:hidden;margin-top:-1px">';
-          mH+='<div onclick="var p=this.nextElementSibling;p.style.display=p.style.display===\'none\'?\'block\':\'none\';this.querySelector(\'.ke-arrow\').textContent=p.style.display===\'none\'?\'▸ 展开\':\'▾ 收起\'" style="display:flex;align-items:center;justify-content:space-between;padding:10px 20px;cursor:pointer;border-bottom:1px solid #a7f3d0" onmouseover="this.style.background=\'#d1fae5\'" onmouseout="this.style.background=\'transparent\'">';
-          mH+='<div style="font-size:13px;font-weight:600;color:#065f46;display:flex;align-items:center;gap:8px">✅ 展开查看可保留详情 — 按要素 + 原因 + 服务商</div>';
-          mH+='<div class="ke-arrow" style="font-size:12px;color:#94a3b8">▸ 展开</div></div>';
-          mH+='<div style="display:none;padding:12px 20px;background:#fff;max-height:400px;overflow-y:auto">';
-          ['经营模式','货盘','基建-商户号','基建-门店'].forEach(iss=>{
-            const fk=_fkMap[iss];const keepRuleVals=(_keepRules[iss]||{})[fk]||[];
-            const matched=[];keepB.forEach(b=>{const v=(_fbCache[b.brandId+'_'+fk]||'').trim();if(keepRuleVals.includes(v))matched.push({b:b,reason:v})});
-            if(!matched.length)return;
-            const byR={};matched.forEach(({b,reason})=>{if(!byR[reason])byR[reason]=[];byR[reason].push(b)});
-            mH+='<div style="margin-bottom:12px"><div style="font-size:12px;font-weight:600;color:#059669;margin-bottom:6px">'+iss+' ('+matched.length+')</div>';
-            for(const[reason,bs]of Object.entries(byR).sort((a,b)=>b[1].length-a[1].length)){
-              const groups=_spGrp(bs);
-              mH+='<div style="background:#f0fdf4;border-radius:6px;padding:8px 12px;margin-bottom:6px;border-left:3px solid #10b981">';
-              mH+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px"><span style="font-size:11px;color:#065f46;font-weight:500">'+reason+'</span><span style="font-size:12px;font-weight:700;color:#059669">'+bs.length+'</span></div>';
-              groups.forEach(([sp,arr])=>{mH+='<div style="padding:2px 0;font-size:12px"><span style="font-weight:600;color:#475569">'+sp+'</span><span style="color:#94a3b8">('+arr.length+')</span> <span style="color:#64748b">'+arr.map(x=>x.name).join('、')+'</span></div>'});
-              mH+='</div>';
-            }
-            mH+='</div>';
-          });
-          mH+='</div></div>';
-        }
-        // 继续跟进折叠
+        // 待跟进折叠
         const followBrands=progB.concat(nofbB);
-        const _factorTabs=['经营模式','货盘','基建-商户号','基建-门店'];
-        const _tabData={};_factorTabs.forEach(iss=>{_tabData[iss]=followBrands.filter(b=>(b.issues||[]).includes(iss))});
         mH+='<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:0 0 12px 12px;overflow:hidden;margin-top:-1px">';
         mH+='<div onclick="var p=this.nextElementSibling;p.style.display=p.style.display===\'none\'?\'block\':\'none\';this.querySelector(\'.fe-arrow\').textContent=p.style.display===\'none\'?\'▸ 展开\':\'▾ 收起\'" style="display:flex;align-items:center;justify-content:space-between;padding:10px 20px;cursor:pointer;border-bottom:1px solid #fde68a" onmouseover="this.style.background=\'#fef3c7\'" onmouseout="this.style.background=\'transparent\'">';
-        mH+='<div style="font-size:13px;font-weight:600;color:#92400e;display:flex;align-items:center;gap:8px">🔍 展开查看待跟进详情 — 按要素 + 服务商</div>';
+        mH+='<div style="font-size:13px;font-weight:600;color:#92400e">🔍 展开查看待跟进详情</div>';
         mH+='<div class="fe-arrow" style="font-size:12px;color:#94a3b8">▸ 展开</div></div>';
         mH+='<div style="display:none">';
-        mH+='<div style="display:flex;gap:0;border-bottom:1px solid #fde68a;background:#fff">';
-        _factorTabs.forEach((iss,i)=>{const n=_tabData[iss].length;mH+='<div onclick="document.querySelectorAll(\'.ft-panel\').forEach(p=>p.style.display=\'none\');document.getElementById(\'ftp_'+i+'\').style.display=\'block\';document.querySelectorAll(\'.ft-tab\').forEach(t=>{t.style.borderBottomColor=\'transparent\';t.style.fontWeight=\'400\';t.style.color=\'#64748b\'});this.style.borderBottomColor=\'#d97706\';this.style.fontWeight=\'600\';this.style.color=\'#d97706\'" class="ft-tab" style="flex:1;padding:10px 12px;text-align:center;font-size:12px;color:'+(i===0?'#d97706':'#64748b')+';cursor:pointer;border-bottom:2px solid '+(i===0?'#d97706':'transparent')+';font-weight:'+(i===0?'600':'400')+'">'+iss+'<span style="font-weight:700;font-size:14px;display:block;margin-top:2px">'+n+'</span></div>'});
-        mH+='</div>';
-        _factorTabs.forEach((iss,i)=>{
-          const bs=_tabData[iss];const groups=_spGrp(bs);
-          mH+='<div id="ftp_'+i+'" class="ft-panel" style="display:'+(i===0?'block':'none')+';padding:12px 20px;background:#fff;max-height:300px;overflow-y:auto">';
-          groups.forEach(([sp,arr])=>{
-            mH+='<div style="border-bottom:1px solid #f1f5f9;padding:8px 0"><div style="font-size:13px;font-weight:600;color:#475569;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:#f59e0b;display:inline-block"></span>'+sp+' <span style="font-size:11px;color:#94a3b8;font-weight:400">('+arr.length+')</span></div>';
-            mH+='<div style="padding-left:20px;display:flex;flex-wrap:wrap;gap:4px 16px">';
-            arr.forEach(b=>{mH+='<span style="font-size:12px;color:#64748b;padding:2px 0">● '+b.name+'</span>'});
-            mH+='</div></div>';
-          });
-          mH+='</div>';
-        });
+        mH+=_buildTabPanel('fp',_factors,iss=>followBrands.filter(b=>(b.issues||[]).includes(iss)),'#d97706','#fde68a');
         mH+='</div></div>';
+        // 计划下线（最后）
         if(offB.length){
           mH+='<div onclick="var p=this.nextElementSibling;p.style.display=p.style.display===\'none\'?\'block\':\'none\'" style="display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;margin-top:12px;cursor:pointer" onmouseover="this.style.background=\'#fee2e2\'" onmouseout="this.style.background=\'#fef2f2\'">';
           mH+='<div style="font-size:13px;font-weight:600;color:#dc2626;display:flex;align-items:center;gap:8px">❌ 计划下线（不配合整改）<span style="font-size:12px;font-weight:400;color:#94a3b8">'+offB.length+' 个品牌</span></div>';
           mH+='<div style="font-size:12px;color:#94a3b8">▸ 点击展开</div></div>';
           mH+='<div style="display:none;padding:8px 20px;background:#fff;border:1px solid #fecaca;border-top:0;border-radius:0 0 8px 8px">';
-          const offGroups=_spGrp(offB);
-          offGroups.forEach(([sp,arr])=>{mH+='<div style="padding:4px 0;font-size:12px"><b>'+sp+'</b>('+arr.length+'): '+arr.map(b=>b.name).join('、')+'</div>'});
+          const offGroups=_spGrp(offB);offGroups.forEach(([sp,arr])=>{mH+='<div style="padding:4px 0;font-size:12px"><b>'+sp+'</b>('+arr.length+'): '+arr.map(b=>b.name).join('、')+'</div>'});
           mH+='</div>';
         }
         mH+='</div>';
