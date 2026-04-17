@@ -723,29 +723,57 @@ function rsop(){
       function _issueProgCount(issue){return SCR.filter(b=>{const d=brandDetails[b.brandId]||{};return d[issue]==='progress'||d[issue]==='nofb'}).length}
       function _spGrp(bs){const m={};bs.forEach(b=>{const s=b.sp||'未知';if(!m[s])m[s]=[];m[s].push(b)});return Object.entries(m).sort((a,b)=>b[1].length-a[1].length)}
       // 普通Tab面板（待跟进用）
-      function _buildTabPanel(prefix,tabs,dataFn,accentColor,borderColor){
-        let h='<div style="display:flex;gap:0;border-bottom:1px solid '+borderColor+';background:#fff">';
-        tabs.forEach((iss,i)=>{const bs=dataFn(iss);const n=bs.length;h+='<div onclick="document.querySelectorAll(\'.'+(prefix)+'p\').forEach(p=>p.style.display=\'none\');document.getElementById(\''+(prefix)+i+'\').style.display=\'block\';document.querySelectorAll(\'.'+(prefix)+'t\').forEach(t=>{t.style.borderBottomColor=\'transparent\';t.style.fontWeight=\'400\';t.style.color=\'#64748b\'});this.style.borderBottomColor=\''+accentColor+'\';this.style.fontWeight=\'600\';this.style.color=\''+accentColor+'\'" class="'+(prefix)+'t" style="flex:1;padding:10px 12px;text-align:center;font-size:12px;color:'+(i===0?accentColor:'#64748b')+';cursor:pointer;border-bottom:2px solid '+(i===0?accentColor:'transparent')+';font-weight:'+(i===0?'600':'400')+'">'+iss+'<span style="font-weight:700;font-size:14px;display:block;margin-top:2px">'+n+'</span></div>'});
+      function _buildSpList(groups,accentColor){
+        let h='';
+        if(!groups.length){h+='<div style="font-size:12px;color:#94a3b8;padding:8px 0">暂无数据</div>'}
+        groups.forEach(([sp,arr])=>{
+          h+='<div style="border-bottom:1px solid #f1f5f9;padding:8px 0"><div style="font-size:13px;font-weight:600;color:#475569;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:'+accentColor+';display:inline-block"></span>'+sp+' <span style="font-size:11px;color:#94a3b8;font-weight:400">('+arr.length+')</span></div>';
+          h+='<div style="padding-left:20px;display:flex;flex-wrap:wrap;gap:4px 16px">';
+          arr.forEach(b=>{h+='<span style="font-size:12px;color:#64748b;padding:2px 0">'+b.name+'</span>'});
+          h+='</div></div>';
+        });
+        return h;
+      }
+      function _buildFollowTabPanel(prefix,tabs,accentColor,borderColor,bgColor){
+        bgColor=bgColor||'#fff';
+        // 两个子状态
+        const _statusLabels=[{key:'progress',label:'🔄 整改中',pill:'#dbeafe',pillTxt:'#1e40af'},{key:'nofb',label:'⚠️ 未回复',pill:'#fef3c7',pillTxt:'#92400e'}];
+        let h='<div style="display:flex;gap:0;border-bottom:1px solid '+borderColor+';background:'+bgColor+'">';
+        tabs.forEach((iss,i)=>{
+          const n=SCR.filter(b=>{const d=brandDetails[b.brandId]||{};return d[iss]==='progress'||d[iss]==='nofb'}).length;
+          h+='<div onclick="document.querySelectorAll(\'.'+(prefix)+'p\').forEach(p=>p.style.display=\'none\');document.getElementById(\''+(prefix)+i+'\').style.display=\'block\';document.querySelectorAll(\'.'+(prefix)+'t\').forEach(t=>{t.style.borderBottomColor=\'transparent\';t.style.fontWeight=\'400\';t.style.color=\'#64748b\'});this.style.borderBottomColor=\''+accentColor+'\';this.style.fontWeight=\'600\';this.style.color=\''+accentColor+'\'" class="'+(prefix)+'t" style="flex:1;padding:10px 12px;text-align:center;font-size:12px;color:'+(i===0?accentColor:'#64748b')+';cursor:pointer;border-bottom:2px solid '+(i===0?accentColor:'transparent')+';font-weight:'+(i===0?'600':'400')+'">'+iss+'<span style="font-weight:700;font-size:14px;display:block;margin-top:2px">'+n+'</span></div>'});
         h+='</div>';
         tabs.forEach((iss,i)=>{
-          const bs=dataFn(iss);const groups=_spGrp(bs);
-          h+='<div id="'+(prefix)+i+'" class="'+(prefix)+'p" style="display:'+(i===0?'block':'none')+';padding:12px 20px;background:#fff;max-height:300px;overflow-y:auto">';
-          if(!groups.length){h+='<div style="font-size:12px;color:#94a3b8;padding:8px 0">暂无数据</div>'}
-          groups.forEach(([sp,arr])=>{
-            h+='<div style="border-bottom:1px solid #f1f5f9;padding:8px 0"><div style="font-size:13px;font-weight:600;color:#475569;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:'+accentColor+';display:inline-block"></span>'+sp+' <span style="font-size:11px;color:#94a3b8;font-weight:400">('+arr.length+')</span></div>';
-            h+='<div style="padding-left:20px;display:flex;flex-wrap:wrap;gap:4px 16px">';
-            arr.forEach(b=>{h+='<span style="font-size:12px;color:#64748b;padding:2px 0">'+b.name+'</span>'});
-            h+='</div></div>';
+          h+='<div id="'+(prefix)+i+'" class="'+(prefix)+'p" style="display:'+(i===0?'block':'none')+';background:'+bgColor+'">';
+          // 按状态分组
+          const subGroups=[];
+          _statusLabels.forEach(sl=>{
+            const bs=SCR.filter(b=>{const d=brandDetails[b.brandId]||{};return d[iss]===sl.key});
+            if(bs.length)subGroups.push({key:sl.key,label:sl.label,pill:sl.pill,pillTxt:sl.pillTxt,bs:bs});
           });
+          if(!subGroups.length){h+='<div style="font-size:12px;color:#94a3b8;padding:12px 20px">暂无数据</div>'}
+          else{
+            const subPfx=prefix+'s'+i+'_';
+            h+='<div style="display:flex;gap:0;border-bottom:1px solid '+borderColor+';background:'+bgColor+';padding:0 8px">';
+            subGroups.forEach((sg,j)=>{h+='<div onclick="document.querySelectorAll(\'.'+(subPfx)+'p\').forEach(p=>p.style.display=\'none\');document.getElementById(\''+(subPfx)+j+'\').style.display=\'block\';document.querySelectorAll(\'.'+(subPfx)+'t\').forEach(t=>{t.style.borderBottomColor=\'transparent\';t.style.fontWeight=\'400\';t.style.color=\'#94a3b8\'});this.style.borderBottomColor=\''+accentColor+'\';this.style.fontWeight=\'500\';this.style.color=\''+sg.pillTxt+'\'" class="'+(subPfx)+'t" style="padding:8px 12px;font-size:11px;color:'+(j===0?sg.pillTxt:'#94a3b8')+';cursor:pointer;border-bottom:2px solid '+(j===0?accentColor:'transparent')+';font-weight:'+(j===0?'500':'400')+';white-space:nowrap;display:flex;align-items:center;gap:4px">'+sg.label+' <span style="display:inline-flex;align-items:center;padding:1px 8px;border-radius:12px;background:'+sg.pill+';color:'+sg.pillTxt+';font-size:11px;font-weight:600">'+sg.bs.length+'</span></div>'});
+            h+='</div>';
+            subGroups.forEach((sg,j)=>{
+              const groups=_spGrp(sg.bs);
+              h+='<div id="'+(subPfx)+j+'" class="'+(subPfx)+'p" style="display:'+(j===0?'block':'none')+';padding:12px 20px;max-height:260px;overflow-y:auto">';
+              h+=_buildSpList(groups,accentColor);
+              h+='</div>';
+            });
+          }
           h+='</div>';
         });
         return h;
       }
       // 可保留Tab面板（带二级原因Tab）
-      function _buildKeepTabPanel(prefix,tabs,accentColor,borderColor){
+      function _buildKeepTabPanel(prefix,tabs,accentColor,borderColor,bgColor){
+        bgColor=bgColor||'#fff';
         const _fkMap={'经营模式':'screen_biz','货盘':'screen_price','基建-商户号':'screen_infra','基建-门店':'screen_store'};
         // 先算每个要素的品牌数（品牌维度，和卡片一致）
-        let h='<div style="display:flex;gap:0;border-bottom:1px solid '+borderColor+';background:#fff">';
+        let h='<div style="display:flex;gap:0;border-bottom:1px solid '+borderColor+';background:'+bgColor+'">';
         tabs.forEach((iss,i)=>{const n=_issueKeepCount(iss);h+='<div onclick="document.querySelectorAll(\'.'+(prefix)+'p\').forEach(p=>p.style.display=\'none\');document.getElementById(\''+(prefix)+i+'\').style.display=\'block\';document.querySelectorAll(\'.'+(prefix)+'t\').forEach(t=>{t.style.borderBottomColor=\'transparent\';t.style.fontWeight=\'400\';t.style.color=\'#64748b\'});this.style.borderBottomColor=\''+accentColor+'\';this.style.fontWeight=\'600\';this.style.color=\''+accentColor+'\'" class="'+(prefix)+'t" style="flex:1;padding:10px 12px;text-align:center;font-size:12px;color:'+(i===0?accentColor:'#64748b')+';cursor:pointer;border-bottom:2px solid '+(i===0?accentColor:'transparent')+';font-weight:'+(i===0?'600':'400')+'">'+iss+'<span style="font-weight:700;font-size:14px;display:block;margin-top:2px">'+n+'</span></div>'});
         h+='</div>';
         tabs.forEach((iss,i)=>{
@@ -755,23 +783,18 @@ function rsop(){
           // 按原因分组
           const byReason={};matched.forEach(({b,reason})=>{if(!byReason[reason])byReason[reason]=[];byReason[reason].push(b)});
           const reasons=Object.entries(byReason).sort((a,b)=>b[1].length-a[1].length);
-          h+='<div id="'+(prefix)+i+'" class="'+(prefix)+'p" style="display:'+(i===0?'block':'none')+';background:#fff">';
+          h+='<div id="'+(prefix)+i+'" class="'+(prefix)+'p" style="display:'+(i===0?'block':'none')+';background:'+bgColor+'">';
           if(!reasons.length){h+='<div style="font-size:12px;color:#94a3b8;padding:12px 20px">暂无数据</div>'}
           else{
             // 二级原因Tab
             const subPfx=prefix+'s'+i+'_';
-            h+='<div style="display:flex;gap:0;border-bottom:1px solid #e2e8f0;background:#fafafa;padding:0 8px">';
+            h+='<div style="display:flex;gap:0;border-bottom:1px solid '+borderColor+';background:'+bgColor+';padding:0 8px">';
             reasons.forEach(([reason,bs],j)=>{h+='<div onclick="document.querySelectorAll(\'.'+(subPfx)+'p\').forEach(p=>p.style.display=\'none\');document.getElementById(\''+(subPfx)+j+'\').style.display=\'block\';document.querySelectorAll(\'.'+(subPfx)+'t\').forEach(t=>{t.style.borderBottomColor=\'transparent\';t.style.fontWeight=\'400\';t.style.color=\'#94a3b8\'});this.style.borderBottomColor=\''+accentColor+'\';this.style.fontWeight=\'500\';this.style.color=\'#065f46\'" class="'+(subPfx)+'t" style="padding:8px 12px;font-size:11px;color:'+(j===0?'#065f46':'#94a3b8')+';cursor:pointer;border-bottom:2px solid '+(j===0?accentColor:'transparent')+';font-weight:'+(j===0?'500':'400')+';white-space:nowrap">'+reason+' <b>'+bs.length+'</b></div>'});
             h+='</div>';
             reasons.forEach(([reason,bs],j)=>{
               const groups=_spGrp(bs);
               h+='<div id="'+(subPfx)+j+'" class="'+(subPfx)+'p" style="display:'+(j===0?'block':'none')+';padding:12px 20px;max-height:260px;overflow-y:auto">';
-              groups.forEach(([sp,arr])=>{
-                h+='<div style="border-bottom:1px solid #f1f5f9;padding:6px 0"><div style="font-size:13px;font-weight:600;color:#475569;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:'+accentColor+';display:inline-block"></span>'+sp+' <span style="font-size:11px;color:#94a3b8;font-weight:400">('+arr.length+')</span></div>';
-                h+='<div style="padding-left:20px;display:flex;flex-wrap:wrap;gap:4px 16px">';
-                arr.forEach(b=>{h+='<span style="font-size:12px;color:#64748b;padding:2px 0">'+b.name+'</span>'});
-                h+='</div></div>';
-              });
+              h+=_buildSpList(groups,accentColor);
               h+='</div>';
             });
           }
@@ -796,7 +819,7 @@ function rsop(){
         mH+='<div style="grid-column:1/-1;display:flex;align-items:center;justify-content:center;padding:2px 0;color:#cbd5e1;font-size:14px;gap:6px"><span>⬇</span><span>⬇</span><span>⬇</span><span>⬇</span><span>⬇</span></div>';
         const humanPass=keepB.length;const effectivePass=fv4.all_pass+humanPass;
         mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 10px;font-size:13px;font-weight:600;border-right:2px solid #e2e8f0;min-height:90px;background:#f0fdf4;color:#059669"><span style="font-size:18px">✅</span>可保留<span style="font-size:10px;color:#6ee7b7;font-weight:400">人工打标</span></div>';
-        dims.forEach(d=>{const kn=_issueKeepCount(d.name);mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px;min-height:90px;border-bottom:1px solid #f1f5f9;border-right:1px solid #f1f5f9"><div style="font-size:28px;font-weight:700;color:#059669">'+kn+'</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">可保留</div></div>'});
+        dims.forEach(d=>{const kn=_issueKeepCount(d.name);mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px;min-height:90px;border-bottom:1px solid #a7f3d0;border-right:1px solid #a7f3d0;background:#ecfdf5"><div style="font-size:28px;font-weight:700;color:#059669">'+kn+'</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">可保留</div></div>'});
         mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px;min-height:90px;background:#ecfdf5;border-left:2px solid #e2e8f0;border-bottom:1px solid #f1f5f9"><div style="font-size:28px;font-weight:700;color:#059669">'+effectivePass+'</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">占比 '+(fv4.valid?Math.round(effectivePass/fv4.valid*100):0)+'%</div><div style="font-size:11px;font-weight:600;margin-top:4px;padding:1px 8px;border-radius:10px;background:#dcfce7;color:#16a34a">↑ +'+humanPass+'</div></div>';
         mH+='</div>';
         // 可保留折叠（二级原因Tab）
@@ -806,7 +829,7 @@ function rsop(){
           mH+='<div style="font-size:13px;font-weight:600;color:#065f46">✅ 展开查看可保留详情</div>';
           mH+='<div class="ke-arrow" style="font-size:12px;color:#94a3b8">▸ 展开</div></div>';
           mH+='<div style="display:none">';
-          mH+=_buildKeepTabPanel('kp',_factors,'#059669','#a7f3d0');
+          mH+=_buildKeepTabPanel('kp',_factors,'#059669','#a7f3d0','#ecfdf5');
           mH+='</div></div>';
         }
         mH+='<div style="display:flex;align-items:center;justify-content:center;padding:4px 0;color:#cbd5e1;font-size:14px;gap:6px;margin:4px 0"><span>⬇</span><span>⬇</span><span>⬇</span><span>⬇</span><span>⬇</span></div>';
@@ -824,7 +847,7 @@ function rsop(){
         mH+='<div style="font-size:13px;font-weight:600;color:#92400e">🔍 展开查看待跟进详情</div>';
         mH+='<div class="fe-arrow" style="font-size:12px;color:#94a3b8">▸ 展开</div></div>';
         mH+='<div style="display:none">';
-        mH+=_buildTabPanel('fp',_factors,iss=>SCR.filter(b=>{const d=brandDetails[b.brandId]||{};return d[iss]==='progress'||d[iss]==='nofb'}),'#d97706','#fde68a');
+        mH+=_buildFollowTabPanel('fp',_factors,'#d97706','#fde68a','#fffbeb');
         mH+='</div></div>';
         // 计划下线（最后）
         if(offB.length){
