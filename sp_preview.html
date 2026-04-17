@@ -648,8 +648,7 @@ function rsop(){
       function classifyBrand(b){
         const bid=b.brandId,vals={};
         ['screen_biz','screen_price','screen_infra','screen_store','screen_remark','screen_fb0410'].forEach(k=>vals[k]=(_fbCache[bid+'_'+k]||'').trim());
-        const allTxt=Object.values(vals).join(' ');
-        if(allTxt.includes('已下线')||allTxt.includes('已流失'))return{brand:'offline',details:{}};
+        // 只有下拉选项精确匹配 _offRules 才算 offline，备注里的关键词不算
         const issueMap={'screen_biz':'经营模式','screen_price':'货盘','screen_infra':'基建-商户号','screen_store':'基建-门店'};
         const details={};let hasAnyIssue=false;
         for(const fk of ['screen_biz','screen_price','screen_infra','screen_store']){
