@@ -88,7 +88,7 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
 <div class="P" id="t1">
 <div class="S"><div class="ST">🏢 分服务商（腰部）</div><div class="tw"><table id="spTbl"><thead><tr><th>服务商</th><th>类型</th><th>负责人</th><th class="nc">目标</th><th class="nc">投放</th><th class="nc">在线</th><th class="nc">流失</th><th class="nc">存活</th><th class="nc">存活率</th><th>进度</th></tr></thead><tbody></tbody></table></div></div>
 <div class="S"><div class="ST">📋 品牌明细</div>
-<div class="fb"><span class="fl">筛选</span><select id="fSP" onchange="rbt()"><option value="">服务商</option></select><select id="fOwner" onchange="rbt()"><option value="">负责人</option></select><select id="fAsst" onchange="rbt()"><option value="">助理</option></select><select id="fCat" onchange="rbt()"><option value="">类目</option></select><select id="fTier" onchange="rbt()"><option value="">分层</option><option value="KA">KA</option><option value="腰部">腰部</option><option value="尾部">尾部</option></select><select id="fSt" onchange="rbt()"><option value="">存活状态</option><option value="alive">存活</option><option value="dead">未存活</option></select><select id="fOnline" onchange="rbt()"><option value="">在线状态</option><option value="online">在线</option><option value="pending">在线待确认</option><option value="nodata">未更新</option><option value="lost">流失</option></select><select id="fScr" onchange="rbt()"><option value="">筛选维度</option><option value="biz_f">经营模式❌</option><option value="price_f">货盘⚠️</option><option value="infra_f">基建⚠️</option><option value="traffic_f">流量⚠️</option><option value="all_p">全达标✅</option><option value="no_data">无数据</option></select><input id="fQ" type="text" placeholder="搜索品牌" oninput="rbt()" style="width:100px"><button onclick="document.querySelectorAll('#t1 select').forEach(s=>s.value='');document.getElementById('fQ').value='';document.getElementById('fVal').value='';document.getElementById('fMetric').value='';rbt()" style="padding:5px 8px;border:1px solid var(--r);border-radius:5px;background:var(--r1);color:var(--r);font-size:10px;font-weight:600;cursor:pointer">一键清除</button></div>
+<div class="fb"><span class="fl">筛选</span><select id="fSP" onchange="rbt()"><option value="">服务商</option></select><select id="fOwner" onchange="rbt()"><option value="">负责人</option></select><select id="fAsst" onchange="rbt()"><option value="">助理</option></select><select id="fCat" onchange="rbt()"><option value="">类目</option></select><select id="fTier" onchange="rbt()"><option value="">分层</option><option value="KA">KA</option><option value="腰部">腰部</option><option value="尾部">尾部</option></select><select id="fSt" onchange="rbt()"><option value="">存活状态</option><option value="alive">存活</option><option value="dead">未存活</option></select><select id="fOnline" onchange="rbt()"><option value="">在线状态</option><option value="online">在线</option><option value="pending">在线待确认</option><option value="nodata">未更新</option><option value="lost">流失</option></select><select id="fScr" onchange="rbt()"><option value="">筛选维度</option><option value="biz_f">经营模式❌</option><option value="price_f">货盘⚠️</option><option value="infra_f">基建⚠️</option><option value="traffic_f">流量⚠️</option><option value="all_p">全达标✅</option><option value="no_data">无数据</option></select><input id="fQ" type="text" placeholder="搜索品牌/ID" oninput="rbt()" style="width:100px"><button onclick="document.querySelectorAll('#t1 select').forEach(s=>s.value='');document.getElementById('fQ').value='';document.getElementById('fVal').value='';document.getElementById('fMetric').value='';rbt()" style="padding:5px 8px;border:1px solid var(--r);border-radius:5px;background:var(--r1);color:var(--r);font-size:10px;font-weight:600;cursor:pointer">一键清除</button></div>
 <div class="fb"><span class="fl">数值</span><select id="fMetric"><option value="">指标</option><option value="miniApp">小程序渗透</option><option value="priceForce">价格力</option><option value="storeComplete">门店完整度</option><option value="txPerStore">1店几笔</option><option value="e21Ratio">二选一曝光</option><option value="visitUseRate">到店核销率</option></select><select id="fOp"><option value="lt">&lt;</option><option value="lte">≤</option><option value="gt">&gt;</option><option value="gte">≥</option></select><input id="fVal" type="number" placeholder="值" style="width:55px"><button onclick="rbt()" style="padding:5px 8px;border:1px solid var(--b);border-radius:5px;background:var(--b1);color:var(--b);font-size:10px;font-weight:600;cursor:pointer">筛选</button><button onclick="document.getElementById('fMetric').value='';document.getElementById('fVal').value='';rbt()" style="padding:5px 6px;border:1px solid var(--x3);border-radius:5px;background:#fff;color:var(--x6);font-size:10px;cursor:pointer">清除</button></div>
 <div class="tw"><table id="bTbl"><thead>
 <tr>
@@ -112,7 +112,7 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
 
 <div class="P" id="t2">
 <div style="font-size:10px;color:var(--x5);margin:8px 0">日均数据。曝光(w万) 核销(绝对值)。点击展开活动，占比=活动÷品牌整体。</div>
-<div class="fb"><span class="fl">筛选</span><select id="cSP" onchange="rconv()"><option value="">服务商</option></select><select id="cCat" onchange="rconv()"><option value="">类目</option></select><select id="cTier" onchange="rconv()"><option value="">分层</option><option value="KA">KA</option><option value="腰部">腰部</option><option value="尾部">尾部</option></select><select id="cAlive" onchange="rconv()"><option value="">全部</option><option value="1">存活</option><option value="0">未存活</option></select><input id="cQ" type="text" placeholder="搜索品牌" oninput="clearTimeout(window._cdbT);window._cdbT=setTimeout(rconv,300)" style="width:100px"><button onclick="exportActCSV()" style="margin-left:8px;padding:5px 14px;background:#2563eb;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.1)">📥 导出活动CSV</button></div>
+<div class="fb"><span class="fl">筛选</span><select id="cSP" onchange="rconv()"><option value="">服务商</option></select><select id="cCat" onchange="rconv()"><option value="">类目</option></select><select id="cTier" onchange="rconv()"><option value="">分层</option><option value="KA">KA</option><option value="腰部">腰部</option><option value="尾部">尾部</option></select><select id="cAlive" onchange="rconv()"><option value="">全部</option><option value="1">存活</option><option value="0">未存活</option></select><input id="cQ" type="text" placeholder="搜索品牌/ID" oninput="clearTimeout(window._cdbT);window._cdbT=setTimeout(rconv,300)" style="width:100px"><button onclick="exportActCSV()" style="margin-left:8px;padding:5px 14px;background:#2563eb;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.1)">📥 导出活动CSV</button></div>
 <div class="tw"><table id="cTbl"><thead>
 <tr><th rowspan="2" style="width:32px"><input type="checkbox" onchange="toggleAllExp(this)" title="全选/取消" style="cursor:pointer;vertical-align:middle"></th><th rowspan="2" onclick="csrt('name')">品牌⇅</th><th rowspan="2">品牌ID</th><th rowspan="2" onclick="csrt('cat4')">类目⇅</th><th rowspan="2" onclick="csrt('sp')">服务商⇅</th><th rowspan="2" onclick="csrt('tier')">分层⇅</th><th rowspan="2">存活</th><th rowspan="2" class="nc" onclick="csrt('dailyTx')">日均交易(w)⇅</th>
 <th class="nc" colspan="5" style="background:var(--x6);color:#fff;text-align:center">整体</th>
@@ -335,7 +335,7 @@ function rsop(){
   // 动态填充区块标题
   const _fv4=SOP.factors_v4||{}, _cp=SOP.cust_pool||{}, _q=SOP.quadrant||{};
   var _hfc=document.getElementById('hdrFactorsCnt');if(_hfc)_hfc.textContent=(_fv4.total||'—')+'个在线腰部餐饮品牌';
-  document.getElementById('hdrCustPoolCnt').textContent='← 四要素全达标但未存活的'+(_cp.total||'—')+'个品牌';
+  document.getElementById('hdrCustPoolCnt').textContent='← 可保留（全达标+人工打标）未存活的'+(_cp.total||'—')+'个品牌';
   document.getElementById('hdrQuadrantCnt').textContent='← 老客池子充足的'+(_q.total||'—')+'个品牌';
 
   // SOP timeline（不变）
@@ -395,7 +395,7 @@ function rsop(){
           <select id="scrOwner" onchange="renderScreen()"><option value="">负责人</option></select>
           <select id="scrAsst" onchange="renderScreen()"><option value="">助理</option></select>
           <select id="scrIssue" onchange="renderScreen()"><option value="">待排查问题</option><option value="经营模式">经营模式</option><option value="货盘">货盘</option><option value="基建-商户号">基建-商户号</option><option value="基建-门店">基建-门店</option></select>
-          <input id="scrQ" type="text" placeholder="搜索品牌" oninput="renderScreen()" style="width:100px">
+          <input id="scrQ" type="text" placeholder="搜索品牌/ID" oninput="renderScreen()" style="width:100px">
         </div>
       </div>
       <div class="tw" style="max-height:600px;overflow:auto;position:relative"><table id="scrTbl" class="an-tbl" style="font-size:13px"><thead style="position:sticky;top:0;z-index:2;background:#fff"><tr>
@@ -479,14 +479,14 @@ function rsop(){
       if(fSP&&b.sp!==fSP)return false;
       if(fOwner&&b.owner!==fOwner)return false;
       if(fAsst&&b.assistant!==fAsst)return false;
-      if(fIssue&&!(b.issues||[]).includes(fIssue))return false;
+      if(fIssue&&!b.issues.includes(fIssue))return false;
       if(fQ&&!b.name.toLowerCase().includes(fQ)&&!(b.brandId||'').includes(fQ))return false;
       return true;
     });
     const tb=document.querySelector('#scrTbl tbody');
     tb.innerHTML='';
     fl.forEach(b=>{
-      const issues=(b.issues||[]).map(i=>{
+      const issues=b.issues.map(i=>{
         const colors={'经营模式':'#b45852','货盘':'#b49252','基建-商户号':'#5a8aad','基建-门店':'#6366f1'};
         return`<span style="display:inline-block;font-size:9px;font-weight:600;padding:1px 5px;border-radius:3px;background:${colors[i]}20;color:${colors[i]};margin:1px 2px">${i}</span>`;
       }).join('');
@@ -506,10 +506,10 @@ function rsop(){
         <td class="nc">${b.priceForce!=null?(b.priceForce>0?'+':'')+_P(b.priceForce).replace('—',''):'—'}</td>
         <td class="nc" style="color:${b.storeComplete!=null&&b.storeComplete<90?'var(--r)':'inherit'};font-weight:${b.storeComplete!=null&&b.storeComplete<90?'700':'400'}">${b.storeComplete!=null?_P(b.storeComplete):'—'}</td>
         <td>${issues}</td>
-        <td>${(b.issues||[]).includes('经营模式')?scrSelect(b.brandId,b.name,'经营模式','screen_biz'):''}</td>
-        <td>${(b.issues||[]).includes('货盘')?scrSelect(b.brandId,b.name,'货盘','screen_price'):''}</td>
-        <td>${(b.issues||[]).includes('基建-商户号')?scrSelect(b.brandId,b.name,'基建','screen_infra'):''}</td>
-        <td>${(b.issues||[]).includes('基建-门店')?scrSelect(b.brandId,b.name,'门店','screen_store'):''}</td>
+        <td>${b.issues.includes('经营模式')?scrSelect(b.brandId,b.name,'经营模式','screen_biz'):''}</td>
+        <td>${b.issues.includes('货盘')?scrSelect(b.brandId,b.name,'货盘','screen_price'):''}</td>
+        <td>${b.issues.includes('基建-商户号')?scrSelect(b.brandId,b.name,'基建','screen_infra'):''}</td>
+        <td>${b.issues.includes('基建-门店')?scrSelect(b.brandId,b.name,'门店','screen_store'):''}</td>
         <td><textarea class="rm" style="min-width:140px;font-size:12px;padding:4px 6px" placeholder="..." onblur="scrRemarkChange(this,'${b.brandId}','${b.name.replace(/'/g,"\\'")}')" onkeydown="if(event.key==='Enter'){event.preventDefault();scrRemarkChange(this,'${b.brandId}','${b.name.replace(/'/g,"\\'")}');this.blur()}" onclick="event.stopPropagation()">${remarkVal}</textarea></td>
         <td><textarea class="rm" style="min-width:160px;font-size:12px;padding:4px 6px" placeholder="0407-0410反馈..." onblur="scrFb0410Change(this,'${b.brandId}','${b.name.replace(/'/g,"\\'")}')" onkeydown="if(event.key==='Enter'){event.preventDefault();scrFb0410Change(this,'${b.brandId}','${b.name.replace(/'/g,"\\'")}');this.blur()}" onclick="event.stopPropagation()">${fb0410Val}</textarea></td>
         <td><textarea class="rm" style="min-width:160px;font-size:12px;padding:4px 6px" placeholder="0412-0417反馈..." onblur="scrFb0417Change(this,'${b.brandId}','${b.name.replace(/'/g,"\\'")}')" onkeydown="if(event.key==='Enter'){event.preventDefault();scrFb0417Change(this,'${b.brandId}','${b.name.replace(/'/g,"\\'")}');this.blur()}" onclick="event.stopPropagation()">${fb0417Val}</textarea></td>
@@ -519,10 +519,10 @@ function rsop(){
     // 反馈汇总
     if(_fbLoaded){
       const bizC={},priceC={},infraC={};
-      const bizBrands=SCR.filter(b=>(b.issues||[]).includes('经营模式'));
-      const priceBrands=SCR.filter(b=>(b.issues||[]).includes('货盘'));
-      const infraBrands=SCR.filter(b=>(b.issues||[]).includes('基建-商户号'));
-      const storeBrands=SCR.filter(b=>(b.issues||[]).includes('基建-门店'));
+      const bizBrands=SCR.filter(b=>b.issues.includes('经营模式'));
+      const priceBrands=SCR.filter(b=>b.issues.includes('货盘'));
+      const infraBrands=SCR.filter(b=>b.issues.includes('基建-商户号'));
+      const storeBrands=SCR.filter(b=>b.issues.includes('基建-门店'));
       function countFb(brands,field){
         const c={};
         brands.forEach(b=>{
@@ -792,7 +792,7 @@ function rsop(){
         const humanPass=keepB.length;const effectivePass=fv4.all_pass+humanPass;
         mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 10px;font-size:13px;font-weight:600;border-right:2px solid #e2e8f0;min-height:90px;background:#f0fdf4;color:#059669"><span style="font-size:18px">✅</span>可保留<span style="font-size:10px;color:#6ee7b7;font-weight:400">人工打标</span></div>';
         dims.forEach(d=>{const kn=_issueKeepCount(d.name);mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px;min-height:90px;border-bottom:1px solid #a7f3d0;border-right:1px solid #a7f3d0;background:#ecfdf5"><div style="font-size:28px;font-weight:700;color:#059669">'+kn+'</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">可保留</div></div>'});
-        mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px;min-height:90px;background:#ecfdf5;border-left:2px solid #e2e8f0;border-bottom:1px solid #f1f5f9"><div style="font-size:28px;font-weight:700;color:#059669">'+effectivePass+'</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">占比 '+(fv4.valid?Math.round(effectivePass/fv4.valid*100):0)+'%</div><div style="font-size:11px;font-weight:600;margin-top:4px;padding:1px 8px;border-radius:10px;background:#dcfce7;color:#16a34a">↑ +'+humanPass+'</div></div>';
+        mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px;min-height:90px;background:#ecfdf5;border-left:2px solid #e2e8f0;border-bottom:1px solid #f1f5f9"><div style="font-size:28px;font-weight:700;color:#059669">'+effectivePass+'</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">占比 '+(fv4.valid?Math.round(effectivePass/fv4.valid*100):0)+'%</div><div style="font-size:10px;font-weight:600;margin-top:4px;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#16a34a">系统'+fv4.all_pass+' + 人工'+humanPass+'</div></div>';
         mH+='</div>';
         // 可保留折叠（二级原因Tab）
         if(keepB.length){
@@ -869,7 +869,7 @@ function rsop(){
   cpOkRows+=`<tr style="font-weight:700;background:var(--x1)"><td>合计/均值</td><td></td><td></td><td></td><td></td><td class="nc">${sumDtx.toLocaleString()}</td><td></td><td class="nc" style="background:#dbeafe">${sumApp.toLocaleString()}</td><td class="nc" style="background:#dbeafe">${sumExp.toLocaleString()}</td><td class="nc" style="background:#dbeafe">${avgRate}%</td><td class="nc" style="background:#dbeafe">${sumUse.toFixed(0)}</td><td class="nc" style="background:#dbeafe">${avgEUR}%</td></tr>`;
 
   document.getElementById('sopCustPool').innerHTML=`
-    <div style="font-size:12px;color:var(--x6);margin-bottom:12px">四要素全达标但未存活的 <b>${CP.total}个</b> 品牌，排查老客基数是否支撑1:1曝光目标</div>
+    <div style="font-size:12px;color:var(--x6);margin-bottom:12px">可保留（全达标+人工打标）未存活的 <b>${CP.total}个</b> 品牌，排查老客基数是否支撑1:1曝光目标</div>
     <div style="font-size:11px;color:var(--x5);margin-bottom:14px">排查口径：二选一应曝老客UV（近7日高频+低频）/ 日均交易笔数 ≥ 1</div>
     <div style="display:flex;gap:14px;margin-bottom:14px">
       <div style="flex:1;background:#fff;border-radius:10px;box-shadow:var(--s);padding:18px;position:relative;overflow:hidden">
@@ -908,7 +908,7 @@ function rsop(){
   const qA=QS.A||{count:0},qB=QS.B||{count:0},qC=QS.C||{count:0},qD=QS.D||{count:0},qX=QS.X||{count:0};
 
   document.getElementById('sopQuadrant').innerHTML=`
-    <div style="font-size:12px;color:var(--x5);margin-bottom:16px">四要素全达标、老客池子充足但未存活的 <b style="color:var(--x7)">${Q.total}个</b> 品牌，按老客曝光充分度和曝光核销率分为四个象限：</div>
+    <div style="font-size:12px;color:var(--x5);margin-bottom:16px">可保留（全达标+人工打标）、老客池子充足但未存活的 <b style="color:var(--x7)">${Q.total}个</b> 品牌，按老客曝光充分度和曝光核销率分为四个象限：</div>
     <div style="max-width:860px;margin:0 auto">
       <!-- 上半：曝光充足 → B(左,低核销) + A(右,高核销) -->
       <div style="display:flex">
@@ -937,14 +937,14 @@ function rsop(){
           <div style="flex:1;min-width:0;padding:20px 22px;background:#fff7ed;border-radius:0 0 0 10px;border-right:1.5px dashed var(--x3)">
             <div style="font-size:13px;font-weight:700;color:#9a3412;margin-bottom:6px">D · 流量不足、低核销率</div>
             <div style="font-size:40px;font-weight:800;color:#ea580c">${qD.count}</div>
-            <div style="font-size:11px;color:#9a3412;margin-top:8px">其中 <b style="font-size:18px;color:#c2410c">${qD.no_exp}</b> 个老客曝光几乎为0 <span style="font-size:9px;color:#c2410c80">（尽曝UV < 5）</span></div>
+            <div style="font-size:11px;color:#9a3412;margin-top:8px">其中 <b style="font-size:18px;color:#c2410c">${qD.no_exp}</b> 个老客曝光几乎为0 <span style="font-size:9px;color:#c2410c80">（尽曝UV < 10）</span></div>
             <div style="font-size:11px;color:#9a3412;margin-top:4px"><b style="font-size:18px;color:#c2410c">${qD.has_exp}</b> 个有老客曝光但核销率低 ${(()=>{const dExp=QR.filter(r=>r.quad==='D'&&r.eur_reliable);if(!dExp.length)return'';const names=dExp.map(b=>b.name).join('、');const detail=dExp.map(b=>'<b>'+b.name+'</b> 尽曝UV:'+Math.round(b.cur_exp)+' 交易:'+b.daily_tx.toLocaleString()+' 核销率:'+(b.cur_e21_eur!=null?b.cur_e21_eur+'%':'—')).join('<br>');return`<span onclick="quadDetail('qd_detail')" style="cursor:pointer;color:var(--b);font-weight:600">（${names} ▾）</span></div><div id="qd_detail" style="display:none;margin-top:6px;font-size:10px;color:var(--x6);background:#fff5ed;padding:8px 10px;border-radius:5px;line-height:1.7">${detail}`})()}</div>
           </div>
           <div style="flex:1;min-width:0;padding:20px 22px;background:#fef2f2;border-radius:0 0 10px 0">
             <div style="font-size:13px;font-weight:700;color:#991b1b;margin-bottom:6px">C · 流量不足、高核销率</div>
             <div style="font-size:40px;font-weight:800;color:#dc2626">${qC.count}</div>
             <div style="font-size:11px;color:#991b1b;margin-top:8px"><b style="font-size:18px;color:#dc2626">${qC.has_exp}</b> 个核销率可信，补流量可存活</div>
-            <div style="font-size:11px;color:#991b1b;margin-top:4px"><b style="font-size:18px;color:#c2410c">${qC.no_exp}</b> 个老客曝光几乎为0 <span style="font-size:9px;color:#c2410c80">（尽曝UV < 5，核销率不可信）</span></div>
+            <div style="font-size:11px;color:#991b1b;margin-top:4px"><b style="font-size:18px;color:#c2410c">${qC.no_exp}</b> 个老客曝光几乎为0 <span style="font-size:9px;color:#c2410c80">（尽曝UV < 10，核销率不可信）</span></div>
           </div>
         </div>
       </div>
@@ -1011,7 +1011,7 @@ function rsop(){
         <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--o)"></div>
         <div style="font-size:13px;color:var(--x5);font-weight:600;margin-bottom:14px">待验证品牌 <span style="font-size:9px;font-weight:600;background:#fff7ed;color:#c2410c;padding:2px 6px;border-radius:3px;margin-left:6px">需尽快推动置顶曝光</span></div>
         <div style="font-size:36px;font-weight:800;color:var(--o)">${unreliable}</div>
-        <div style="font-size:12px;color:var(--x6);margin-top:8px;line-height:1.6">日均老客尽曝UV < 5，当前无有效核销数据。<br>需要有老客曝光，才能验证核销率能否达到1%。</div>
+        <div style="font-size:12px;color:var(--x6);margin-top:8px;line-height:1.6">日均老客尽曝UV < 10，当前无有效核销数据。<br>需要有老客曝光，才能验证核销率能否达到1%。</div>
       </div>
     </div>
     <div style="margin-bottom:20px">
@@ -1094,7 +1094,7 @@ function rsop(){
         const tbl='<table style="width:100%;font-size:11px;border-collapse:collapse">';
         const thBase='<thead><tr style="background:var(--x0)"><th style="padding:5px 8px;text-align:left">品牌</th><th style="padding:5px 8px">品牌ID</th><th style="padding:5px 8px">服务商</th><th style="padding:5px 8px">负责人</th><th style="padding:5px 8px">业态</th><th style="padding:5px 8px" class="nc">门店数</th><th style="padding:5px 8px" class="nc">日均交易(w)</th><th style="padding:5px 8px" class="nc">1店几笔</th><th style="padding:5px 8px" class="nc">小程序占比</th><th style="padding:5px 8px" class="nc">价格力</th><th style="padding:5px 8px">待排查问题</th></tr></thead>';
         const thFlow='<thead><tr style="background:var(--x0)"><th style="padding:5px 8px;text-align:left">品牌</th><th style="padding:5px 8px">品牌ID</th><th style="padding:5px 8px">服务商</th><th style="padding:5px 8px">负责人</th><th style="padding:5px 8px">业态</th><th style="padding:5px 8px" class="nc">门店数</th><th style="padding:5px 8px" class="nc">日均交易(w)</th><th style="padding:5px 8px" class="nc">1店几笔</th><th style="padding:5px 8px" class="nc">小程序占比</th><th style="padding:5px 8px" class="nc">价格力</th><th style="padding:5px 8px" class="nc">日均曝光(w)</th><th style="padding:5px 8px" class="nc">日均尽曝UV</th><th style="padding:5px 8px" class="nc">7日应曝UV</th></tr></thead>';
-        function issSpan(b){return (b.issues||[]).map(i=>'<span style="display:inline-block;font-size:9px;font-weight:600;padding:1px 4px;border-radius:3px;background:'+({'经营模式':'#b4585220','货盘':'#b4925220','基建':'#5a8aad20'}[i]||'#eee')+';color:'+({'经营模式':'#b45852','货盘':'#b49252','基建':'#5a8aad'}[i]||'#666')+';margin:1px">'+i+'</span>').join('')}
+        function issSpan(b){return b.issues.map(i=>'<span style="display:inline-block;font-size:9px;font-weight:600;padding:1px 4px;border-radius:3px;background:'+({'经营模式':'#b4585220','货盘':'#b4925220','基建':'#5a8aad20'}[i]||'#eee')+';color:'+({'经营模式':'#b45852','货盘':'#b49252','基建':'#5a8aad'}[i]||'#666')+';margin:1px">'+i+'</span>').join('')}
         function baseRow(b){return '<tr><td style="padding:4px 8px;font-weight:600">'+b.name+'</td><td style="padding:4px 8px">'+(b.brandId||'—')+'</td><td style="padding:4px 8px">'+(b.sp||'—')+'</td><td style="padding:4px 8px">'+(b.owner||'—')+'</td><td style="padding:4px 8px">'+(b.cat4||'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.storeCount!=null?b.storeCount:'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.dailyTx!=null?b.dailyTx+'w':'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.txPerStore!=null?b.txPerStore:'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.miniApp!=null?_P(b.miniApp):'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.priceForce!=null?(b.priceForce>0?'+':'')+_P(b.priceForce).replace('—',''):'—')+'</td><td style="padding:4px 8px">'+issSpan(b)+'</td></tr>'}
         function flowRow(b){return '<tr><td style="padding:4px 8px;font-weight:600">'+b.name+'</td><td style="padding:4px 8px">'+(b.brandId||'—')+'</td><td style="padding:4px 8px">'+(b.sp||'—')+'</td><td style="padding:4px 8px">'+(b.owner||'—')+'</td><td style="padding:4px 8px">'+(b.cat4||'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.storeCount!=null?b.storeCount:'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.dailyTx!=null?b.dailyTx+'w':'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.txPerStore!=null?b.txPerStore:'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.miniApp!=null?_P(b.miniApp):'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.priceForce!=null?(b.priceForce>0?'+':'')+_P(b.priceForce).replace('—',''):'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.expPvW||'—')+'</td><td style="padding:4px 8px" class="nc">'+b.dailyExpUV+'</td><td style="padding:4px 8px" class="nc">'+(b.e21AppUV7d||'—')+'</td></tr>'}
         const cs='background:#fff;border-radius:10px;box-shadow:var(--s);padding:18px;position:relative;overflow:hidden';
@@ -1137,7 +1137,7 @@ function rsop(){
           <div style="display:flex;flex-direction:column;gap:0">
             <div style="${cs};min-height:120px;border:2px solid #c2410c">
               ${topBar('#c2410c')}
-              <div style="font-size:12px;color:var(--x5);margin-bottom:6px">老客尽曝UV < 5</div>
+              <div style="font-size:12px;color:var(--x5);margin-bottom:6px">老客尽曝UV < 10</div>
               <div style="font-size:32px;font-weight:800;color:#c2410c">${ZU.uv_lt5}</div>
               <div style="margin-top:6px"><span style="font-size:9px;font-weight:600;background:#fff7ed;color:#c2410c;padding:2px 6px;border-radius:3px">${ZU.uv_lt5_pct||0}%在待验证${Q.unreliable_count||0}个中，需尽快置顶曝光</span></div>
             </div>
@@ -1145,7 +1145,7 @@ function rsop(){
         </div>`
         +(ZU.fail_brands&&ZU.fail_brands.length?'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:#b45852;margin-bottom:6px">↓ 四要素不达标（'+ZU.fail_count+'个）→ 待排查四要素 ▾</summary><div class="tw">'+tbl+thBase+'<tbody>'+ZU.fail_brands.map(baseRow).join('')+'</tbody></table></div></details>':'')
         +(ZU.pool_fail_brands&&ZU.pool_fail_brands.length?'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--o);margin-bottom:6px">↓ 老客基数不够（'+ZU.pool_fail+'个）→ 待确认罗盘规则 ▾</summary><div class="tw">'+tbl+thFlow+'<tbody>'+ZU.pool_fail_brands.map(flowRow).join('')+'</tbody></table></div></details>':'')
-        +(ZU.pool_ok_brands&&ZU.pool_ok_brands.length?'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:#c2410c;margin-bottom:6px">→ 尽曝UV < 5（'+(ZU.pool_ok||0)+'个）→ 需公线尽快置顶 ▾</summary><div class="tw">'+tbl+thFlow+'<tbody>'+ZU.pool_ok_brands.map(flowRow).join('')+'</tbody></table></div></details>':'');
+        +(ZU.pool_ok_brands&&ZU.pool_ok_brands.length?'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:#c2410c;margin-bottom:6px">→ 尽曝UV < 10（'+(ZU.pool_ok||0)+'个）→ 需公线尽快置顶 ▾</summary><div class="tw">'+tbl+thFlow+'<tbody>'+ZU.pool_ok_brands.map(flowRow).join('')+'</tbody></table></div></details>':'');
       })()}
     </div>`;
 
@@ -1155,7 +1155,7 @@ function rov(){const tb=document.querySelector('#spTbl tbody');tb.innerHTML='';O
 
 let curS=null,sortD=1;function srt(f){if(curS===f)sortD*=-1;else{curS=f;sortD=1};rbt()}
 function rbt(){const fSP=document.getElementById('fSP').value,fOwner=document.getElementById('fOwner').value,fAsst=document.getElementById('fAsst').value,fCat=document.getElementById('fCat').value,fTier=document.getElementById('fTier').value,fSt=document.getElementById('fSt').value,fOnline=document.getElementById('fOnline').value,fScr=document.getElementById('fScr').value,fQ=document.getElementById('fQ').value.toLowerCase(),fM=document.getElementById('fMetric').value,fOp=document.getElementById('fOp').value,fVr=document.getElementById('fVal').value,fVn=fVr!==''?parseFloat(fVr):null;
-let fl=BS.filter(b=>{if(fSP&&b.spMapped!==fSP)return false;if(fOwner&&b.owner!==fOwner)return false;if(fAsst&&b.assistant!==fAsst)return false;if(fCat&&b.cat4!==fCat)return false;if(fTier&&b.tierManual!==fTier)return false;if(fSt==='alive'&&b.isAlive!==true)return false;if(fSt==='dead'&&b.isAlive!==false)return false;if(fOnline==='online'&&b.onlineStatus!=='在线')return false;if(fOnline==='pending'&&b.onlineStatus!=='在线待确认')return false;if(fOnline==='nodata'&&b.onlineStatus!=='未更新')return false;if(fOnline==='lost'&&b.statusManual!=='流失')return false;if(fScr==='biz_f'&&b.bizOk!==false)return false;if(fScr==='price_f'&&b.priceOk!==false)return false;if(fScr==='infra_f'&&b.infraOk!==false)return false;if(fScr==='traffic_f'&&b.trafficOk!==false)return false;if(fScr==='all_p'&&!(b.bizOk===true&&b.priceOk===true&&b.infraOk===true&&b.trafficOk===true))return false;if(fScr==='no_data'&&b.hasDailyData)return false;if(fQ&&!b.name.toLowerCase().includes(fQ))return false;if(fM&&fVn!==null){const v=b[fM];if(v==null)return false;if(fOp==='lt'&&!(v<fVn))return false;if(fOp==='lte'&&!(v<=fVn))return false;if(fOp==='gt'&&!(v>fVn))return false;if(fOp==='gte'&&!(v>=fVn))return false}return true});
+let fl=BS.filter(b=>{if(b.displayLevel==='ka_self')return false;if(fSP&&b.spMapped!==fSP)return false;if(fOwner&&b.owner!==fOwner)return false;if(fAsst&&b.assistant!==fAsst)return false;if(fCat&&b.cat4!==fCat)return false;if(fTier&&b.tierManual!==fTier)return false;if(fSt==='alive'&&b.isAlive!==true)return false;if(fSt==='dead'&&b.isAlive!==false)return false;if(fOnline==='online'&&b.onlineStatus!=='在线')return false;if(fOnline==='pending'&&b.onlineStatus!=='在线待确认')return false;if(fOnline==='nodata'&&b.onlineStatus!=='未更新')return false;if(fOnline==='lost'&&b.statusManual!=='流失')return false;if(fScr==='biz_f'&&b.bizOk!==false)return false;if(fScr==='price_f'&&b.priceOk!==false)return false;if(fScr==='infra_f'&&b.infraOk!==false)return false;if(fScr==='traffic_f'&&b.trafficOk!==false)return false;if(fScr==='all_p'&&!(b.bizOk===true&&b.priceOk===true&&b.infraOk===true&&b.trafficOk===true))return false;if(fScr==='no_data'&&b.hasDailyData)return false;if(fQ&&!b.name.toLowerCase().includes(fQ)&&!String(b.brandId).includes(fQ))return false;if(fM&&fVn!==null){const v=b[fM];if(v==null)return false;if(fOp==='lt'&&!(v<fVn))return false;if(fOp==='lte'&&!(v<=fVn))return false;if(fOp==='gt'&&!(v>fVn))return false;if(fOp==='gte'&&!(v>=fVn))return false}return true});
 fl.sort((a,b)=>a.hasDailyData===b.hasDailyData?0:(a.hasDailyData?-1:1));if(curS)fl.sort((a,b)=>{let av=a[curS],bv=b[curS];if(av==null)return 1;if(bv==null)return -1;if(typeof av==='boolean'){av=av?1:0;bv=bv?1:0}if(typeof av==='string')return sortD*av.localeCompare(bv);return sortD*(av-bv)});
 const tb=document.querySelector('#bTbl tbody');tb.innerHTML='';fl.forEach(b=>{const al=b.isAlive===true?'<span class="bd b-ok">存活</span>':(b.isAlive===false?'<span class="bd b-d">未存活</span>':'—');const tg=[];if(b.bizOk===false)tg.push('<span class="bd b-d">经营❌</span>');if(b.priceOk===false)tg.push('<span class="bd b-w">货盘⚠️</span>');if(b.infraOk===false)tg.push('<span class="bd b-w">基建⚠️</span>');if(b.trafficOk===false)tg.push('<span class="bd b-w">流量⚠️</span>');if(!b.hasDailyData)tg.push('<span class="bd b-g">无数据</span>');if(b.bizOk===true&&b.priceOk===true&&b.infraOk===true&&b.trafficOk===true&&b.hasDailyData)tg.push('<span class="bd b-ok">✅</span>');
 tb.innerHTML+=`<tr><td><b>${b.name}</b></td><td>${b.brandId||'—'}</td><td>${b.cat4||'—'}</td><td>${b.spMapped}</td><td>${b.owner||'—'}</td><td>${b.assistant||'—'}</td><td>${b.tierManual||'—'}</td><td>${b.tierDaily||'—'}</td><td>${b.onlineStatus==='在线'?'<span class="bd b-ok">在线</span>':b.onlineStatus==='在线待确认'?'<span class="bd b-w">在线待确认</span>':b.onlineStatus==='流失'?'<span class="bd b-d">流失</span>':b.onlineStatus==='筹备中'?'<span class="bd b-g">筹备中</span>':b.statusManual||'—'}</td><td>${al}</td><td class="nc">${V(b.survivalRate,'%')}</td><td class="nc ${b.miniApp!=null&&b.miniApp<20?'wc':''}">${V(b.miniApp,'%')}</td><td class="nc ${b.priceOk===false?'wc':''}">${b.priceForce!=null?(b.priceForce>0?'+':'')+_P(b.priceForce).replace('—',''):'—'}</td><td class="nc">${b.storeCount!=null?b.storeCount:'—'}</td><td class="nc ${b.storeComplete!=null&&b.storeComplete<90?'wc':''}">${V(b.storeComplete,'%')}</td><td class="nc">${b.dailyTx!=null?b.dailyTx+'w':'—'}</td><td class="nc ${b.txPerStore!=null&&b.txPerStore<5?'wc':''}">${V(b.txPerStore)}</td><td class="nc">${b.e21ExpRatio!=null?_P(b.e21ExpRatio):'—'}</td><td class="nc">${V(b.e21Ratio,'%')}</td><td class="nc">${b.hiRate_uv!=null?(b.hiRate_uv*100).toFixed(1)+'%':'—'}</td><td class="nc">${b.loRate_uv!=null?(b.loRate_uv*100).toFixed(1)+'%':'—'}</td><td class="nc">${b.custAppRate!=null?(b.custAppRate*100).toFixed(1)+'%':'—'}</td><td class="nc">${b.e21EUR!=null?_P(b.e21EUR):'—'}</td><td>${tg.join(' ')||'—'}</td><td><textarea class="rm" placeholder="..." onblur="saveFeedback('${b.brandId||b.name}','${b.name}','remark',this.value)" onclick="event.stopPropagation()">${_fbCache[(b.brandId||b.name)+'_remark']||b.remark||''}</textarea></td></tr>`});document.getElementById('bCnt').textContent=fl.length+'/'+BS.length;setTimeout(autoResizeAll,50)}
@@ -1163,7 +1163,7 @@ tb.innerHTML+=`<tr><td><b>${b.name}</b></td><td>${b.brandId||'—'}</td><td>${b.
 let curCS=null,csD=1;function csrt(f){if(curCS===f)csD*=-1;else{curCS=f;csD=1};rconv()}
 function tgact(el){const next=el.closest('tr').nextElementSibling;if(next&&next.classList.contains('act-detail')){next.classList.toggle('show');const btn=el.querySelector('.xb');if(btn){const n=btn.dataset.n;btn.textContent=next.classList.contains('show')?'收起':n+'个活动'}}}
 function rconv(){var _dlMap={};BS.forEach(function(b){_dlMap[b.brandId]=b.displayLevel||'other'});const fSP=document.getElementById('cSP').value,fCat=document.getElementById('cCat').value,fTier=document.getElementById('cTier').value,fA=document.getElementById('cAlive').value,fQ=document.getElementById('cQ').value.toLowerCase();
-let fl=BC.filter(b=>{if((_dlMap[b.brandId]||'other')==='ka_self')return false;if(fSP&&b.sp!==fSP)return false;if(fCat&&b.cat4!==fCat)return false;if(fTier&&b.tier!==fTier)return false;if(fA==='1'&&b.alive!==true)return false;if(fA==='0'&&b.alive!==false)return false;if(fQ&&!b.name.toLowerCase().includes(fQ))return false;return true});
+let fl=BC.filter(b=>{if((_dlMap[b.brandId]||'other')==='ka_self')return false;if(fSP&&b.sp!==fSP)return false;if(fCat&&b.cat4!==fCat)return false;if(fTier&&b.tier!==fTier)return false;if(fA==='1'&&b.alive!==true)return false;if(fA==='0'&&b.alive!==false)return false;if(fQ&&!b.name.toLowerCase().includes(fQ)&&!String(b.brandId).includes(fQ))return false;return true});
 fl.sort((a,b)=>{if(a.dExpW==null&&b.dExpW!=null)return 1;if(b.dExpW==null&&a.dExpW!=null)return -1;return 0});
 if(curCS)fl.sort((a,b)=>{let av=a[curCS],bv=b[curCS];if(av==null)return 1;if(bv==null)return -1;if(typeof av==='string')return csD*av.localeCompare(bv);return csD*(av-bv)});else fl.sort((a,b)=>{if(a.dUse==null)return 1;if(b.dUse==null)return -1;return(b.dUse||0)-(a.dUse||0)});
 const tb=document.querySelector('#cTbl tbody');tb.innerHTML='';
