@@ -1143,9 +1143,9 @@ function rsop(){
             </div>
           </div>
         </div>`
-        +(ZU.fail_brands&&ZU.fail_brands.length?'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:#b45852;margin-bottom:6px">↓ 四要素不达标（'+ZU.fail_count+'个）→ 待排查四要素 ▾</summary><div class="tw">'+tbl+thBase+'<tbody>'+ZU.fail_brands.map(baseRow).join('')+'</tbody></table></div></details>':'')
-        +(ZU.pool_fail_brands&&ZU.pool_fail_brands.length?'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--o);margin-bottom:6px">↓ 老客基数不够（'+ZU.pool_fail+'个）→ 待确认罗盘规则 ▾</summary><div class="tw">'+tbl+thFlow+'<tbody>'+ZU.pool_fail_brands.map(flowRow).join('')+'</tbody></table></div></details>':'')
-        +(ZU.pool_ok_brands&&ZU.pool_ok_brands.length?'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:#c2410c;margin-bottom:6px">→ 尽曝UV < 10（'+(ZU.pool_ok||0)+'个）→ 需公线尽快置顶 ▾</summary><div class="tw">'+tbl+thFlow+'<tbody>'+ZU.pool_ok_brands.map(flowRow).join('')+'</tbody></table></div></details>':'');
+        +(ZU.fail_brands&&ZU.fail_brands.length?'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:#b45852;margin-bottom:6px">↓ 四要素不达标（'+ZU.fail_count+'个）→ 待排查四要素 ▾</summary><div class="tw" style="max-height:60vh;overflow-y:auto">'+tbl+thBase+'<tbody>'+ZU.fail_brands.map(baseRow).join('')+'</tbody></table></div></details>':'')
+        +(ZU.pool_fail_brands&&ZU.pool_fail_brands.length?'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--o);margin-bottom:6px">↓ 老客基数不够（'+ZU.pool_fail+'个）→ 待确认罗盘规则 ▾</summary><div class="tw" style="max-height:60vh;overflow-y:auto">'+tbl+thFlow+'<tbody>'+ZU.pool_fail_brands.map(flowRow).join('')+'</tbody></table></div></details>':'')
+        +(ZU.pool_ok_brands&&ZU.pool_ok_brands.length?'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:#c2410c;margin-bottom:6px">→ 尽曝UV < 10（'+(ZU.pool_ok||0)+'个）→ 需公线尽快置顶 ▾</summary><div class="tw" style="max-height:60vh;overflow-y:auto">'+tbl+thFlow+'<tbody>'+ZU.pool_ok_brands.map(flowRow).join('')+'</tbody></table></div></details>':'');
       })()}
     </div>`;
 
