@@ -242,7 +242,7 @@ async function loadDashboardData(targetDate) {
       hiRate_pv:s.hi_rate_e21!=null?s.hi_rate_e21/100:null,
       loRate_pv:s.lo_rate_e21!=null?s.lo_rate_e21/100:null,
       e21AppUV_7d:e21AppUV7d, allAppUV_7d:hiAppAll+loAppAll, allExpUV_7d:hiExpAll+loExpAll,
-      totalAppUV:e21AppUV7d, totalExpUV:totalExpUV, dailyExpUV:dailyExpUV,
+      totalAppUV:e21AppUV7d, totalExpUV:totalExpUV, dailyExpUV:Math.round(dailyExpUV*10)/10,
       e21_use_daily:e21UseDly, all_use_daily:allUseDly, other_use_daily:otherUseDly,
       custAppRate:e21AppUV7d>0&&dTxAbs>0?Math.round(e21AppUV7d/7/dTxAbs*10000)/10000:0,
       custTxRatio:dTxAbs>0?Math.round((e21AppUV7d/7)/dTxAbs*10000)/100:0,
