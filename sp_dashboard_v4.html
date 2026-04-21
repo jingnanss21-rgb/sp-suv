@@ -41,7 +41,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
 .ref th.h0{background:var(--x6);color:#fff}.ref th.h1{background:#4a7ab5;color:#fff}.ref th.h2{background:var(--x4);color:#fff}
 .ref .ra td{background:var(--g1)}.ref .rd td{background:var(--r1)}
 /* table common */
-.tw{background:#fff;border-radius:var(--rd);box-shadow:var(--s);overflow-x:auto}
+.tw{background:#fff;border-radius:var(--rd);box-shadow:var(--s);overflow-x:auto}thead tr:nth-child(2) th{top:28px}
 table{width:100%;border-collapse:collapse;font-size:11px}th{background:var(--x0);color:var(--x6);font-weight:600;text-align:left;padding:6px 7px;border-bottom:1.5px solid var(--x2);white-space:nowrap;position:sticky;top:0;z-index:2;cursor:pointer;font-size:10px}th:hover{background:var(--x2)}
 td{padding:5px 7px;border-bottom:1px solid var(--x1);vertical-align:middle;white-space:nowrap}tr:hover td{background:var(--x0)}
 .nc{text-align:right;font-variant-numeric:tabular-nums}
@@ -90,7 +90,7 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
 <div class="S"><div class="ST">📋 品牌明细</div>
 <div class="fb"><span class="fl">筛选</span><select id="fSP" onchange="rbt()"><option value="">服务商</option></select><select id="fOwner" onchange="rbt()"><option value="">负责人</option></select><select id="fAsst" onchange="rbt()"><option value="">助理</option></select><select id="fCat" onchange="rbt()"><option value="">类目</option></select><select id="fTier" onchange="rbt()"><option value="">分层</option><option value="KA">KA</option><option value="腰部">腰部</option><option value="尾部">尾部</option></select><select id="fSt" onchange="rbt()"><option value="">存活状态</option><option value="alive">存活</option><option value="dead">未存活</option></select><select id="fOnline" onchange="rbt()"><option value="">在线状态</option><option value="online">在线</option><option value="pending">在线待确认</option><option value="nodata">未更新</option><option value="lost">流失</option></select><select id="fScr" onchange="rbt()"><option value="">筛选维度</option><option value="biz_f">经营模式❌</option><option value="price_f">货盘⚠️</option><option value="infra_f">基建⚠️</option><option value="traffic_f">流量⚠️</option><option value="all_p">全达标✅</option><option value="no_data">无数据</option></select><input id="fQ" type="text" placeholder="搜索品牌/ID" oninput="rbt()" style="width:100px"><button onclick="document.querySelectorAll('#t1 select').forEach(s=>s.value='');document.getElementById('fQ').value='';document.getElementById('fVal').value='';document.getElementById('fMetric').value='';rbt()" style="padding:5px 8px;border:1px solid var(--r);border-radius:5px;background:var(--r1);color:var(--r);font-size:10px;font-weight:600;cursor:pointer">一键清除</button></div>
 <div class="fb"><span class="fl">数值</span><select id="fMetric"><option value="">指标</option><option value="miniApp">小程序渗透</option><option value="priceForce">价格力</option><option value="storeComplete">门店完整度</option><option value="txPerStore">1店几笔</option><option value="e21Ratio">二选一曝光</option><option value="visitUseRate">到店核销率</option></select><select id="fOp"><option value="lt">&lt;</option><option value="lte">≤</option><option value="gt">&gt;</option><option value="gte">≥</option></select><input id="fVal" type="number" placeholder="值" style="width:55px"><button onclick="rbt()" style="padding:5px 8px;border:1px solid var(--b);border-radius:5px;background:var(--b1);color:var(--b);font-size:10px;font-weight:600;cursor:pointer">筛选</button><button onclick="document.getElementById('fMetric').value='';document.getElementById('fVal').value='';rbt()" style="padding:5px 6px;border:1px solid var(--x3);border-radius:5px;background:#fff;color:var(--x6);font-size:10px;cursor:pointer">清除</button></div>
-<div class="tw"><table id="bTbl"><thead>
+<div class="tw" style="max-height:calc(100vh - 200px);overflow-y:auto"><table id="bTbl"><thead>
 <tr>
 <th rowspan="2" onclick="srt('name')">品牌⇅</th><th rowspan="2">品牌ID</th><th rowspan="2">类目</th><th rowspan="2">服务商</th><th rowspan="2">负责人</th><th rowspan="2">助理</th><th rowspan="2">分层</th><th rowspan="2">公线</th><th rowspan="2">状态</th>
 <th class="nc" colspan="2" style="background:var(--x6);color:#fff;text-align:center">存活</th>
@@ -113,7 +113,7 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
 <div class="P" id="t2">
 <div style="font-size:10px;color:var(--x5);margin:8px 0">日均数据。曝光(w万) 核销(绝对值)。点击展开活动，占比=活动÷品牌整体。</div>
 <div class="fb"><span class="fl">筛选</span><select id="cSP" onchange="rconv()"><option value="">服务商</option></select><select id="cCat" onchange="rconv()"><option value="">类目</option></select><select id="cTier" onchange="rconv()"><option value="">分层</option><option value="KA">KA</option><option value="腰部">腰部</option><option value="尾部">尾部</option></select><select id="cAlive" onchange="rconv()"><option value="">全部</option><option value="1">存活</option><option value="0">未存活</option></select><input id="cQ" type="text" placeholder="搜索品牌/ID" oninput="clearTimeout(window._cdbT);window._cdbT=setTimeout(rconv,300)" style="width:100px"><button onclick="exportActCSV()" style="margin-left:8px;padding:5px 14px;background:#2563eb;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.1)">📥 导出活动CSV</button></div>
-<div class="tw"><table id="cTbl"><thead>
+<div class="tw" style="max-height:calc(100vh - 200px);overflow-y:auto"><table id="cTbl"><thead>
 <tr><th rowspan="2" style="width:32px"><input type="checkbox" onchange="toggleAllExp(this)" title="全选/取消" style="cursor:pointer;vertical-align:middle"></th><th rowspan="2" onclick="csrt('name')">品牌⇅</th><th rowspan="2">品牌ID</th><th rowspan="2" onclick="csrt('cat4')">类目⇅</th><th rowspan="2" onclick="csrt('sp')">服务商⇅</th><th rowspan="2" onclick="csrt('tier')">分层⇅</th><th rowspan="2">存活</th><th rowspan="2" class="nc" onclick="csrt('dailyTx')">日均交易(w)⇅</th>
 <th class="nc" colspan="5" style="background:var(--x6);color:#fff;text-align:center">整体</th>
 <th class="nc" colspan="5" style="background:#4a7ab5;color:#fff;text-align:center">二选一</th>
@@ -242,7 +242,7 @@ async function loadDashboardData(targetDate) {
       hiRate_pv:s.hi_rate_e21!=null?s.hi_rate_e21/100:null,
       loRate_pv:s.lo_rate_e21!=null?s.lo_rate_e21/100:null,
       e21AppUV_7d:e21AppUV7d, allAppUV_7d:hiAppAll+loAppAll, allExpUV_7d:hiExpAll+loExpAll,
-      totalAppUV:e21AppUV7d, totalExpUV:totalExpUV, dailyExpUV:dailyExpUV,
+      totalAppUV:e21AppUV7d, totalExpUV:totalExpUV, dailyExpUV:Math.round(dailyExpUV*10)/10,
       e21_use_daily:e21UseDly, all_use_daily:allUseDly, other_use_daily:otherUseDly,
       custAppRate:e21AppUV7d>0&&dTxAbs>0?Math.round(e21AppUV7d/7/dTxAbs*10000)/10000:0,
       custTxRatio:dTxAbs>0?Math.round((e21AppUV7d/7)/dTxAbs*10000)/100:0,
@@ -893,14 +893,14 @@ function rsop(){
     </div>
     <details style="margin-bottom:10px">
       <summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--g);margin-bottom:6px">老客池子充足的 ${CP.ok} 个品牌明细 ▾</summary>
-      <div class="tw"><table class="an-tbl"><thead><tr>
+      <div class="tw" style="max-height:60vh;overflow-y:auto"><table class="an-tbl"><thead><tr>
         <th>品牌</th><th>品牌ID</th><th>服务商</th><th>业态</th><th class="nc">门店数</th><th class="nc">日均交易笔数</th><th class="nc">1店几笔</th>
         <th class="nc" style="background:#2563eb;color:#fff">应曝UV(7日)</th><th class="nc" style="background:#2563eb;color:#fff">尽曝UV(7日)</th><th class="nc" style="background:#2563eb;color:#fff">应曝尽曝率</th><th class="nc" style="background:#2563eb;color:#fff">日均核销PV</th><th class="nc" style="background:#2563eb;color:#fff">曝光核销率</th>
       </tr></thead><tbody>${cpOkRows}</tbody></table></div>
     </details>
     ${CP.fail>0?`<details>
       <summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--o);margin-bottom:6px">老客池子不足的 ${CP.fail} 个品牌明细（待确认罗盘规则）▾</summary>
-      <div class="tw"><table class="an-tbl"><thead><tr><th>品牌</th><th>品牌ID</th><th>服务商</th><th>业态</th><th class="nc">审核通过门店</th><th class="nc">日均交易笔数</th><th class="nc">1店几笔</th><th class="nc">二选一应曝UV(7日)</th></tr></thead><tbody>${cpFailRows}</tbody></table></div>
+      <div class="tw" style="max-height:60vh;overflow-y:auto"><table class="an-tbl"><thead><tr><th>品牌</th><th>品牌ID</th><th>服务商</th><th>业态</th><th class="nc">审核通过门店</th><th class="nc">日均交易笔数</th><th class="nc">1店几笔</th><th class="nc">二选一应曝UV(7日)</th></tr></thead><tbody>${cpFailRows}</tbody></table></div>
     </details>`:''}`;
 
   // === 象限分析 ===
@@ -1016,11 +1016,11 @@ function rsop(){
     </div>
     <div style="margin-bottom:20px">
       <div style="font-size:13px;font-weight:700;color:var(--x7);margin-bottom:10px">分类目测算对比</div>
-      <div class="tw"><table class="an-tbl"><thead><tr><th>类目</th><th class="nc">当前存活</th><th class="nc" style="color:var(--g)">补后存活</th><th class="nc">当前核销PV</th><th class="nc" style="color:var(--g)">补后核销PV</th></tr></thead><tbody>${catTableRows}</tbody></table></div>
+      <div class="tw" style="max-height:60vh;overflow-y:auto"><table class="an-tbl"><thead><tr><th>类目</th><th class="nc">当前存活</th><th class="nc" style="color:var(--g)">补后存活</th><th class="nc">当前核销PV</th><th class="nc" style="color:var(--g)">补后核销PV</th></tr></thead><tbody>${catTableRows}</tbody></table></div>
     </div>
     <details>
       <summary style="cursor:pointer;font-size:12px;font-weight:700;color:var(--b);margin-bottom:8px">${nAlive}个确定新增存活品牌明细 — 点击展开</summary>
-      <div class="tw"><table class="an-tbl"><thead><tr><th>品牌</th><th>品牌ID</th><th>类目</th><th class="nc">日均交易</th><th class="nc">日均尽曝UV</th><th class="nc">老客曝光核销率</th><th class="nc">当前核销</th><th class="nc">补后核销</th><th class="nc">增量</th></tr></thead><tbody>${aliveTable}</tbody></table></div>
+      <div class="tw" style="max-height:60vh;overflow-y:auto"><table class="an-tbl"><thead><tr><th>品牌</th><th>品牌ID</th><th>类目</th><th class="nc">日均交易</th><th class="nc">日均尽曝UV</th><th class="nc">老客曝光核销率</th><th class="nc">当前核销</th><th class="nc">补后核销</th><th class="nc">增量</th></tr></thead><tbody>${aliveTable}</tbody></table></div>
     </details>
     <div style="font-size:10px;color:var(--x4);margin-top:10px;line-height:1.8">
       <b>测算口径</b><br>
@@ -1071,19 +1071,19 @@ function rsop(){
       </tbody></table></div>
       ${ndBrands.length?`<details style="margin-top:8px">
         <summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--x6);margin-bottom:6px">📋 日报无数据（${ndBrands.length}个）</summary>
-        <div class="tw"><table class="an-tbl"><thead><tr><th>品牌</th><th>品牌ID</th><th>服务商</th><th>业态</th><th class="nc">门店数</th></tr></thead><tbody>${ndRows}</tbody></table></div>
+        <div class="tw" style="max-height:60vh;overflow-y:auto"><table class="an-tbl"><thead><tr><th>品牌</th><th>品牌ID</th><th>服务商</th><th>业态</th><th class="nc">门店数</th></tr></thead><tbody>${ndRows}</tbody></table></div>
       </details>`:''}
       ${ncBrands.length?`<details style="margin-top:8px">
         <summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--x6);margin-bottom:6px">📋 公线类目≠餐饮（${ncBrands.length}个）</summary>
-        <div class="tw"><table class="an-tbl"><thead><tr><th>品牌</th><th>品牌ID</th><th>服务商</th><th>业态</th><th>公线类目</th><th class="nc">门店数</th></tr></thead><tbody>${ncRows}</tbody></table></div>
+        <div class="tw" style="max-height:60vh;overflow-y:auto"><table class="an-tbl"><thead><tr><th>品牌</th><th>品牌ID</th><th>服务商</th><th>业态</th><th>公线类目</th><th class="nc">门店数</th></tr></thead><tbody>${ncRows}</tbody></table></div>
       </details>`:''}
       <details style="margin-top:8px">
         <summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--b);margin-bottom:6px">📋 公线分层≠腰部（${tailBrands.length}个）— 待确认上传门店数，校验分层</summary>
-        <div class="tw"><table class="an-tbl"><thead><tr><th>品牌</th><th>品牌ID</th><th>服务商</th><th>业态</th><th>公线分层</th><th class="nc">审核通过门店数</th></tr></thead><tbody>${tailRows}</tbody></table></div>
+        <div class="tw" style="max-height:60vh;overflow-y:auto"><table class="an-tbl"><thead><tr><th>品牌</th><th>品牌ID</th><th>服务商</th><th>业态</th><th>公线分层</th><th class="nc">审核通过门店数</th></tr></thead><tbody>${tailRows}</tbody></table></div>
       </details>
       ${offBrands.length?`<details style="margin-top:8px">
         <summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--o);margin-bottom:6px">📋 当日未在线（${offBrands.length}个）— 待确认在线状态</summary>
-        <div class="tw"><table class="an-tbl"><thead><tr><th>品牌</th><th>品牌ID</th><th>服务商</th><th>业态</th><th>当日在线状态</th><th class="nc">门店数</th></tr></thead><tbody>${offRows}</tbody></table></div>
+        <div class="tw" style="max-height:60vh;overflow-y:auto"><table class="an-tbl"><thead><tr><th>品牌</th><th>品牌ID</th><th>服务商</th><th>业态</th><th>当日在线状态</th><th class="nc">门店数</th></tr></thead><tbody>${offRows}</tbody></table></div>
       </details>`:''}
     </div>
     <div class="qa" style="margin-top:14px">
@@ -1143,9 +1143,9 @@ function rsop(){
             </div>
           </div>
         </div>`
-        +(ZU.fail_brands&&ZU.fail_brands.length?'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:#b45852;margin-bottom:6px">↓ 四要素不达标（'+ZU.fail_count+'个）→ 待排查四要素 ▾</summary><div class="tw">'+tbl+thBase+'<tbody>'+ZU.fail_brands.map(baseRow).join('')+'</tbody></table></div></details>':'')
-        +(ZU.pool_fail_brands&&ZU.pool_fail_brands.length?'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--o);margin-bottom:6px">↓ 老客基数不够（'+ZU.pool_fail+'个）→ 待确认罗盘规则 ▾</summary><div class="tw">'+tbl+thFlow+'<tbody>'+ZU.pool_fail_brands.map(flowRow).join('')+'</tbody></table></div></details>':'')
-        +(ZU.pool_ok_brands&&ZU.pool_ok_brands.length?'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:#c2410c;margin-bottom:6px">→ 尽曝UV < 10（'+(ZU.pool_ok||0)+'个）→ 需公线尽快置顶 ▾</summary><div class="tw">'+tbl+thFlow+'<tbody>'+ZU.pool_ok_brands.map(flowRow).join('')+'</tbody></table></div></details>':'');
+        +(ZU.fail_brands&&ZU.fail_brands.length?'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:#b45852;margin-bottom:6px">↓ 四要素不达标（'+ZU.fail_count+'个）→ 待排查四要素 ▾</summary><div class="tw" style="max-height:60vh;overflow-y:auto">'+tbl+thBase+'<tbody>'+ZU.fail_brands.map(baseRow).join('')+'</tbody></table></div></details>':'')
+        +(ZU.pool_fail_brands&&ZU.pool_fail_brands.length?'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--o);margin-bottom:6px">↓ 老客基数不够（'+ZU.pool_fail+'个）→ 待确认罗盘规则 ▾</summary><div class="tw" style="max-height:60vh;overflow-y:auto">'+tbl+thFlow+'<tbody>'+ZU.pool_fail_brands.map(flowRow).join('')+'</tbody></table></div></details>':'')
+        +(ZU.pool_ok_brands&&ZU.pool_ok_brands.length?'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:#c2410c;margin-bottom:6px">→ 尽曝UV < 10（'+(ZU.pool_ok||0)+'个）→ 需公线尽快置顶 ▾</summary><div class="tw" style="max-height:60vh;overflow-y:auto">'+tbl+thFlow+'<tbody>'+ZU.pool_ok_brands.map(flowRow).join('')+'</tbody></table></div></details>':'');
       })()}
     </div>`;
 
