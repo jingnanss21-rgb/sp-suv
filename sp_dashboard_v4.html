@@ -1199,6 +1199,19 @@ function stab(i){document.querySelectorAll('.tab').forEach((b,j)=>{b.classList.t
 
 async function initDashboard(targetDate) {
   try {
+    // 埋点
+    try {
+      supa.from('brand_feedback').insert({
+        brand_id: 'visit', field_name: 'visit::PAR看板',
+        field_value: JSON.stringify({
+          page: 'PAR看板',
+          device: /Mobi|Android/i.test(navigator.userAgent) ? '手机' : '电脑',
+          screen: screen.width + 'x' + screen.height,
+          referrer: document.referrer ? document.referrer.substring(0, 100) : '直接访问',
+          ts: new Date().toISOString()
+        })
+      }).then(function(){}).catch(function(){});
+    } catch(e) {}
     const D = await loadDashboardData(targetDate);
 
     F=D.final,BS=F.brands,SPS=F.spSummary,SOP=D.sop,BC=D.bc,ACTS=D.acts;
