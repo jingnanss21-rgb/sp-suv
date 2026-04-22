@@ -72,7 +72,7 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
 @media(max-width:900px){.sop-factors{grid-template-columns:1fr}.kg{grid-template-columns:repeat(2,1fr)}}
 </style></head><body>
 <div id="loading" style="position:fixed;top:0;left:0;right:0;bottom:0;background:#eef2f7;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column"><div style="font-size:16px;color:#475569;font-weight:600">🍜 加载中...</div><div style="font-size:11px;color:#94a3b8;margin-top:6px">正在渲染数据</div></div>
-<div class="hdr" style="position:sticky;top:0;z-index:900;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><h1>🍜 餐饮服务商 · 运营看板</h1><p>数据 2026-04-20 · 周报 0409-0415 · v5.0</p></div><div style="padding:4px 8px"><select id="dateSelector" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px"></select></div></div><div class="W">
+<div class="hdr" style="position:sticky;top:0;z-index:900;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><h1>🍜 餐饮服务商 · 运营看板</h1><p>数据 2026-04-21 · 周报 0409-0415 · v5.0</p></div><div style="padding:4px 8px"><select id="dateSelector" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px"></select></div></div><div class="W">
 <div class="tabs"><button class="tab on" onclick="stab(0)">📋 运营SOP</button><button class="tab" onclick="stab(1)">📊 要素检查明细</button><button class="tab" onclick="stab(2)">🔄 活动转化明细</button></div>
 
 <div class="P on" id="t0">
@@ -792,7 +792,7 @@ function rsop(){
         const humanPass=keepB.length;const effectivePass=fv4.all_pass+humanPass;
         mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 10px;font-size:13px;font-weight:600;border-right:2px solid #e2e8f0;min-height:90px;background:#f0fdf4;color:#059669"><span style="font-size:18px">✅</span>可保留<span style="font-size:10px;color:#6ee7b7;font-weight:400">人工打标</span></div>';
         dims.forEach(d=>{const kn=_issueKeepCount(d.name);mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px;min-height:90px;border-bottom:1px solid #a7f3d0;border-right:1px solid #a7f3d0;background:#ecfdf5"><div style="font-size:28px;font-weight:700;color:#059669">'+kn+'</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">可保留</div></div>'});
-        mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px;min-height:90px;background:#ecfdf5;border-left:2px solid #e2e8f0;border-bottom:1px solid #f1f5f9"><div style="font-size:28px;font-weight:700;color:#059669">'+effectivePass+'</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">占比 '+(fv4.valid?Math.round(effectivePass/fv4.valid*100):0)+'%</div><div style="font-size:10px;font-weight:600;margin-top:4px;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#16a34a">系统'+fv4.all_pass+' + 人工'+humanPass+'</div></div>';
+        mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px;min-height:90px;background:#ecfdf5;border-left:2px solid #e2e8f0;border-bottom:1px solid #f1f5f9"><div style="font-size:28px;font-weight:700;color:#059669">'+humanPass+'</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">人工可保留</div></div>';
         mH+='</div>';
         // 可保留折叠（二级原因Tab）
         if(keepB.length){
