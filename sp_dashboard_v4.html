@@ -72,7 +72,7 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
 @media(max-width:900px){.sop-factors{grid-template-columns:1fr}.kg{grid-template-columns:repeat(2,1fr)}}
 </style></head><body>
 <div id="loading" style="position:fixed;top:0;left:0;right:0;bottom:0;background:#eef2f7;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column"><div style="font-size:16px;color:#475569;font-weight:600">🍜 加载中...</div><div style="font-size:11px;color:#94a3b8;margin-top:6px">正在渲染数据</div></div>
-<div class="hdr" style="position:sticky;top:0;z-index:900;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><h1>🍜 餐饮服务商 · 运营看板</h1><p>数据 2026-04-21 · 周报 0409-0415 · v5.0</p></div><div style="padding:4px 8px"><select id="dateSelector" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px"></select></div></div><div class="W">
+<div class="hdr" style="position:sticky;top:0;z-index:900;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><h1>🍜 餐饮服务商 · 运营看板</h1><p>数据 2026-04-22 · 周报 0409-0415 · v5.0</p></div><div style="padding:4px 8px"><select id="dateSelector" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px"></select></div></div><div class="W">
 <div class="tabs"><button class="tab on" onclick="stab(0)">📋 运营SOP</button><button class="tab" onclick="stab(1)">📊 要素检查明细</button><button class="tab" onclick="stab(2)">🔄 活动转化明细</button></div>
 
 <div class="P on" id="t0">
@@ -196,13 +196,62 @@ async function loadDashboardData(targetDate) {
   }
 
   if (!targetDate) {
-    const dates = await fetchJSON('brand_snapshot', 'select=data_date&order=data_date.desc&limit=1');
-    if (!dates.length) throw new Error('brand_snapshot 中无数据');
-    targetDate = dates[0].data_date;
+    // ── 兜底：当日数据不全时回退到上一期 ──
+    // 关键字段空值率 > 50% 判为不合格，最多回退 5 期
+    const PAR_CRITICAL = ['hi_app_uv_e21', 'daily_tx', 'exp_pv'];
+    const THRESHOLD = 0.5;
+    const MAX_FALLBACK = 5;
+
+    function isSnapshotComplete(rows, fields, threshold) {
+      if (!rows || !rows.length) return false;
+      for (const f of fields) {
+        let empty = 0;
+        for (const r of rows) {
+          const v = r[f];
+          if (v === null || v === undefined || v === '' || v === 'NULL') empty++;
+        }
+        if (empty / rows.length > threshold) return false;
+      }
+      return true;
+    }
+
+    const candDates = await fetchJSON('brand_snapshot', 'select=data_date&order=data_date.desc&limit=' + MAX_FALLBACK);
+    if (!candDates.length) throw new Error('brand_snapshot 中无数据');
+    // 去重（同 data_date 可能多行）
+    const uniqDates = [];
+    const seenD = {};
+    for (const d of candDates) {
+      if (!seenD[d.data_date]) { seenD[d.data_date] = true; uniqDates.push(d.data_date); }
+    }
+
+    var pickedSnapshots = null;
+    for (const d of uniqDates) {
+      const rows = await fetchJSON('brand_snapshot', 'data_date=eq.' + d + '&select=*');
+      if (isSnapshotComplete(rows, PAR_CRITICAL, THRESHOLD)) {
+        targetDate = d;
+        pickedSnapshots = rows;
+        if (d !== uniqDates[0]) {
+          console.warn('[FALLBACK] 当日(' + uniqDates[0] + ')数据不全，已回退到 ' + d);
+        }
+        break;
+      } else {
+        console.warn('[FALLBACK] ' + d + ' 关键字段空值率过高，尝试下一期');
+      }
+    }
+    if (!targetDate) {
+      // 全不合格：取最新一期强行渲染，避免白屏
+      targetDate = uniqDates[0];
+      console.warn('[FALLBACK][MISS] 最近 ' + uniqDates.length + ' 期均不合格，仍渲染最新一期 ' + targetDate);
+      pickedSnapshots = await fetchJSON('brand_snapshot', 'data_date=eq.' + targetDate + '&select=*');
+    }
+    // 缓存已拉到的 snapshots，避免下面 Promise.all 再拉一次
+    window.__parPickedSnapshots = pickedSnapshots;
   }
 
-  const [snapshots, channels, spInfos, sopRows] = await Promise.all([
-    fetchJSON('brand_snapshot', 'data_date=eq.' + targetDate + '&select=*'),
+  const snapshots = window.__parPickedSnapshots
+    || await fetchJSON('brand_snapshot', 'data_date=eq.' + targetDate + '&select=*');
+  window.__parPickedSnapshots = null;  // 用完清空
+  const [channels, spInfos, sopRows] = await Promise.all([
     fetchJSON('brand_channel', 'data_date=eq.' + targetDate + '&select=*'),
     fetchJSON('sp_info', 'select=*'),
     fetchJSON('sop_snapshot', 'data_date=eq.' + targetDate + '&select=*'),
@@ -1201,13 +1250,24 @@ async function initDashboard(targetDate) {
   try {
     // 埋点
     try {
+      var __sid = sessionStorage.getItem('__visit_sid');
+      if(!__sid) {
+        __sid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+        sessionStorage.setItem('__visit_sid', __sid);
+      }
       supa.from('brand_feedback').insert({
         brand_id: 'visit', field_name: 'visit::PAR看板',
         field_value: JSON.stringify({
           page: 'PAR看板',
           device: /Mobi|Android/i.test(navigator.userAgent) ? '手机' : '电脑',
           screen: screen.width + 'x' + screen.height,
-          referrer: document.referrer ? document.referrer.substring(0, 100) : '直接访问',
+          orientation: screen.width > screen.height ? 'landscape' : 'portrait',
+          referrer: document.referrer ? document.referrer.substring(0, 150) : '直接访问',
+          path: location.pathname + location.search,
+          ua: navigator.userAgent.substring(0, 200),
+          tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          lang: navigator.language,
+          sessionId: __sid,
           ts: new Date().toISOString()
         })
       }).then(function(){}).catch(function(){});
