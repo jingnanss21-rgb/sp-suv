@@ -91,8 +91,7 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
       <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-          <div style="font-size:13px;font-weight:700;color:#1e293b">📈 在线 vs 已投放</div>
-          <div style="font-size:10px;color:#94a3b8">绿=在线 · 蓝=已投放</div>
+          <div style="font-size:13px;font-weight:700;color:#1e293b">📈 投放品牌趋势</div>
         </div>
         <div id="introTrendChart" style="width:100%;height:300px"></div>
       </div>
@@ -1370,12 +1369,11 @@ function rintro(D){
   }
   if (_introChart){ _introChart.dispose(); _introChart = null; }
   _introChart = echarts.init(el);
-  // X 轴稀疏：只显示周一、周四和首尾日期
+  // X 轴稀疏：首日 + 每 7 天 + 末日
   const xLabelFmt = function(val, idx){
     const isFirst = idx === 0;
     const isLast = idx === xDates.length - 1;
-    const dow = new Date(val + 'T00:00:00').getDay(); // 0=Sun..6=Sat
-    if (isFirst || isLast || dow === 1 || dow === 4){
+    if (isFirst || isLast || idx % 7 === 0){
       return val.substring(5);
     }
     return '';
@@ -1532,13 +1530,7 @@ function rintro(D){
         {offset: 0, color: 'rgba(3,105,161,0.14)'},
         {offset: 1, color: 'rgba(3,105,161,0.01)'}
       ]}},
-      data: aliveSeries,
-      markLine: {
-        silent: true,
-        symbol: 'none',
-        lineStyle: {color: '#94a3b8', type: 'dashed', width: 1},
-        data: [{type: 'average', name: '均值', label: {formatter: '均值 {c}%', fontSize: 10, color: '#94a3b8'}}]
-      }
+      data: aliveSeries
     }]
   });
 }
