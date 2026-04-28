@@ -2006,7 +2006,8 @@ function _pinBuildCard(b){
 
   // ⑦ 备注反馈框
   const remark = _fbCache[b.brandId+'_pin_remark'] || '';
-  const fbSec = '<div><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">✏️ 补充反馈</div><textarea placeholder="添加反馈..." style="width:100%;min-height:48px;padding:8px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;resize:vertical" onblur="saveFeedback(\''+b.brandId+'\',\''+(b.name||'').replace(/\'/g,\"\\\\\'\")+'\',\'pin_remark\',this.value)">'+remark+'</textarea></div>';
+  const safeName = (b.name||'').replace(/'/g, "\\'");
+  const fbSec = '<div><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">✏️ 补充反馈</div><textarea placeholder="添加反馈..." style="width:100%;min-height:48px;padding:8px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;resize:vertical" onblur="saveFeedback(\''+b.brandId+'\',\''+safeName+'\',\'pin_remark\',this.value)">'+remark+'</textarea></div>';
 
   return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:16px">' +
     head + resultSec + fourSec + chnSec + custSec + visitSec + actsSec + fbSec +
