@@ -2390,26 +2390,7 @@ function _pinBuildCard(b){
     '<div style="background:#f8fafc;border-radius:8px;padding:12px"><div style="font-size:11px;color:#64748b;margin-bottom:4px">日均核销</div><div style="font-size:20px;font-weight:800;color:#1e293b">'+(daily_use>0?(daily_use>=10000?(daily_use/10000).toFixed(1)+'w':daily_use.toLocaleString()):'—')+'</div></div>'+
   '</div></div>';
 
-  // ⑥ 活动明细
-  const acts = (window.actByBrand && window.actByBrand[b.name]) || actByBrand[b.name] || [];
-  let actsSec = '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">🎫 活动明细 ('+acts.length+'个)</div>';
-  if (!acts.length){
-    actsSec += '<div style="padding:20px;text-align:center;color:#94a3b8;font-size:11px;background:#f8fafc;border-radius:6px">该品牌暂无在线活动</div>';
-  } else {
-    const sorted = [...acts].sort((a,b) => (b.expPV||0) - (a.expPV||0));
-    actsSec += '<div style="overflow-x:auto"><table style="width:100%;font-size:11px;border-collapse:collapse"><thead><tr style="background:#f1f5f9;color:#475569"><th style="padding:5px 8px;text-align:left">活动名称</th><th style="padding:5px 8px;text-align:left">券名称</th><th style="padding:5px 8px" class="nc">价格力</th><th style="padding:5px 8px" class="nc">日均曝光</th><th style="padding:5px 8px" class="nc">曝光核销率</th></tr></thead><tbody>';
-    sorted.forEach(a => {
-      actsSec += '<tr>'+
-        '<td style="padding:4px 8px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(a.activityName||'')+'">'+(a.activityName||'—')+'</td>'+
-        '<td style="padding:4px 8px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(a.couponName||'')+'">'+(a.couponName||'—')+'</td>'+
-        '<td style="padding:4px 8px" class="nc">'+(a.priceForce!=null?(a.priceForce>0?'+':'')+a.priceForce.toFixed(2)+'%':'—')+'</td>'+
-        '<td style="padding:4px 8px" class="nc">'+(a.dailyExpPV!=null?(a.dailyExpPV>=10000?(a.dailyExpPV/10000).toFixed(1)+'w':a.dailyExpPV.toLocaleString()):'—')+'</td>'+
-        '<td style="padding:4px 8px" class="nc">'+(a.expUseRate!=null?a.expUseRate.toFixed(2)+'%':'—')+'</td>'+
-      '</tr>';
-    });
-    actsSec += '</tbody></table></div>';
-  }
-  actsSec += '</div>';
+  // ⑥ 活动明细模块已移除（见 Tab 2 活动明细完整看板）
 
   // ⑦ 备注反馈框
   const remark = _fbCache[b.brandId+'_pin_remark'] || '';
@@ -2417,7 +2398,7 @@ function _pinBuildCard(b){
   const fbSec = '<div><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">✏️ 补充反馈</div><textarea placeholder="添加反馈..." style="width:100%;min-height:48px;padding:8px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;resize:vertical" onblur="saveFeedback(\''+b.brandId+'\',\''+safeName+'\',\'pin_remark\',this.value)">'+remark+'</textarea></div>';
 
   return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:16px">' +
-    head + resultSec + fourSec + chnSec + custSec + visitSec + actsSec + fbSec +
+    head + resultSec + fourSec + chnSec + custSec + visitSec + fbSec +
   '</div>';
 }
 
