@@ -86,43 +86,20 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
 <div class="P on" id="t0">
   <!-- 板块 A: 引入概览 -->
   <div class="S">
-    <div class="ST">📈 引入概览</div>
-    <div class="kg" id="introKg" style="margin-bottom:10px"></div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:stretch;margin-top:8px">
-      <div style="flex:2;min-width:520px;background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:12px">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <div style="font-size:13px;font-weight:700;color:#1e293b">📊 腰部餐饮在线品牌 · 滚动7天窗口</div>
-          <div style="font-size:10px;color:#94a3b8">每日一个点，窗口=[当日-6, 当日]</div>
-        </div>
-        <div id="introTrendChart" style="width:100%;height:260px"></div>
+    <div class="ST">引入概览 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:8px">口径：腰部 × 餐饮 · <span id="introDataDate">—</span></span></div>
+    <div id="introKg" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px"></div>
+    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-size:13px;font-weight:700;color:#1e293b">腰部餐饮在线品牌趋势 · 每日截面</div>
+        <div style="font-size:11px;color:#94a3b8">口径：tier=腰部 ∩ 餐饮类目 ∩ 品牌日报当日在线=1</div>
       </div>
-      <div style="flex:1;min-width:240px;display:flex;flex-direction:column;gap:8px">
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:12px">
-          <div style="font-size:11px;color:#64748b;font-weight:600;margin-bottom:4px">本期 7 天窗口</div>
-          <div id="introCurPeriod" style="font-size:11px;color:#94a3b8;margin-bottom:4px">—</div>
-          <div id="introCurValue" style="font-size:28px;font-weight:800;color:#1e40af">—</div>
-          <div id="introQoQ" style="font-size:11px;font-weight:600;margin-top:2px">—</div>
-        </div>
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:12px">
-          <div style="font-size:11px;color:#64748b;font-weight:600;margin-bottom:4px">上一期</div>
-          <div id="introPrevPeriod" style="font-size:11px;color:#94a3b8;margin-bottom:4px">—</div>
-          <div id="introPrevValue" style="font-size:22px;font-weight:700;color:#475569">—</div>
-        </div>
-        <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:12px">
-          <div style="font-size:11px;color:#9a3412;font-weight:600;margin-bottom:4px">🔝 置顶进度</div>
-          <div style="display:flex;justify-content:space-between;align-items:baseline">
-            <div style="font-size:22px;font-weight:800;color:#c2410c"><span id="introTopCur">—</span><span style="font-size:12px;color:#9a3412">/<span id="introTopMax">50</span></span></div>
-            <div style="font-size:10px;color:#9a3412;cursor:pointer" onclick="stab(2)">查看 →</div>
-          </div>
-          <div style="height:6px;background:#fed7aa;border-radius:3px;overflow:hidden;margin-top:4px"><div id="introTopBar" style="height:100%;width:0%;background:linear-gradient(90deg,#f59e0b,#d97706);transition:width .5s"></div></div>
-        </div>
-      </div>
+      <div id="introTrendChart" style="width:100%;height:300px"></div>
     </div>
   </div>
 
   <!-- 板块 B: 服务商目标达成度（保留原 spTbl）-->
   <div class="S">
-    <div class="ST">🎯 服务商目标达成度</div>
+    <div class="ST">服务商目标达成度</div>
     <div class="tw"><table id="spTbl"><thead><tr><th>服务商</th><th>类型</th><th>负责人</th><th class="nc">目标</th><th class="nc">投放</th><th class="nc">在线</th><th class="nc">流失</th><th class="nc">存活</th><th class="nc">存活率</th><th>进度</th></tr></thead><tbody></tbody></table></div>
   </div>
 </div>
@@ -298,7 +275,7 @@ async function loadDashboardData(targetDate) {
       assistant:s.assistant||'', owner:s.owner||'', couponSP:s.coupon_sp||'',
       hasDailyData:s.daily_tx!=null, cat2:s.category||'', cat4:s.sub_category||'',
       displayLevel:s.display_level||'other',
-      survivalRate:s.survival_rate, isAlive:s.is_alive, priceForce:s.price_force,
+      survivalRate:s.survival_rate, isAlive:s.is_alive, onlineToday:s.online_today, priceForce:s.price_force,
       miniApp:s.mini_app, txPerStore:s.tx_per_store, storeComplete:s.store_complete,
       storeCount:s.store_count, visitUseRate:s.visit_use_rate, e21Ratio:s.e21_ratio,
       expPv:s.exp_pv, claimPv:s.claim_pv, usePv:s.use_pv, dailyTx:s.daily_tx,
@@ -1226,7 +1203,7 @@ function rsop(){
 
 function rov(){const tb=document.querySelector('#spTbl tbody');tb.innerHTML='';Object.keys(SPS).filter(k=>SPS[k].brands.length>0).sort((a,b)=>{const ta=SPS[a].type||'',tb2=SPS[b].type||'';return(ta.indexOf('SaaS')>=0?0:1)-(tb2.indexOf('SaaS')>=0?0:1)||SPS[b].brands.length-SPS[a].brands.length}).forEach(k=>{const s=SPS[k],bs2=W.filter(b=>b.spMapped===k);if(!bs2.length)return;const o2=bs2.filter(b=>b.statusManual==='在线'),l2=bs2.filter(b=>b.statusManual==='流失'),a2=o2.filter(b=>b.isAlive===true);const sr2=o2.length?(a2.length/o2.length*100).toFixed(1):'—';const p2=s.target?(bs2.length/s.target*100).toFixed(1):'—';const pc=parseFloat(p2)>=100?'pf-g':parseFloat(p2)>=60?'pf-b':'pf-o';tb.innerHTML+=`<tr><td><b>${s.name}</b></td><td>${s.type||'—'}</td><td>${s.owner||'—'}</td><td class="nc">${s.target||'—'}</td><td class="nc"><b>${bs2.length}</b></td><td class="nc">${o2.length}</td><td class="nc">${l2.length}</td><td class="nc">${a2.length}</td><td class="nc ${parseFloat(sr2)>=50?'oc':'wc'}">${sr2}%</td><td style="min-width:80px"><div class="pb"><div class="pf ${pc}" style="width:${Math.min(parseFloat(p2)||0,100)}%"></div></div><div class="pt">${p2}%</div></td></tr>`})}
 
-// ========== 引入进度：概览卡 + 滚动 7 天趋势线 ==========
+// ========== 引入进度：概览 4 大卡 + 每日折线图 ==========
 const INTRO_CATERING = new Set(['正餐','茶饮咖啡','中式快餐','甜品烘焙','西式快餐','小吃','其他餐饮']);
 var _introChart = null;
 
@@ -1236,8 +1213,8 @@ function _introAddDays(isoDate, delta){
   return d.toISOString().substring(0,10);
 }
 
+// 聚合：每天 online_today=true × tier=腰部 × 餐饮 的 brand_id 集合
 function _introDailyMap(trendRows){
-  // { 'YYYY-MM-DD': Set(brandIds) }
   const m = {};
   (trendRows||[]).forEach(function(r){
     if (!r) return;
@@ -1251,79 +1228,104 @@ function _introDailyMap(trendRows){
   return m;
 }
 
-function _introWindowCount(dailyMap, endDate, days){
-  const s = new Set();
-  for (let i = 0; i < days; i++){
+// 近 N 天均值（含当天，不足 N 天取现有天数）
+function _introAvgNDays(dailyMap, endDate, n){
+  let total = 0, cnt = 0;
+  for (let i = 0; i < n; i++){
     const d = _introAddDays(endDate, -i);
-    if (dailyMap[d]) dailyMap[d].forEach(function(b){s.add(b)});
+    if (dailyMap[d]) { total += dailyMap[d].size; cnt++; }
   }
-  return s.size;
+  return cnt > 0 ? total / cnt : null;
+}
+
+function _introFmtPct(delta, prev){
+  if (prev == null || prev === 0) return '—';
+  const pct = (delta/prev)*100;
+  return pct.toFixed(1) + '%';
+}
+
+function _introChip(todayN, avg7, prev7){
+  if (avg7 == null || prev7 == null) return '';
+  const delta = avg7 - prev7;
+  const color = delta > 0 ? '#059669' : delta < 0 ? '#dc2626' : '#64748b';
+  const arrow = delta > 0 ? '↑' : delta < 0 ? '↓' : '→';
+  const sign = delta > 0 ? '+' : '';
+  return '<div style="font-size:11px;color:#94a3b8;margin-top:6px">近7日均 <b style="color:#475569">'+avg7.toFixed(1)+'</b></div>' +
+         '<div style="font-size:11px;margin-top:2px;color:'+color+';font-weight:600">'+arrow+' '+sign+delta.toFixed(1)+' ('+_introFmtPct(delta, prev7)+')</div>';
+}
+
+function _introRateChip(curRate, avg7Rate, prev7Rate){
+  if (avg7Rate == null || prev7Rate == null) return '';
+  const delta = avg7Rate - prev7Rate;
+  const color = delta > 0 ? '#059669' : delta < 0 ? '#dc2626' : '#64748b';
+  const arrow = delta > 0 ? '↑' : delta < 0 ? '↓' : '→';
+  const sign = delta > 0 ? '+' : '';
+  return '<div style="font-size:11px;color:#94a3b8;margin-top:6px">近7日均 <b style="color:#475569">'+(avg7Rate*100).toFixed(1)+'%</b></div>' +
+         '<div style="font-size:11px;margin-top:2px;color:'+color+';font-weight:600">'+arrow+' '+sign+(delta*100).toFixed(1)+'pp</div>';
 }
 
 function rintro(D){
-  // 概览卡：目标 / 已投放 / 在线 / 存活 / 存活率 / 总品牌（腰部口径）
-  const wBrands = (BS||[]).filter(b=>b.tierManual==='腰部');
-  const wOnline = wBrands.filter(b=>b.statusManual==='在线');
-  const wLost = wBrands.filter(b=>b.statusManual==='流失');
-  const wAlive = wOnline.filter(b=>b.isAlive===true);
-  const wSR = wOnline.length ? (wAlive.length/wOnline.length*100).toFixed(1) : '—';
-  const totalTarget = (F && F.totalTarget) || 800;
-  const kg = document.getElementById('introKg');
-  if (kg){
-    const card = (lb, v, sub, color) => `<div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;min-width:110px"><div style="font-size:11px;color:#64748b;font-weight:600">${lb}</div><div style="font-size:22px;font-weight:800;color:${color||'#1e293b'};margin-top:2px">${v}</div>${sub?'<div style="font-size:10px;color:#94a3b8;margin-top:1px">'+sub+'</div>':''}</div>`;
-    kg.innerHTML = `<div style="display:flex;gap:8px;flex-wrap:wrap">
-      ${card('🎯 目标', totalTarget, '腰部服务商合计','#1e40af')}
-      ${card('📦 已投放', wBrands.length, '跟进表在线+流失','#0369a1')}
-      ${card('🟢 在线', wOnline.length, '跟进表 = 在线','#059669')}
-      ${card('🔴 流失', wLost.length, '跟进表 = 流失','#dc2626')}
-      ${card('💚 存活', wAlive.length, '存活率≥1%','#059669')}
-      ${card('📊 存活率', wSR+'%', '存活/在线','#0369a1')}
-    </div>`;
-  }
+  const targetDate = (F && F.dataDate) || '';
+  const dd = document.getElementById('introDataDate');
+  if (dd) dd.textContent = targetDate;
 
-  // 趋势图数据准备
-  const trendRows = (D && D.trendRows) || [];
-  const dailyMap = _introDailyMap(trendRows);
+  // ========== 1. 概览 4 大卡（全部腰部×餐饮）==========
+  // 已投放 = 跟进表 status ∈ {在线, 流失}
+  const wc = (BS||[]).filter(b =>
+    b.tierManual === '腰部' && INTRO_CATERING.has(b.cat4)
+  );
+  const deployed = wc.filter(b => b.statusManual === '在线' || b.statusManual === '流失').length;
+  const totalTarget = (F && F.totalTarget) || 800;
+  const deployedPct = totalTarget > 0 ? (deployed/totalTarget*100) : 0;
+
+  // 在线 / 存活（当日截面 - 来自 BS）
+  const onlineBS = wc.filter(b => b.onlineToday === true);
+  const aliveBS = onlineBS.filter(b => b.isAlive === true);
+  const todayOnline = onlineBS.length;
+  const todayAlive = aliveBS.length;
+  const todayRate = todayOnline > 0 ? todayAlive/todayOnline : null;
+
+  // 近 7 日 vs 上 7 日均值 —— 从 D.trendRows 算
+  const dailyMap = _introDailyMap((D && D.trendRows) || []);
+  // 存活也需要按日计算，但 trendRows 没带 is_alive。简化方案：环比只对"在线"卡做，存活/存活率用近7日均的 (存活/在线) 口径 — 但 trendRows 无 is_alive 数据
+  // 折中：在线卡带环比，存活/存活率用文字说明"仅今日截面"
+  const avg7Online = _introAvgNDays(dailyMap, targetDate, 7);
+  const prev7Online = _introAvgNDays(dailyMap, _introAddDays(targetDate, -7), 7);
+
+  const card = function(label, bigValue, bigUnit, subHtml, color){
+    return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px 18px">' +
+      '<div style="font-size:12px;color:#64748b;font-weight:600">'+label+'</div>' +
+      '<div style="font-size:32px;font-weight:800;color:'+(color||'#1e293b')+';margin-top:6px;line-height:1.1">' +
+        bigValue + (bigUnit ? '<span style="font-size:14px;color:#94a3b8;font-weight:500;margin-left:4px">'+bigUnit+'</span>' : '') +
+      '</div>' + (subHtml||'') +
+    '</div>';
+  };
+
+  // 已投放卡 - 带进度条
+  const depBarHtml = '<div style="margin-top:8px"><div style="height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden"><div style="height:100%;width:'+Math.min(deployedPct,100).toFixed(1)+'%;background:linear-gradient(90deg,#3b82f6,#2563eb);transition:width .4s"></div></div><div style="font-size:11px;color:#64748b;margin-top:4px">完成度 <b style="color:#2563eb">'+deployedPct.toFixed(1)+'%</b> · 目标 '+totalTarget+'</div></div>';
+
+  // 存活率环比 — 用 (今日存活率 vs 昨日存活率) 或者留空。这里留空以免误导
+  let html = '';
+  html += card('已投放', deployed, '/ ' + totalTarget, depBarHtml, '#2563eb');
+  html += card('在线', todayOnline, '家', _introChip(todayOnline, avg7Online, prev7Online), '#059669');
+  // 存活卡 - 仅今日截面（trendRows 没 is_alive）
+  html += card('存活', todayAlive, '家', '<div style="font-size:11px;color:#94a3b8;margin-top:6px">当日截面 · 近7日存活率 ≥1%</div>', '#059669');
+  // 存活率卡
+  const rateStr = todayRate != null ? (todayRate*100).toFixed(1)+'%' : '—';
+  html += card('存活率', rateStr, '', '<div style="font-size:11px;color:#94a3b8;margin-top:6px">存活 / 在线</div>', '#0369a1');
+
+  const kg = document.getElementById('introKg');
+  if (kg) kg.innerHTML = html;
+
+  // ========== 2. 每日折线图 ==========
   const dates = Object.keys(dailyMap).sort();
-  if (dates.length === 0){
+  const xDates = dates.filter(d => d <= targetDate);
+  if (xDates.length === 0){
     document.getElementById('introTrendChart').innerHTML = '<div style="padding:40px;text-align:center;color:#94a3b8;font-size:12px">暂无数据</div>';
     return;
   }
-  const targetDate = (F && F.dataDate) || dates[dates.length-1];
-  // X 轴只画有数据的日期
-  const xDates = dates.filter(d => d <= targetDate);
-  const ySeries = xDates.map(d => _introWindowCount(dailyMap, d, 7));
+  const ySeries = xDates.map(d => dailyMap[d].size);
 
-  // 当前窗口和上一窗口
-  const curEnd = targetDate;
-  const curStart = _introAddDays(curEnd, -6);
-  const prevEnd = _introAddDays(curEnd, -7);
-  const prevStart = _introAddDays(prevEnd, -6);
-  const curVal = _introWindowCount(dailyMap, curEnd, 7);
-  const prevVal = _introWindowCount(dailyMap, prevEnd, 7);
-  const delta = curVal - prevVal;
-  const pctStr = prevVal > 0 ? ((delta/prevVal)*100).toFixed(1)+'%' : '—';
-
-  document.getElementById('introCurPeriod').textContent = curStart + ' ~ ' + curEnd;
-  document.getElementById('introCurValue').textContent = curVal + ' 家';
-  const qoqEl = document.getElementById('introQoQ');
-  if (prevVal > 0){
-    const color = delta >= 0 ? '#059669' : '#dc2626';
-    const arrow = delta >= 0 ? '↑' : '↓';
-    qoqEl.innerHTML = `<span style="color:${color}">${arrow} ${Math.abs(delta)}（${pctStr}）</span> 环比上期`;
-  } else {
-    qoqEl.textContent = '—';
-  }
-  document.getElementById('introPrevPeriod').textContent = prevStart + ' ~ ' + prevEnd;
-  document.getElementById('introPrevValue').textContent = prevVal + ' 家';
-
-  // 置顶进度
-  const topRecs = (D && D.topRecords) || [];
-  document.getElementById('introTopCur').textContent = topRecs.length;
-  document.getElementById('introTopMax').textContent = '50';
-  document.getElementById('introTopBar').style.width = Math.min(topRecs.length/50*100, 100) + '%';
-
-  // ECharts 初始化
   const el = document.getElementById('introTrendChart');
   if (typeof echarts === 'undefined'){
     el.innerHTML = '<div style="padding:40px;text-align:center;color:#dc2626;font-size:12px">ECharts 未加载</div>';
@@ -1331,51 +1333,57 @@ function rintro(D){
   }
   if (_introChart){ _introChart.dispose(); _introChart = null; }
   _introChart = echarts.init(el);
-  const isCurPoint = xDates.map(d => d === targetDate);
   _introChart.setOption({
-    grid: {left: 40, right: 16, top: 24, bottom: 30},
+    grid: {left: 48, right: 24, top: 30, bottom: 40},
     tooltip: {
       trigger: 'axis',
       formatter: function(params){
         const p = params[0];
-        const d = p.axisValue;
-        const start = _introAddDays(d, -6);
-        return `<b>${d}</b><br>窗口: ${start} ~ ${d}<br>在线去重: <b>${p.value}</b> 家`;
+        return '<b>'+p.axisValue+'</b><br>腰部餐饮当日在线: <b>'+p.value+'</b> 家';
       }
     },
     xAxis: {
       type: 'category',
       data: xDates,
+      boundaryGap: false,
       axisLabel: {fontSize: 10, color: '#64748b', formatter: v => v.substring(5)},
       axisLine: {lineStyle: {color: '#cbd5e1'}},
       axisTick: {show: false}
     },
     yAxis: {
       type: 'value',
+      name: '在线品牌数',
+      nameTextStyle: {fontSize: 10, color: '#94a3b8', padding: [0,0,0,30]},
       axisLabel: {fontSize: 10, color: '#64748b'},
       splitLine: {lineStyle: {color: '#e2e8f0', type: 'dashed'}},
-      min: function(v){ return Math.max(0, Math.floor(v.min - 10)) }
+      scale: true
     },
     series: [{
       type: 'line',
-      smooth: true,
+      smooth: false,
       symbol: 'circle',
-      symbolSize: function(v, p){ return p.dataIndex === xDates.length-1 ? 8 : 4 },
+      symbolSize: function(v, p){ return p.dataIndex === xDates.length-1 ? 9 : 5 },
       lineStyle: {width: 2, color: '#2563eb'},
-      itemStyle: {color: '#2563eb'},
+      itemStyle: {
+        color: function(p){ return p.dataIndex === xDates.length-1 ? '#dc2626' : '#2563eb' }
+      },
       areaStyle: {color: {type: 'linear', x:0,y:0,x2:0,y2:1, colorStops: [
-        {offset: 0, color: 'rgba(37,99,235,0.18)'},
-        {offset: 1, color: 'rgba(37,99,235,0.02)'}
+        {offset: 0, color: 'rgba(37,99,235,0.14)'},
+        {offset: 1, color: 'rgba(37,99,235,0.01)'}
       ]}},
       data: ySeries,
-      markPoint: {
-        symbol: 'pin',
-        symbolSize: 40,
-        data: [{type:'max', name:'峰值'}]
+      markLine: {
+        silent: true,
+        symbol: 'none',
+        lineStyle: {color: '#94a3b8', type: 'dashed', width: 1},
+        data: [{type: 'average', name: '均值', label: {formatter: '均值 {c}', fontSize: 10, color: '#94a3b8'}}]
       }
     }]
   });
-  window.addEventListener('resize', function(){ if (_introChart) _introChart.resize() });
+  if (!window._introResizeBound){
+    window._introResizeBound = true;
+    window.addEventListener('resize', function(){ if (_introChart) _introChart.resize() });
+  }
 }
 
 let curS=null,sortD=1;function srt(f){if(curS===f)sortD*=-1;else{curS=f;sortD=1};rbt()}
