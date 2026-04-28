@@ -91,7 +91,7 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
     <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:12px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
         <div style="font-size:13px;font-weight:700;color:#1e293b">📈 引入进度趋势 · 每日截面</div>
-        <div style="font-size:11px;color:#94a3b8">绿线=腰部×餐饮当日在线 · 蓝线=跟进表腰部(在线+流失)累计入日报</div>
+        <div style="font-size:11px;color:#94a3b8">绿线=当日在线 · 蓝线=累计已投放（跟进表腰部在线+流失 ∩ 日报类目∈餐饮）</div>
       </div>
       <div id="introTrendChart" style="width:100%;height:300px"></div>
     </div>
@@ -1332,11 +1332,13 @@ function rintro(D){
   if (kg) kg.innerHTML = html;
 
   // ========== 2. 每日折线图：绿线=当日在线 / 蓝线=累计已投放 ==========
-  // 跟进表腰部×(在线+流失) brand_id 集合 —— 从 BS（已注入 tierManual/statusManual）取
+  // 蓝线口径对齐概览卡：跟进表腰部×(在线+流失) ∩ 日报类目∈餐饮
+  // 日报类目用 BS.cat4（来自品牌日报 四级类目名称）
   const followBids = new Set();
   (BS||[]).forEach(function(b){
     if (b && b.tierManual === '腰部'
         && (b.statusManual === '在线' || b.statusManual === '流失')
+        && INTRO_CATERING.has(b.cat4)
         && b.brandId != null){
       followBids.add(Number(b.brandId));
     }
