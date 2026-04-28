@@ -414,6 +414,10 @@ function rsop(){
     </div>
   </div>`;
 
+  // ⚠️ 新版 Tab 1 只保留 SOP 时间轴渲染, 后续四要素扫描/老客池/象限/补量测算/附录已删除对应容器
+  // 直接 return, 后面所有 DOM 操作都会因为容器不存在而报错
+  return;
+
   // === 四要素扫描 ===
   const S=SOP;
   const fv4=S.factors_v4||{};
@@ -474,9 +478,9 @@ function rsop(){
   const scrSPs=[...new Set(SCR.map(b=>b.sp))].sort();
   const scrOwners=[...new Set(SCR.map(b=>b.owner).filter(Boolean))].sort();
   const scrAssts=[...new Set(SCR.map(b=>b.assistant).filter(Boolean))].sort();
-  scrSPs.forEach(v=>{document.getElementById('scrSP').innerHTML+=`<option value="${v}">${v}</option>`});
-  scrOwners.forEach(v=>{document.getElementById('scrOwner').innerHTML+=`<option value="${v}">${v}</option>`});
-  scrAssts.forEach(v=>{document.getElementById('scrAsst').innerHTML+=`<option value="${v}">${v}</option>`});
+  scrSPs.forEach(v=>{var e=document.getElementById('scrSP');if(e)e.innerHTML+=`<option value="${v}">${v}</option>`});
+  scrOwners.forEach(v=>{var e=document.getElementById('scrOwner');if(e)e.innerHTML+=`<option value="${v}">${v}</option>`});
+  scrAssts.forEach(v=>{var e=document.getElementById('scrAsst');if(e)e.innerHTML+=`<option value="${v}">${v}</option>`});
 
   const _scrFbOpts={
     '经营模式':['会员占比超过50%','代金券投放中','准备切代金券投放','不接受代金券，计划下线','沟通确认后希望在线','沟通确认中','已沟通，未回复','已沟通，整改中'],
