@@ -76,10 +76,8 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
 <div class="hdr" style="position:sticky;top:0;z-index:900;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><h1>🍜 餐饮服务商 · 运营看板</h1><p>数据 <span id="hdrDataDate">加载中...</span> · v6.0 重构版</p></div><div style="padding:4px 8px"><select id="dateSelector" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px"></select></div></div><div class="W">
 <div class="tabs">
   <button class="tab on" onclick="stab(0)">📈 引入进度</button>
-  <button class="tab" onclick="stab(1)">⭐ 四要素达标</button>
-  <button class="tab" onclick="stab(2)">📌 置顶情况</button>
-  <button class="tab" onclick="stab(3)">🎫 活动明细</button>
-  <button class="tab" onclick="stab(4)">📎 附录</button>
+  <button class="tab" onclick="stab(1)">🎯 运营策略</button>
+  <button class="tab" onclick="stab(2)">🎫 活动明细</button>
 </div>
 
 <!-- ========== Tab 0: 引入进度（引入概览 + SP 达成度） ========== -->
@@ -112,35 +110,42 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
   </div>
 </div>
 
-<!-- ========== Tab 1: 四要素达标（占位，下一步实现）========== -->
+<!-- ========== Tab 1: 运营策略（SOP + 引入前四要素 + 引入后置顶）========== -->
 <div class="P" id="t1">
-  <div class="S"><div class="ST">🎯 整体目标</div><div class="kg" id="sopTgt"></div></div>
-  <div class="S"><div class="ST">🔍 运营SOP</div><div class="sop-card" id="sopCard"></div></div>
-  <div class="S"><div id="sopFactors"></div></div>
-  <div class="S"><div class="ST">👥 老客基数排查 <span id="hdrCustPoolCnt" style="font-size:11px;font-weight:400;color:var(--x4)"></span></div><div id="sopCustPool"></div></div>
-  <div class="S"><div class="ST">🎯 达标但未存活品牌分析 <span id="hdrQuadrantCnt" style="font-size:11px;font-weight:400;color:var(--x4)"></span></div><div id="sopQuadrant"></div></div>
-  <div class="S"><div class="ST">📈 补充流量提升测算 <span style="font-size:11px;font-weight:400;color:var(--x4)">← 基于象限C/D品牌</span></div><div id="sopBoost"></div></div>
-  <div class="S"><div class="ST">📎 SOP 附录</div><div id="sopAppendix"></div></div>
-</div>
+  <!-- SOP 时间轴（保留原）-->
+  <div class="S"><div class="ST">🔍 运营 SOP</div><div class="sop-card" id="sopCard"></div></div>
 
-<!-- ========== Tab 2: 置顶情况（占位，下一步实现）========== -->
-<div class="P" id="t2">
-  <div class="S"><div class="ST">🔝 置顶概览</div><div id="topOverview" style="padding:12px;color:#94a3b8">待实现</div></div>
-  <div class="S"><div class="ST">⚠️ 预警</div><div id="topAlerts" style="padding:12px;color:#94a3b8">待实现</div></div>
-  <div class="S"><div class="ST">📊 置顶流量分析</div><div id="topFlow" style="padding:12px;color:#94a3b8">老客数据待恢复后接入</div></div>
-</div>
-
-<!-- ========== Tab 3: 活动明细（iframe）========== -->
-<div class="P" id="t3">
-  <div style="margin:-8px 0 8px 0;font-size:11px;color:#64748b">📌 活动明细实时看板（来自 <code>act-temp.pages.dev</code>）</div>
-  <iframe src="https://act-temp.pages.dev/" style="width:100%;height:calc(100vh - 180px);min-height:680px;border:0;border-radius:6px;background:#fff"></iframe>
-</div>
-
-<!-- ========== Tab 4: 附录（原要素检查明细 + 活动转化明细）========== -->
-<div class="P" id="t4">
-  <div class="S"><div class="ST">📋 要素检查明细</div></div>
+  <!-- ========== 板块 A · 引入前 · 四要素检查 ========== -->
   <div class="S">
-<div class="fb"><span class="fl">筛选</span><select id="fSP" onchange="rbt()"><option value="">服务商</option></select><select id="fOwner" onchange="rbt()"><option value="">负责人</option></select><select id="fAsst" onchange="rbt()"><option value="">助理</option></select><select id="fCat" onchange="rbt()"><option value="">类目</option></select><select id="fTier" onchange="rbt()"><option value="">分层</option><option value="KA">KA</option><option value="腰部">腰部</option><option value="尾部">尾部</option></select><select id="fSt" onchange="rbt()"><option value="">存活状态</option><option value="alive">存活</option><option value="dead">未存活</option></select><select id="fOnline" onchange="rbt()"><option value="">在线状态</option><option value="online">在线</option><option value="pending">在线待确认</option><option value="nodata">未更新</option><option value="lost">流失</option></select><select id="fScr" onchange="rbt()"><option value="">筛选维度</option><option value="biz_f">经营模式❌</option><option value="price_f">货盘⚠️</option><option value="infra_f">基建⚠️</option><option value="traffic_f">流量⚠️</option><option value="all_p">全达标✅</option><option value="no_data">无数据</option></select><input id="fQ" type="text" placeholder="搜索品牌" oninput="rbt()" style="width:100px"><button onclick="document.querySelectorAll('#t4 select').forEach(s=>s.value='');document.getElementById('fQ').value='';document.getElementById('fVal').value='';document.getElementById('fMetric').value='';rbt()" style="padding:5px 8px;border:1px solid var(--r);border-radius:5px;background:var(--r1);color:var(--r);font-size:10px;font-weight:600;cursor:pointer">一键清除</button></div>
+    <div class="ST">📦 A · 引入前 · 四要素检查 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:8px">口径：腰部 × 餐饮 × 当日在线</span></div>
+    <!-- A-1 总览 4 卡 -->
+    <div id="fcKg" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px"></div>
+    <!-- A-2 人工打标三层折叠（占位，下一步实现）-->
+    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:12px">
+      <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:8px">🏷 人工打标明细</div>
+      <div id="fcMarkMatrix" style="color:#94a3b8;font-size:12px;padding:16px;text-align:center;background:#f8fafc;border-radius:6px">三层折叠矩阵 — 待实现</div>
+    </div>
+  </div>
+
+  <!-- ========== 板块 B · 引入后 · 达标商户置顶 ========== -->
+  <div class="S">
+    <div class="ST">📦 B · 引入后 · 达标商户置顶</div>
+    <!-- B-1 总览 4 卡（占位）-->
+    <div id="pinKg" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px;color:#94a3b8;font-size:12px;padding:16px;text-align:center;background:#f8fafc;border-radius:6px">置顶总览 — 待实现</div>
+    <!-- B-2 象限图 + 数据源 tab（占位）-->
+    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:12px">
+      <div id="pinQuadrant" style="color:#94a3b8;font-size:12px;padding:16px;text-align:center">象限图 + mock 数据源 tab — 待实现</div>
+    </div>
+    <!-- B-3 品牌卡片池（占位）-->
+    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:12px">
+      <div id="pinBrandCards" style="color:#94a3b8;font-size:12px;padding:16px;text-align:center">品牌卡片池（KA 摇优惠同构）— 待实现</div>
+    </div>
+  </div>
+
+  <!-- ========== 全量失分品牌底表（迁自原 t4 附录）========== -->
+  <div class="S"><div class="ST">📋 全量失分品牌底表 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:8px">A-2 第三层 · 支持筛选/搜索/编辑/写回 Supabase</span></div></div>
+  <div class="S">
+<div class="fb"><span class="fl">筛选</span><select id="fSP" onchange="rbt()"><option value="">服务商</option></select><select id="fOwner" onchange="rbt()"><option value="">负责人</option></select><select id="fAsst" onchange="rbt()"><option value="">助理</option></select><select id="fCat" onchange="rbt()"><option value="">类目</option></select><select id="fTier" onchange="rbt()"><option value="">分层</option><option value="KA">KA</option><option value="腰部">腰部</option><option value="尾部">尾部</option></select><select id="fSt" onchange="rbt()"><option value="">存活状态</option><option value="alive">存活</option><option value="dead">未存活</option></select><select id="fOnline" onchange="rbt()"><option value="">在线状态</option><option value="online">在线</option><option value="pending">在线待确认</option><option value="nodata">未更新</option><option value="lost">流失</option></select><select id="fScr" onchange="rbt()"><option value="">筛选维度</option><option value="biz_f">经营模式❌</option><option value="price_f">货盘⚠️</option><option value="infra_f">基建⚠️</option><option value="traffic_f">流量⚠️</option><option value="all_p">全达标✅</option><option value="no_data">无数据</option></select><input id="fQ" type="text" placeholder="搜索品牌" oninput="rbt()" style="width:100px"><button onclick="document.querySelectorAll('#t1 select').forEach(s=>s.value='');document.getElementById('fQ').value='';document.getElementById('fVal').value='';document.getElementById('fMetric').value='';rbt()" style="padding:5px 8px;border:1px solid var(--r);border-radius:5px;background:var(--r1);color:var(--r);font-size:10px;font-weight:600;cursor:pointer">一键清除</button></div>
 <div class="fb"><span class="fl">数值</span><select id="fMetric"><option value="">指标</option><option value="miniApp">小程序渗透</option><option value="priceForce">价格力</option><option value="storeComplete">门店完整度</option><option value="txPerStore">1店几笔</option><option value="e21Ratio">二选一曝光</option><option value="visitUseRate">到店核销率</option></select><select id="fOp"><option value="lt">&lt;</option><option value="lte">≤</option><option value="gt">&gt;</option><option value="gte">≥</option></select><input id="fVal" type="number" placeholder="值" style="width:55px"><button onclick="rbt()" style="padding:5px 8px;border:1px solid var(--b);border-radius:5px;background:var(--b1);color:var(--b);font-size:10px;font-weight:600;cursor:pointer">筛选</button><button onclick="document.getElementById('fMetric').value='';document.getElementById('fVal').value='';rbt()" style="padding:5px 6px;border:1px solid var(--x3);border-radius:5px;background:#fff;color:var(--x6);font-size:10px;cursor:pointer">清除</button></div>
 <div class="tw"><table id="bTbl"><thead>
 <tr>
@@ -161,23 +166,12 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
 </tr>
 </thead><tbody></tbody></table></div>
 <div id="bCnt" style="font-size:10px;color:var(--x4);margin-top:3px"></div></div>
+</div>
 
-  <div class="S"><div class="ST">🔄 活动转化明细</div>
-<div style="font-size:10px;color:var(--x5);margin:8px 0">日均数据。曝光(w万) 核销(绝对值)。点击展开活动，占比=活动÷品牌整体。</div>
-<div class="fb"><span class="fl">筛选</span><select id="cSP" onchange="rconv()"><option value="">服务商</option></select><select id="cCat" onchange="rconv()"><option value="">类目</option></select><select id="cTier" onchange="rconv()"><option value="">分层</option><option value="KA">KA</option><option value="腰部">腰部</option><option value="尾部">尾部</option></select><select id="cAlive" onchange="rconv()"><option value="">全部</option><option value="1">存活</option><option value="0">未存活</option></select><input id="cQ" type="text" placeholder="搜索品牌" oninput="clearTimeout(window._cdbT);window._cdbT=setTimeout(rconv,300)" style="width:100px"><button onclick="exportActCSV()" style="margin-left:8px;padding:5px 14px;background:#2563eb;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.1)">📥 导出活动CSV</button></div>
-<div class="tw"><table id="cTbl"><thead>
-<tr><th rowspan="2" style="width:32px"><input type="checkbox" onchange="toggleAllExp(this)" title="全选/取消" style="cursor:pointer;vertical-align:middle"></th><th rowspan="2" onclick="csrt('name')">品牌⇅</th><th rowspan="2">品牌ID</th><th rowspan="2" onclick="csrt('cat4')">类目⇅</th><th rowspan="2" onclick="csrt('sp')">服务商⇅</th><th rowspan="2" onclick="csrt('tier')">分层⇅</th><th rowspan="2">存活</th><th rowspan="2" class="nc" onclick="csrt('dailyTx')">日均交易(w)⇅</th>
-<th class="nc" colspan="5" style="background:var(--x6);color:#fff;text-align:center">整体</th>
-<th class="nc" colspan="5" style="background:#4a7ab5;color:#fff;text-align:center">二选一</th>
-<th class="nc" colspan="5" style="background:var(--x5);color:#fff;text-align:center">周边</th>
-<th class="nc" colspan="5" style="background:var(--x4);color:#fff;text-align:center">支付有礼</th></tr>
-<tr>
-<th class="nc" onclick="csrt('dExpW')">曝光(w)⇅</th><th class="nc" onclick="csrt('dClaimW')">领取(w)⇅</th><th class="nc" onclick="csrt('dUse')">核销⇅</th><th class="nc" onclick="csrt('expUseR')">曝光核销率⇅</th><th class="nc" onclick="csrt('wExp')">曝光环比⇅</th>
-<th class="nc" onclick="csrt('e21ExpW')">曝光⇅</th><th class="nc" onclick="csrt('e21Use')">核销⇅</th><th class="nc">曝光占比</th><th class="nc">核销占比</th><th class="nc" onclick="csrt('e21EUR')">曝光核销率⇅</th>
-<th class="nc" onclick="csrt('nbExpW')">曝光⇅</th><th class="nc" onclick="csrt('nbUse')">核销⇅</th><th class="nc">曝光占比</th><th class="nc">核销占比</th><th class="nc" onclick="csrt('nbEUR')">曝光核销率⇅</th>
-<th class="nc" onclick="csrt('payExpW')">曝光⇅</th><th class="nc" onclick="csrt('payUse')">核销⇅</th><th class="nc">曝光占比</th><th class="nc">核销占比</th><th class="nc" onclick="csrt('payEUR')">曝光核销率⇅</th>
-</tr></thead><tbody></tbody></table></div>
-<div id="cCnt" style="font-size:10px;color:var(--x4);margin-top:3px"></div></div>
+<!-- ========== Tab 2: 活动明细（iframe）========== -->
+<div class="P" id="t2">
+  <div style="margin:-8px 0 8px 0;font-size:11px;color:#64748b">📌 活动明细实时看板（来自 <code>act-temp.pages.dev</code>）</div>
+  <iframe src="https://act-temp.pages.dev/" style="width:100%;height:calc(100vh - 180px);min-height:680px;border:0;border-radius:6px;background:#fff"></iframe>
 </div>
 
 <script>/**
@@ -378,11 +372,12 @@ function Pct(n,d){if(!n||!d||d===0)return'—';return(n/d*100).toFixed(1)+'%'}
 function quadDetail(id){const el=document.getElementById(id);if(el)el.style.display=el.style.display==='none'?'block':'none'}
 
 function rsop(){
+  const _setById=(id,html)=>{var el=document.getElementById(id);if(el)el.innerHTML=html;};
   const onl=W.filter(b=>b.statusManual==='在线'),lost=W.filter(b=>b.statusManual==='流失'),alv=onl.filter(b=>b.isAlive===true);
   const sr=onl.length?(alv.length/onl.length*100).toFixed(1):'0';
   const prog=(W.length/F.totalTarget*100).toFixed(1);
   const srProg=Math.min(parseFloat(sr)/50*100,100).toFixed(0);
-  document.getElementById('sopTgt').innerHTML=`
+  (document.getElementById('sopTgt')||{innerHTML:''}).innerHTML=`
     <div class="kc cb"><div class="kl">引入目标</div><div class="kv">${F.totalTarget}</div><div class="ks">腰部商户</div></div>
     <div class="kc cb"><div class="kl">已投放</div><div class="kv">${SOP.waist_total}</div><div class="ks">腰部 · 在线${SOP.waist_online}+流失${SOP.waist_lost}</div><div class="pb"><div class="pf pf-b" style="width:${Math.min(prog,100)}%"></div></div><div class="pt">${prog}%</div></div>
     <div class="kc cb"><div class="kl">在线</div><div class="kv">${onl.length}</div><div class="ks">腰部商户</div></div>
@@ -393,8 +388,8 @@ function rsop(){
   // 动态填充区块标题
   const _fv4=SOP.factors_v4||{}, _cp=SOP.cust_pool||{}, _q=SOP.quadrant||{};
   var _hfc=document.getElementById('hdrFactorsCnt');if(_hfc)_hfc.textContent=(_fv4.total||'—')+'个在线腰部餐饮品牌';
-  document.getElementById('hdrCustPoolCnt').textContent='← 可保留（全达标+人工打标）未存活的'+(_cp.total||'—')+'个品牌';
-  document.getElementById('hdrQuadrantCnt').textContent='← 老客池子充足的'+(_q.total||'—')+'个品牌';
+  var _hcp=document.getElementById('hdrCustPoolCnt');if(_hcp)_hcp.textContent='← 可保留（全达标+人工打标）未存活的'+(_cp.total||'—')+'个品牌';
+  var _hq=document.getElementById('hdrQuadrantCnt');if(_hq)_hq.textContent='← 老客池子充足的'+(_q.total||'—')+'个品牌';
 
   // SOP timeline（不变）
   document.getElementById('sopCard').innerHTML=`<div class="sop-timeline">
@@ -436,7 +431,7 @@ function rsop(){
       </div>
       <div style="padding:10px 18px 14px;background:var(--x0);border-top:1px solid var(--x2);font-size:11px;color:var(--x6);line-height:1.6">🔧 后续跟进：${followUp}</div>
     </div>`}
-  document.getElementById('sopFactors').innerHTML=`
+  (document.getElementById('sopFactors')||{innerHTML:''}).innerHTML=`
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
       <div style="font-size:14px;font-weight:700;color:#1e293b">📊 腰部品牌四要素扫描</div>
       <div style="font-size:11px;background:#dbeafe;color:#1e40af;padding:3px 10px;border-radius:10px">${fv4.total} 个在线品牌</div>
@@ -926,7 +921,7 @@ function rsop(){
   const avgEUR=sumExp>0?(sumUse*7/sumExp*100).toFixed(2):'—';
   cpOkRows+=`<tr style="font-weight:700;background:var(--x1)"><td>合计/均值</td><td></td><td></td><td></td><td></td><td class="nc">${sumDtx.toLocaleString()}</td><td></td><td class="nc" style="background:#dbeafe">${sumApp.toLocaleString()}</td><td class="nc" style="background:#dbeafe">${sumExp.toLocaleString()}</td><td class="nc" style="background:#dbeafe">${avgRate}%</td><td class="nc" style="background:#dbeafe">${sumUse.toFixed(0)}</td><td class="nc" style="background:#dbeafe">${avgEUR}%</td></tr>`;
 
-  document.getElementById('sopCustPool').innerHTML=`
+  (document.getElementById('sopCustPool')||{innerHTML:''}).innerHTML=`
     <div style="font-size:12px;color:var(--x6);margin-bottom:12px">可保留（全达标+人工打标）未存活的 <b>${CP.total}个</b> 品牌，排查老客基数是否支撑1:1曝光目标</div>
     <div style="font-size:11px;color:var(--x5);margin-bottom:14px">排查口径：二选一应曝老客UV（近7日高频+低频）/ 日均交易笔数 ≥ 1</div>
     <div style="display:flex;gap:14px;margin-bottom:14px">
@@ -965,7 +960,7 @@ function rsop(){
   const Q=S.quadrant||{}, QS=Q.summary||{}, QR=Q.results||[];
   const qA=QS.A||{count:0},qB=QS.B||{count:0},qC=QS.C||{count:0},qD=QS.D||{count:0},qX=QS.X||{count:0};
 
-  document.getElementById('sopQuadrant').innerHTML=`
+  (document.getElementById('sopQuadrant')||{innerHTML:''}).innerHTML=`
     <div style="font-size:12px;color:var(--x5);margin-bottom:16px">可保留（全达标+人工打标）、老客池子充足但未存活的 <b style="color:var(--x7)">${Q.total}个</b> 品牌，按老客曝光充分度和曝光核销率分为四个象限：</div>
     <div style="max-width:860px;margin:0 auto">
       <!-- 上半：曝光充足 → B(左,低核销) + A(右,高核销) -->
@@ -1042,7 +1037,7 @@ function rsop(){
     const cap=r.was_capped?' ✂️':'';
     aliveTable+=`<tr><td>${r.name}</td><td>${r.brandId||'—'}</td><td>${r.cat4}</td><td class="nc">${N(r.daily_tx)}</td><td class="nc">${r.cur_exp.toFixed(0)}</td><td class="nc">${eur}${cap}</td><td class="nc">${r.cur_all.toFixed(0)}</td><td class="nc" style="color:var(--g);font-weight:700">${r.new_all.toFixed(0)}</td><td class="nc" style="color:var(--g);font-weight:700">+${r.all_delta.toFixed(0)}</td></tr>`});
 
-  document.getElementById('sopBoost').innerHTML=`
+  (document.getElementById('sopBoost')||{innerHTML:''}).innerHTML=`
     <div style="font-size:12px;color:var(--x6);margin-bottom:14px;line-height:1.7">假设每个品牌的日均老客曝光补到 : 日均交易笔数 = 1:1，老客二选一曝光核销率保持当前水平（因日均老客尽曝UV少造成曝光核销率异常高的，按20%封顶），其他渠道核销不变。</div>
     <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:22px">
       <div style="flex:1;min-width:240px;background:#fff;border-radius:10px;box-shadow:var(--s);padding:22px;position:relative;overflow:hidden">
@@ -1113,7 +1108,7 @@ function rsop(){
   function cR(st,k){const s=st[k]||{};if(s.med==null)return'<td style="text-align:center">—</td>';const mv=(s.med*100).toFixed(1);const av=(s.avg*100).toFixed(1);return`<td style="text-align:center">中位<b>${mv}</b>%<br><span style="font-size:9px;color:var(--x4)">均${av}% n=${s.n}</span></td>`}
   const refHtml=`<div class="tw" style="margin-top:8px"><table class="ref"><thead><tr><th class="h0" rowspan="2" style="text-align:center"></th><th class="h1" style="text-align:center">经营模式</th><th class="h1" style="text-align:center">货盘</th><th class="h1" style="text-align:center">基建</th><th class="h2" colspan="5" style="text-align:center">上线后</th></tr><tr><th class="h1" style="text-align:center">小程序渗透</th><th class="h1" style="text-align:center">价格力</th><th class="h1" style="text-align:center">1店几笔</th><th class="h2" style="text-align:center">1店几曝(二选一)</th><th class="h2" style="text-align:center">老客应曝尽曝率</th><th class="h2" style="text-align:center">老客二选一曝光占比</th><th class="h2" style="text-align:center">二选一曝光核销率</th><th class="h2" style="text-align:center">到店核销率</th></tr></thead><tbody><tr class="ra"><td style="text-align:center;font-weight:700;background:#fff!important">✅ 存活</td>${c(S.alive_stats,'miniApp','%')}${c(S.alive_stats,'priceForce','%')}${c(S.alive_stats,'txPerStore','')}${c(S.alive_stats,'expPerStore','')}${cR(S.alive_stats,'custAppRate')}${c(S.alive_stats,'e21Ratio','%')}${c(S.alive_stats,'e21EUR','%')}${c(S.alive_stats,'visitUseRate','%')}</tr><tr class="rd"><td style="text-align:center;font-weight:700;background:#fff!important">❌ 未存活</td>${c(S.dead_stats,'miniApp','%')}${c(S.dead_stats,'priceForce','%')}${c(S.dead_stats,'txPerStore','')}${c(S.dead_stats,'expPerStore','')}${cR(S.dead_stats,'custAppRate')}${c(S.dead_stats,'e21Ratio','%')}${c(S.dead_stats,'e21EUR','%')}${c(S.dead_stats,'visitUseRate','%')}</tr></tbody></table></div>`;
 
-  document.getElementById('sopAppendix').innerHTML=`
+  (document.getElementById('sopAppendix')||{innerHTML:''}).innerHTML=`
     <div class="qa" style="margin-bottom:14px">
       <div class="qa-q">📋 腰部品牌指标水位（中位数 & 均值）</div>
       ${refHtml}
@@ -1532,6 +1527,44 @@ function rintro(D){
   });
 }
 
+// ========== Tab 1 · A-1 · 四要素检查总览 4 卡 ==========
+function rfc(){
+  const el = document.getElementById('fcKg');
+  if (!el) return;
+  // 口径：腰部 × 餐饮
+  const wc = (BS||[]).filter(b => b.tierManual === '腰部' && INTRO_CATERING.has(b.cat4));
+  // 在线（品牌日报 online_today）
+  const online = wc.filter(b => b.onlineToday === true);
+  // 系统全达标：四要素 bizOk/priceOk/infraOk/trafficOk 全为 true
+  const allPass = online.filter(b => b.bizOk===true && b.priceOk===true && b.infraOk===true && b.trafficOk===true);
+  // 人工打标：_fbCache 里 brandId_screen_biz/price/infra/store 任一有值
+  const hasMark = function(b){
+    const bid = b.brandId;
+    if (!bid) return false;
+    return !!(_fbCache[bid+'_screen_biz'] || _fbCache[bid+'_screen_price']
+           || _fbCache[bid+'_screen_infra'] || _fbCache[bid+'_screen_store']);
+  };
+  const manual = online.filter(b => !allPass.includes(b) && hasMark(b));
+  // 整改中：在线 - 系统全达标 - 人工打标
+  const pending = online.filter(b => !allPass.includes(b) && !hasMark(b));
+
+  const card = function(label, icon, value, unit, sub, color){
+    return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px 18px">' +
+      '<div style="font-size:12px;color:#64748b;font-weight:600">'+icon+' '+label+'</div>' +
+      '<div style="font-size:32px;font-weight:800;color:'+(color||'#1e293b')+';margin-top:6px;line-height:1.1">' +
+        value + (unit ? '<span style="font-size:14px;color:#94a3b8;font-weight:500;margin-left:4px">'+unit+'</span>' : '') +
+      '</div>' + (sub ? '<div style="font-size:11px;color:#94a3b8;margin-top:6px">'+sub+'</div>' : '') +
+    '</div>';
+  };
+
+  let html = '';
+  html += card('在线',       '📡', online.length,  '家', '腰部 × 餐饮 × 日报在线', '#059669');
+  html += card('系统全达标', '✅', allPass.length, '家', '四要素 biz/price/infra/traffic 全 OK', '#16a34a');
+  html += card('人工打标',   '🏷', manual.length,  '家', '四要素失分但经人工打标（可保留/待跟进等）', '#d97706');
+  html += card('整改中',     '⚠️', pending.length, '家', '理论趋零 → 等待运营反馈', '#dc2626');
+  el.innerHTML = html;
+}
+
 let curS=null,sortD=1;function srt(f){if(curS===f)sortD*=-1;else{curS=f;sortD=1};rbt()}
 function rbt(){const fSP=document.getElementById('fSP').value,fOwner=document.getElementById('fOwner').value,fAsst=document.getElementById('fAsst').value,fCat=document.getElementById('fCat').value,fTier=document.getElementById('fTier').value,fSt=document.getElementById('fSt').value,fOnline=document.getElementById('fOnline').value,fScr=document.getElementById('fScr').value,fQ=document.getElementById('fQ').value.toLowerCase(),fM=document.getElementById('fMetric').value,fOp=document.getElementById('fOp').value,fVr=document.getElementById('fVal').value,fVn=fVr!==''?parseFloat(fVr):null;
 let fl=BS.filter(b=>{if(b.displayLevel==='ka_self')return false;if(fSP&&b.spMapped!==fSP)return false;if(fOwner&&b.owner!==fOwner)return false;if(fAsst&&b.assistant!==fAsst)return false;if(fCat&&b.cat4!==fCat)return false;if(fTier&&b.tierManual!==fTier)return false;if(fSt==='alive'&&b.isAlive!==true)return false;if(fSt==='dead'&&b.isAlive!==false)return false;if(fOnline==='online'&&b.onlineStatus!=='在线')return false;if(fOnline==='pending'&&b.onlineStatus!=='在线待确认')return false;if(fOnline==='nodata'&&b.onlineStatus!=='未更新')return false;if(fOnline==='lost'&&b.statusManual!=='流失')return false;if(fScr==='biz_f'&&b.bizOk!==false)return false;if(fScr==='price_f'&&b.priceOk!==false)return false;if(fScr==='infra_f'&&b.infraOk!==false)return false;if(fScr==='traffic_f'&&b.trafficOk!==false)return false;if(fScr==='all_p'&&!(b.bizOk===true&&b.priceOk===true&&b.infraOk===true&&b.trafficOk===true))return false;if(fScr==='no_data'&&b.hasDailyData)return false;if(fQ&&!b.name.toLowerCase().includes(fQ))return false;if(fM&&fVn!==null){const v=b[fM];if(v==null)return false;if(fOp==='lt'&&!(v<fVn))return false;if(fOp==='lte'&&!(v<=fVn))return false;if(fOp==='gt'&&!(v>fVn))return false;if(fOp==='gte'&&!(v>=fVn))return false}return true});
@@ -1583,7 +1616,7 @@ async function initDashboard(targetDate) {
     F=D.final,BS=F.brands,SPS=F.spSummary,SOP=D.sop,BC=D.bc,ACTS=D.acts;
 W=BS.filter(b=>b.tierManual==='腰部'),KA=BS.filter(b=>b.tierManual==='KA');
     actByBrand={};ACTS.forEach(a=>{const n=a.brandName;if(!actByBrand[n])actByBrand[n]=[];actByBrand[n].push(a)});
-const ss=[...new Set(BS.map(b=>b.spMapped))].sort();['fSP','cSP'].forEach(id=>{const s=document.getElementById(id);ss.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o)})});[...new Set(BS.map(b=>b.owner).filter(Boolean))].sort().forEach(v=>{document.getElementById('fOwner').innerHTML+=`<option value="${v}">${v}</option>`});[...new Set(BS.map(b=>b.assistant).filter(Boolean))].sort().forEach(v=>{document.getElementById('fAsst').innerHTML+=`<option value="${v}">${v}</option>`});const catCnt={};BS.forEach(b=>{const c=b.cat4;if(c){catCnt[c]=(catCnt[c]||0)+1}});const cats=Object.keys(catCnt).filter(c=>catCnt[c]>=3).sort();['fCat','cCat'].forEach(id=>{const s=document.getElementById(id);cats.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v+' ('+catCnt[v]+')';s.appendChild(o)})});rsop();rov();rintro(D);rbt();rconv();document.getElementById('loading').style.display='none'
+const ss=[...new Set(BS.map(b=>b.spMapped))].sort();['fSP'].forEach(id=>{const s=document.getElementById(id);if(!s)return;ss.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o)})});[...new Set(BS.map(b=>b.owner).filter(Boolean))].sort().forEach(v=>{const s=document.getElementById('fOwner');if(s)s.innerHTML+=`<option value="${v}">${v}</option>`});[...new Set(BS.map(b=>b.assistant).filter(Boolean))].sort().forEach(v=>{const s=document.getElementById('fAsst');if(s)s.innerHTML+=`<option value="${v}">${v}</option>`});const catCnt={};BS.forEach(b=>{const c=b.cat4;if(c){catCnt[c]=(catCnt[c]||0)+1}});const cats=Object.keys(catCnt).filter(c=>catCnt[c]>=3).sort();['fCat'].forEach(id=>{const s=document.getElementById(id);if(!s)return;cats.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v+' ('+catCnt[v]+')';s.appendChild(o)})});rsop();rov();rintro(D);rfc();rbt();document.getElementById('loading').style.display='none'
 
     // ── 活动明细数据延迟加载（原 Tab2 → 现附录 Tab4）──
     const tabBtns = document.querySelectorAll('.tab');
