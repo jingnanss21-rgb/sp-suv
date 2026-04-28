@@ -399,7 +399,7 @@ function rsop(){
   (document.getElementById('fcScrHost')||{innerHTML:''}).innerHTML=`
     <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-        <div style="font-size:13px;font-weight:700;color:#1e293b">📋 四要素待排查商户清单 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:4px">（${(S.screen_brands||[]).length} 个）</span></div>
+        <div style="font-size:13px;font-weight:700;color:#1e293b">📋 四要素待排查商户清单 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:4px">（<span id="scrHdrCnt">—</span> 个 · 口径 腰部×餐饮×日报在线）</span></div>
       </div>
       <div style="margin-bottom:10px">
         <div class="fb"><span class="fl">筛选</span>
@@ -504,7 +504,15 @@ function rsop(){
     const fAsst=document.getElementById('scrAsst').value;
     const fIssue=document.getElementById('scrIssue').value;
     const fQ=(document.getElementById('scrQ').value||'').toLowerCase();
+    // 对齐 Tab 0 / A-1 口径: tierManual=腰部 ∩ 餐饮 ∩ 日报 online_today=true
+    // screen_brands 本身 tierManual/online_today 为空, 从 BS 按 brandId 补
+    const _bsMap={};(BS||[]).forEach(function(x){if(x&&x.brandId!=null)_bsMap[String(x.brandId)]=x;});
     let fl=SCR.filter(b=>{
+      if(!INTRO_CATERING.has(b.cat4))return false; // 过滤餐饮类目
+      const bs=_bsMap[String(b.brandId)];
+      if(!bs)return false;
+      if(bs.tierManual!=='腰部')return false;
+      if(bs.onlineToday!==true)return false;
       if(fSP&&b.sp!==fSP)return false;
       if(fOwner&&b.owner!==fOwner)return false;
       if(fAsst&&b.assistant!==fAsst)return false;
@@ -545,6 +553,7 @@ function rsop(){
       </tr>`;
     });
     document.getElementById('scrCnt').textContent=fl.length+'/'+SCR.length+' 品牌';
+    var _sh=document.getElementById('scrHdrCnt');if(_sh)_sh.textContent=fl.length;
     // 反馈汇总
     if(_fbLoaded){
       const bizC={},priceC={},infraC={};
