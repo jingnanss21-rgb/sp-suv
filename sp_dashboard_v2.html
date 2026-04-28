@@ -138,9 +138,8 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
   <!-- ========== 板块 B · 引入后 · 达标商户置顶 ========== -->
   <div class="S">
     <div class="ST">🎯 B · 上线后 · 达标商户置顶</div>
-    <!-- B-1 总览 2 卡 + 2 预警卡 -->
+    <!-- B-1 总览 2 卡 -->
     <div id="pinKg" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px"></div>
-    <div id="pinAlert" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px"></div>
     <!-- B-2 象限图 + 数据源 tab -->
     <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:12px">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px">
@@ -423,7 +422,7 @@ function rsop(){
     <details style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px">
       <summary style="cursor:pointer;list-style:none">
         <div style="display:flex;align-items:center;gap:10px">
-          <div style="font-size:13px;font-weight:700;color:#1e293b">📋 四要素待排查商户清单 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:4px">（<span id="scrHdrCnt">—</span> 个 · 口径 腰部×餐饮×日报在线）· 点击展开 ▾</span></div>
+          <div style="font-size:13px;font-weight:700;color:#1e293b">📋 商户反馈明细 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:4px">（<span id="scrHdrCnt">—</span> 个 · 口径 腰部×餐饮×日报在线）· 点击展开 ▾</span></div>
         </div>
       </summary>
       <div style="margin-top:12px">
@@ -1329,7 +1328,8 @@ function rintro(D){
   );
   // 已投放 = 跟进表 status ∈ {在线, 流失}
   const deployed = wc.filter(b => b.statusManual === '在线' || b.statusManual === '流失').length;
-  const lost = wc.filter(b => b.statusManual === '流失').length;
+  // 流失 = 已投放 - 当日在线（日报口径：跟进表腰部×餐饮投放池里今日不在线的）
+  const lost = deployed - wc.filter(b => b.onlineToday === true).length;
   const totalTarget = (F && F.totalTarget) || 800;
   const deployedPct = totalTarget > 0 ? (deployed/totalTarget*100) : 0;
 
@@ -1840,23 +1840,6 @@ function rpin(){
   html += card('达标已置顶', '🎯', passPinned.length,   '家', pinBarHtml, '#059669');
   html += card('达标未置顶', '⏳', passUnpinned.length, '家', '<div style="font-size:11px;color:#94a3b8;margin-top:6px">候补补位池 · 50 名额限制</div>', '#0891b2');
   el.innerHTML = html;
-
-  // 下方 2 预警卡（弱化样式，窄扁条）
-  const alertEl = document.getElementById('pinAlert');
-  if (alertEl){
-    const alertCard = function(icon, label, n, desc, color){
-      return '<div style="background:'+color+'10;border:1px solid '+color+'40;border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:12px">' +
-        '<div style="font-size:22px;font-weight:800;color:'+color+';min-width:36px;text-align:center">'+n+'</div>' +
-        '<div style="flex:1;min-width:0">' +
-          '<div style="font-size:12px;font-weight:600;color:'+color+'">'+icon+' '+label+'</div>' +
-          '<div style="font-size:11px;color:#64748b;margin-top:2px">'+desc+'</div>' +
-        '</div>' +
-      '</div>';
-    };
-    alertEl.innerHTML =
-      alertCard('⚠️','已置顶不达标', pinnedNotPass.length, '需要跟进品牌基建维护', '#d97706') +
-      alertCard('🔴','已置顶不在线', pinnedOffline.length, '需核对曝光和活动投放情况', '#dc2626');
-  }
 }
 
 // ========== Tab 1 · B-2 · 置顶流量象限图（含数据源 tab）==========
@@ -1954,17 +1937,24 @@ function rpinq(){
 
   if (points.length === 0){
     if (typeof echarts !== 'undefined' && _pinChart){ _pinChart.dispose(); _pinChart = null; }
-    el.innerHTML = '<div style="padding:60px;text-align:center;color:#94a3b8;font-size:13px">暂无可用数据点（已置顶 ' + pinnedOnline.length + ' 家，当前数据源下无数据）</div>';
-    if (emptyEl){
-      emptyEl.style.display = 'block';
-      if (_pinDataSource === 'realtime'){
-        emptyEl.innerHTML =
-          '<div style="font-weight:700;margin-bottom:4px">❗️ 暂无可用数据点（已置顶品牌 '+pinnedOnline.length+' 家，当前数据源下无「老客日均PV」数据）</div>' +
-          '<div style="margin-bottom:4px"><b>待排期：</b>老客日均曝光PV 字段暂无。</div>' +
-          '<div><b>待修复：</b>当前「老客7日累计UV」字段自 0420 起因产品 bug 缺失，尚未恢复，且无法体现日均曝光充分度。</div>';
-      } else {
-        emptyEl.innerHTML = '❗️ mock 数据源下也无可用数据点（0413-0419 期间该批品牌无老客UV数据）';
-      }
+    if (emptyEl){ emptyEl.style.display = 'none'; }
+    // 直接把醒目红框放到 pinQuadrant 画布正中央
+    if (_pinDataSource === 'realtime'){
+      el.innerHTML =
+        '<div style="display:flex;align-items:center;justify-content:center;height:100%;padding:20px">' +
+          '<div style="max-width:640px;background:#fef2f2;border:2px solid #fca5a5;border-radius:10px;padding:22px 26px;color:#991b1b;line-height:1.8;box-shadow:0 4px 12px rgba(239,68,68,0.12)">' +
+            '<div style="font-size:15px;font-weight:800;margin-bottom:10px">❗️ 暂无可用数据点（已置顶品牌 '+pinnedOnline.length+' 家，当前数据源下无「老客日均PV」数据）</div>' +
+            '<div style="font-size:12.5px;margin-bottom:4px"><b>待排期：</b>老客日均曝光PV 字段暂无。</div>' +
+            '<div style="font-size:12.5px"><b>待修复：</b>当前「老客7日累计UV」字段自 0420 起因产品 bug 缺失，尚未恢复，且无法体现日均曝光充分度。</div>' +
+          '</div>' +
+        '</div>';
+    } else {
+      el.innerHTML =
+        '<div style="display:flex;align-items:center;justify-content:center;height:100%;padding:20px">' +
+          '<div style="max-width:520px;background:#fef2f2;border:2px solid #fca5a5;border-radius:10px;padding:20px 24px;color:#991b1b;line-height:1.7">' +
+            '<div style="font-size:14px;font-weight:700">❗️ mock 数据源下也无可用数据点（0413-0419 期间该批品牌无老客UV数据）</div>' +
+          '</div>' +
+        '</div>';
     }
     return;
   }
