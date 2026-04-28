@@ -1379,7 +1379,7 @@ function rintro(D){
     return '';
   };
   _introChart.setOption({
-    grid: {left: 52, right: 56, top: 32, bottom: 36},
+    grid: {left: 52, right: 56, top: 42, bottom: 36},
     tooltip: {
       trigger: 'axis',
       formatter: function(params){
@@ -1411,7 +1411,7 @@ function rintro(D){
         name: '在线',
         position: 'left',
         nameTextStyle: {fontSize: 11, color: '#059669', fontWeight: 600, align: 'right'},
-        nameGap: 8,
+        nameGap: 14,
         axisLabel: {fontSize: 10, color: '#059669'},
         splitLine: {lineStyle: {color: '#e2e8f0', type: 'dashed'}},
         scale: true
@@ -1421,7 +1421,7 @@ function rintro(D){
         name: '已投放',
         position: 'right',
         nameTextStyle: {fontSize: 11, color: '#2563eb', fontWeight: 600, align: 'left'},
-        nameGap: 8,
+        nameGap: 14,
         axisLabel: {fontSize: 10, color: '#2563eb'},
         splitLine: {show: false},
         scale: true
