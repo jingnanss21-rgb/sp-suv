@@ -581,7 +581,7 @@ function rsop(){
         else{otherN++;otherList.push({name:b.name,rm:rm})}
       });
       function fbRows(items){return items.map(([k,v])=>`<tr><td style="padding:3px 8px">${k}</td><td style="padding:3px 8px" class="nc"><b>${v}</b></td></tr>`).join('')}
-      document.getElementById('scrFbSummary').innerHTML=`<details>
+      (document.getElementById('scrFbSummary')||{innerHTML:''}).innerHTML=`<details>
         <summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--x6);margin-bottom:6px">📊 初步反馈汇总 ▾</summary>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:14px">
           <div style="background:#fff;border-radius:8px;box-shadow:var(--s);padding:14px">
@@ -870,7 +870,7 @@ function rsop(){
         mH+='</div>';
         mEl.innerHTML=mH;
       }
-      document.getElementById('scrFunnel').innerHTML='';
+      (document.getElementById('scrFunnel')||{innerHTML:''}).innerHTML='';
     }
     setTimeout(autoResizeAll,50);
   }
