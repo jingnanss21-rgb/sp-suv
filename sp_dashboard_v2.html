@@ -117,7 +117,7 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
 
   <!-- ========== 板块 A · 引入前 · 四要素检查 ========== -->
   <div class="S">
-    <div class="ST">📦 A · 引入前 · 四要素检查 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:8px">口径：腰部 × 餐饮 × 当日在线</span></div>
+    <div class="ST">📦 A · 上线前 · 四要素检查 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:8px">口径：腰部 × 餐饮 × 当日在线</span></div>
     <!-- A-1 总览 4 卡 -->
     <div id="fcKg" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px"></div>
     <!-- A-2 人工打标三层折叠（占位，下一步实现）-->
@@ -125,11 +125,13 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
       <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:8px">🏷 人工打标明细</div>
       <div id="fcMarkMatrix" style="color:#94a3b8;font-size:12px;padding:16px;text-align:center;background:#f8fafc;border-radius:6px">三层折叠矩阵 — 待实现</div>
     </div>
+    <!-- A-3 四要素待排查商户清单（保留原 scrTbl）-->
+    <div id="fcScrHost" style="margin-top:12px"></div>
   </div>
 
   <!-- ========== 板块 B · 引入后 · 达标商户置顶 ========== -->
   <div class="S">
-    <div class="ST">📦 B · 引入后 · 达标商户置顶</div>
+    <div class="ST">📦 B · 上线后 · 达标商户置顶</div>
     <!-- B-1 总览 4 卡（占位）-->
     <div id="pinKg" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px;color:#94a3b8;font-size:12px;padding:16px;text-align:center;background:#f8fafc;border-radius:6px">置顶总览 — 待实现</div>
     <!-- B-2 象限图 + 数据源 tab（占位）-->
@@ -142,30 +144,7 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
     </div>
   </div>
 
-  <!-- ========== 全量失分品牌底表（迁自原 t4 附录）========== -->
-  <div class="S"><div class="ST">📋 全量失分品牌底表 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:8px">A-2 第三层 · 支持筛选/搜索/编辑/写回 Supabase</span></div></div>
-  <div class="S">
-<div class="fb"><span class="fl">筛选</span><select id="fSP" onchange="rbt()"><option value="">服务商</option></select><select id="fOwner" onchange="rbt()"><option value="">负责人</option></select><select id="fAsst" onchange="rbt()"><option value="">助理</option></select><select id="fCat" onchange="rbt()"><option value="">类目</option></select><select id="fTier" onchange="rbt()"><option value="">分层</option><option value="KA">KA</option><option value="腰部">腰部</option><option value="尾部">尾部</option></select><select id="fSt" onchange="rbt()"><option value="">存活状态</option><option value="alive">存活</option><option value="dead">未存活</option></select><select id="fOnline" onchange="rbt()"><option value="">在线状态</option><option value="online">在线</option><option value="pending">在线待确认</option><option value="nodata">未更新</option><option value="lost">流失</option></select><select id="fScr" onchange="rbt()"><option value="">筛选维度</option><option value="biz_f">经营模式❌</option><option value="price_f">货盘⚠️</option><option value="infra_f">基建⚠️</option><option value="traffic_f">流量⚠️</option><option value="all_p">全达标✅</option><option value="no_data">无数据</option></select><input id="fQ" type="text" placeholder="搜索品牌" oninput="rbt()" style="width:100px"><button onclick="document.querySelectorAll('#t1 select').forEach(s=>s.value='');document.getElementById('fQ').value='';document.getElementById('fVal').value='';document.getElementById('fMetric').value='';rbt()" style="padding:5px 8px;border:1px solid var(--r);border-radius:5px;background:var(--r1);color:var(--r);font-size:10px;font-weight:600;cursor:pointer">一键清除</button></div>
-<div class="fb"><span class="fl">数值</span><select id="fMetric"><option value="">指标</option><option value="miniApp">小程序渗透</option><option value="priceForce">价格力</option><option value="storeComplete">门店完整度</option><option value="txPerStore">1店几笔</option><option value="e21Ratio">二选一曝光</option><option value="visitUseRate">到店核销率</option></select><select id="fOp"><option value="lt">&lt;</option><option value="lte">≤</option><option value="gt">&gt;</option><option value="gte">≥</option></select><input id="fVal" type="number" placeholder="值" style="width:55px"><button onclick="rbt()" style="padding:5px 8px;border:1px solid var(--b);border-radius:5px;background:var(--b1);color:var(--b);font-size:10px;font-weight:600;cursor:pointer">筛选</button><button onclick="document.getElementById('fMetric').value='';document.getElementById('fVal').value='';rbt()" style="padding:5px 6px;border:1px solid var(--x3);border-radius:5px;background:#fff;color:var(--x6);font-size:10px;cursor:pointer">清除</button></div>
-<div class="tw"><table id="bTbl"><thead>
-<tr>
-<th rowspan="2" onclick="srt('name')">品牌⇅</th><th rowspan="2">品牌ID</th><th rowspan="2">类目</th><th rowspan="2">服务商</th><th rowspan="2">负责人</th><th rowspan="2">助理</th><th rowspan="2">分层</th><th rowspan="2">公线</th><th rowspan="2">状态</th>
-<th class="nc" colspan="2" style="background:var(--x6);color:#fff;text-align:center">存活</th>
-<th class="nc" colspan="1" style="background:#4a7ab5;color:#fff;text-align:center">经营模式</th>
-<th class="nc" colspan="1" style="background:#4a7ab5;color:#fff;text-align:center">货盘</th>
-<th class="nc" colspan="4" style="background:#4a7ab5;color:#fff;text-align:center">基建</th>
-<th class="nc" colspan="6" style="background:var(--x5);color:#fff;text-align:center">曝光</th>
-<th rowspan="2">筛选</th><th rowspan="2" style="min-width:90px">备注</th>
-</tr>
-<tr>
-<th class="nc" onclick="srt('isAlive')">存活⇅</th><th class="nc" onclick="srt('survivalRate')">存活率⇅</th>
-<th class="nc" onclick="srt('miniApp')">小程序⇅</th>
-<th class="nc" onclick="srt('priceForce')">价格力⇅</th>
-<th class="nc" onclick="srt('storeCount')">门店数⇅</th><th class="nc" onclick="srt('storeComplete')">门店完整度⇅</th><th class="nc" onclick="srt('dailyTx')">日均交易(w)⇅</th><th class="nc" onclick="srt('txPerStore')">1店几笔⇅</th>
-<th class="nc" onclick="srt('e21ExpRatio')" title="=(商业支付+面对面+固定入口)日均曝光PV/整体日均曝光PV">二选一<br>曝光占比⇅</th><th class="nc" onclick="srt('e21Ratio')" title="=(高频应曝UV_二选一+低频应曝UV_二选一)/整体曝光(含二选一、支付有礼、周边)">老客二选一<br>曝光占比⇅</th><th class="nc" onclick="srt('hiRate_uv')">高频应曝尽曝⇅</th><th class="nc" onclick="srt('loRate_uv')">低频应曝尽曝⇅</th><th class="nc" onclick="srt('custAppRate')">老客应曝尽曝⇅</th><th class="nc" onclick="srt('e21EUR')">老客曝光核销率<span title="公式: 日均二选一核销PV / 日均二选一老客尽曝UV" style="cursor:help;margin-left:2px;font-size:10px;color:var(--x5)">ⓘ</span>⇅</th>
-</tr>
-</thead><tbody></tbody></table></div>
-<div id="bCnt" style="font-size:10px;color:var(--x4);margin-top:3px"></div></div>
+  <!-- （原 全量失分品牌底表 已删除, 由 A-3 scrTbl 替代）-->
 </div>
 
 <!-- ========== Tab 2: 活动明细（iframe）========== -->
@@ -414,38 +393,14 @@ function rsop(){
     </div>
   </div>`;
 
-  // ⚠️ 新版 Tab 1 只保留 SOP 时间轴渲染, 后续四要素扫描/老客池/象限/补量测算/附录已删除对应容器
-  // 直接 return, 后面所有 DOM 操作都会因为容器不存在而报错
-  return;
-
-  // === 四要素扫描 ===
+  // === 四要素待排查商户清单（保留原逻辑，仅注入到 #fcScrHost）===
   const S=SOP;
   const fv4=S.factors_v4||{};
-  function fCard(cat,metricDesc,n,total,color,followUp){
-    const w=total?(n/total*100).toFixed(0):0;
-    return`<div style="background:#fff;border-radius:10px;box-shadow:var(--s);overflow:hidden">
-      <div style="padding:6px 18px 5px;background:${color};color:#fff;font-size:13px;font-weight:700;letter-spacing:0.5px">${cat}</div>
-      <div style="padding:18px 18px 0">
-        <div style="font-size:12px;color:var(--x6);margin-bottom:8px">${metricDesc}</div>
-        <div style="display:flex;align-items:baseline;gap:8px;margin:8px 0">
-          <span style="font-size:34px;font-weight:800;color:${color}">${n}</span>
-          <span style="font-size:12px;color:var(--x5)">/ ${total}（${w}%）</span>
-        </div>
-        <div class="bar-track" style="height:10px;margin-bottom:14px"><div class="bar-fill" style="width:${w}%;background:${color};min-width:${n>0?'10px':'0'}"></div></div>
+  (document.getElementById('fcScrHost')||{innerHTML:''}).innerHTML=`
+    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div style="font-size:13px;font-weight:700;color:#1e293b">📋 四要素待排查商户清单 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:4px">（${(S.screen_brands||[]).length} 个）</span></div>
       </div>
-      <div style="padding:10px 18px 14px;background:var(--x0);border-top:1px solid var(--x2);font-size:11px;color:var(--x6);line-height:1.6">🔧 后续跟进：${followUp}</div>
-    </div>`}
-  (document.getElementById('sopFactors')||{innerHTML:''}).innerHTML=`
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-      <div style="font-size:14px;font-weight:700;color:#1e293b">📊 腰部品牌四要素扫描</div>
-      <div style="font-size:11px;background:#dbeafe;color:#1e40af;padding:3px 10px;border-radius:10px">${fv4.total} 个在线品牌</div>
-    </div>
-    <div id="sopMatrix"></div>
-    <div id="scrFunnel" style="margin-top:12px"></div>
-    <div id="scrFbSummary" style="margin-top:12px"></div>
-    <!-- 四要素排查清单 -->
-    <details style="margin-top:12px">
-      <summary style="cursor:pointer;font-size:13px;font-weight:700;color:var(--x7);margin-bottom:8px">📋 四要素待排查商户清单（${(S.screen_brands||[]).length}个）▾</summary>
       <div style="margin-bottom:10px">
         <div class="fb"><span class="fl">筛选</span>
           <select id="scrSP" onchange="renderScreen()"><option value="">服务商</option></select>
@@ -467,10 +422,27 @@ function rsop(){
         <th style="min-width:160px;background:#0d9488;color:#fff">0412-0417反馈</th>
       </tr></thead><tbody></tbody></table></div>
       <div id="scrCnt" style="font-size:10px;color:var(--x4);margin-top:3px"></div>
-    </details>
-    ${(()=>{const dm=S.data_missing_brands||[];if(!dm.length)return'';
-      let rows='';dm.forEach(b=>{rows+='<tr><td style="padding:4px 8px;font-weight:600">'+b.name+'</td><td style="padding:4px 8px">'+(b.brandId||'—')+'</td><td style="padding:4px 8px">'+(b.sp||'—')+'</td><td style="padding:4px 8px">'+(b.owner||'—')+'</td><td style="padding:4px 8px">'+(b.assistant||'—')+'</td><td style="padding:4px 8px">'+(b.cat4||'—')+'</td><td style="padding:4px 8px">'+(b.isAlive===true?'<span class="bd b-ok">存活</span>':(b.isAlive===false?'<span class="bd b-d">未存活</span>':'—'))+'</td><td style="padding:4px 8px" class="nc">'+(b.storeCount!=null?b.storeCount:'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.dailyTx?b.dailyTx.toLocaleString():'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.txPerStore!=null?b.txPerStore:'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.miniApp!=null?_P(b.miniApp):'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.priceForce!=null?(b.priceForce>0?'+':'')+_P(b.priceForce).replace('—',''):'—')+'</td></tr>'});
-      return '<details style="margin-top:12px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--x4);margin-bottom:6px">⚠️ 小程序交易占比无数据品牌（'+dm.length+'个）— 待日报更新 ▾</summary><div class="tw"><table style="width:100%;font-size:11px;border-collapse:collapse"><thead><tr style="background:var(--x0)"><th style="padding:5px 8px;text-align:left">品牌</th><th style="padding:5px 8px">品牌ID</th><th style="padding:5px 8px">服务商</th><th style="padding:5px 8px">负责人</th><th style="padding:5px 8px">助理</th><th style="padding:5px 8px">业态</th><th style="padding:5px 8px">存活</th><th style="padding:5px 8px" class="nc">门店数</th><th style="padding:5px 8px" class="nc">日均交易</th><th style="padding:5px 8px" class="nc">1店几笔</th><th style="padding:5px 8px" class="nc">小程序占比</th><th style="padding:5px 8px" class="nc">价格力</th></tr></thead><tbody>'+rows+'</tbody></table></div></details>'})()}`;
+      ${(()=>{const dm=S.data_missing_brands||[];if(!dm.length)return'';
+        let rows='';dm.forEach(b=>{rows+='<tr><td style="padding:4px 8px;font-weight:600">'+b.name+'</td><td style="padding:4px 8px">'+(b.brandId||'—')+'</td><td style="padding:4px 8px">'+(b.sp||'—')+'</td><td style="padding:4px 8px">'+(b.owner||'—')+'</td><td style="padding:4px 8px">'+(b.assistant||'—')+'</td><td style="padding:4px 8px">'+(b.cat4||'—')+'</td><td style="padding:4px 8px">'+(b.isAlive===true?'<span class="bd b-ok">存活</span>':(b.isAlive===false?'<span class="bd b-d">未存活</span>':'—'))+'</td><td style="padding:4px 8px" class="nc">'+(b.storeCount!=null?b.storeCount:'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.dailyTx?b.dailyTx.toLocaleString():'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.txPerStore!=null?b.txPerStore:'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.miniApp!=null?_P(b.miniApp):'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.priceForce!=null?(b.priceForce>0?'+':'')+_P(b.priceForce).replace('—',''):'—')+'</td></tr>'});
+        return '<details style="margin-top:12px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--x4);margin-bottom:6px">⚠️ 小程序交易占比无数据品牌（'+dm.length+'个）— 待日报更新 ▾</summary><div class="tw"><table style="width:100%;font-size:11px;border-collapse:collapse"><thead><tr style="background:var(--x0)"><th style="padding:5px 8px;text-align:left">品牌</th><th style="padding:5px 8px">品牌ID</th><th style="padding:5px 8px">服务商</th><th style="padding:5px 8px">负责人</th><th style="padding:5px 8px">助理</th><th style="padding:5px 8px">业态</th><th style="padding:5px 8px">存活</th><th style="padding:5px 8px" class="nc">门店数</th><th style="padding:5px 8px" class="nc">日均交易</th><th style="padding:5px 8px" class="nc">1店几笔</th><th style="padding:5px 8px" class="nc">小程序占比</th><th style="padding:5px 8px" class="nc">价格力</th></tr></thead><tbody>'+rows+'</tbody></table></div></details>'})()}
+    </div>`;
+
+  // 继续原 rsop 以下渲染（SCR 填充 + 监听等）——保留原逻辑
+  // === 四要素扫描 ===
+  function fCard(cat,metricDesc,n,total,color,followUp){
+    const w=total?(n/total*100).toFixed(0):0;
+    return`<div style="background:#fff;border-radius:10px;box-shadow:var(--s);overflow:hidden">
+      <div style="padding:6px 18px 5px;background:${color};color:#fff;font-size:13px;font-weight:700;letter-spacing:0.5px">${cat}</div>
+      <div style="padding:18px 18px 0">
+        <div style="font-size:12px;color:var(--x6);margin-bottom:8px">${metricDesc}</div>
+        <div style="display:flex;align-items:baseline;gap:8px;margin:8px 0">
+          <span style="font-size:34px;font-weight:800;color:${color}">${n}</span>
+          <span style="font-size:12px;color:var(--x5)">/ ${total}（${w}%）</span>
+        </div>
+        <div class="bar-track" style="height:10px;margin-bottom:14px"><div class="bar-fill" style="width:${w}%;background:${color};min-width:${n>0?'10px':'0'}"></div></div>
+      </div>
+      <div style="padding:10px 18px 14px;background:var(--x0);border-top:1px solid var(--x2);font-size:11px;color:var(--x6);line-height:1.6">🔧 后续跟进：${followUp}</div>
+    </div>`}
 
   // 四要素排查清单渲染
   const SCR=S.screen_brands||[];
