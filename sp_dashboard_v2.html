@@ -46,6 +46,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
 table{width:100%;border-collapse:collapse;font-size:11px}th{background:var(--x0);color:var(--x6);font-weight:600;text-align:left;padding:6px 7px;border-bottom:1.5px solid var(--x2);white-space:nowrap;position:sticky;top:0;z-index:2;cursor:pointer;font-size:10px}th:hover{background:var(--x2)}
 td{padding:5px 7px;border-bottom:1px solid var(--x1);vertical-align:middle;white-space:nowrap}tr:hover td{background:var(--x0)}
 .nc{text-align:right;font-variant-numeric:tabular-nums}
+#spTbl th, #spTbl td{text-align:left !important}
 .bd{display:inline-block;font-size:9px;font-weight:600;padding:1px 5px;border-radius:3px}.b-ok{background:var(--g1);color:var(--g)}.b-w{background:var(--o1);color:var(--o)}.b-d{background:var(--r1);color:var(--r)}.b-g{background:var(--x2);color:var(--x6)}
 .wc{color:var(--r);font-weight:600}.oc{color:var(--g)}.up{color:var(--g)}.dn{color:var(--r)}
 .fb{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0;align-items:center}.fb select,.fb input{padding:5px 7px;border:1px solid var(--x3);border-radius:5px;font-size:11px;background:#fff}.fl{font-size:10px;color:var(--x5);font-weight:600}
@@ -84,7 +85,7 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
 <div class="P on" id="t0">
   <!-- 板块 A: 引入概览 -->
   <div class="S">
-    <div class="ST">引入概览 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:8px">口径：腰部 × 餐饮 · <span id="introDataDate">—</span></span></div>
+    <div class="ST">📋 引入概览 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:8px">口径：腰部 × 餐饮 · <span id="introDataDate">—</span></span></div>
     <div id="introKg" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
       <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px">
@@ -105,7 +106,7 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
 
   <!-- 板块 B: 服务商目标达成度（保留原 spTbl）-->
   <div class="S">
-    <div class="ST">服务商目标达成度</div>
+    <div class="ST">📊 服务商目标达成概览</div>
     <div class="tw"><table id="spTbl"><thead><tr><th>服务商</th><th>类型</th><th>负责人</th><th class="nc">目标</th><th class="nc">投放</th><th class="nc">在线</th><th class="nc">流失</th><th class="nc">存活</th><th class="nc">存活率</th><th>进度</th></tr></thead><tbody></tbody></table></div>
   </div>
 </div>
@@ -117,26 +118,29 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
 
   <!-- ========== 板块 A · 引入前 · 四要素检查 ========== -->
   <div class="S">
-    <div class="ST">📦 A · 上线前 · 四要素检查 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:8px">口径：腰部 × 餐饮 × 当日在线</span></div>
+    <div class="ST">🚀 A · 上线前 · 四要素检查 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:8px">口径：腰部 × 餐饮 × 当日在线</span></div>
     <!-- A-1 总览 4 卡 -->
     <div id="fcKg" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px"></div>
     <!-- A-2 人工打标三层折叠 -->
-    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:12px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <div style="font-size:13px;font-weight:700;color:#1e293b">🏷 人工打标明细 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:4px">· 四要素 × 4 分类</span></div>
-        <div style="font-size:11px;color:#94a3b8">点击 cell 展开二级原因 · 再点原因展开品牌</div>
-      </div>
-      <div id="fcMarkMatrix"></div>
-    </div>
+    <details style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:12px">
+      <summary style="cursor:pointer;list-style:none">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:13px;font-weight:700;color:#1e293b">🏷 人工打标明细 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:4px">· 四要素 × 4 分类 · 点击展开 ▾</span></div>
+          <div style="font-size:11px;color:#94a3b8">点击 cell 展开二级原因 · 再点原因展开品牌</div>
+        </div>
+      </summary>
+      <div id="fcMarkMatrix" style="margin-top:12px"></div>
+    </details>
     <!-- A-3 四要素待排查商户清单（保留原 scrTbl）-->
     <div id="fcScrHost" style="margin-top:12px"></div>
   </div>
 
   <!-- ========== 板块 B · 引入后 · 达标商户置顶 ========== -->
   <div class="S">
-    <div class="ST">📦 B · 上线后 · 达标商户置顶</div>
-    <!-- B-1 总览 4 卡 -->
-    <div id="pinKg" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px"></div>
+    <div class="ST">🎯 B · 上线后 · 达标商户置顶</div>
+    <!-- B-1 总览 2 卡 + 2 预警卡 -->
+    <div id="pinKg" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px"></div>
+    <div id="pinAlert" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:8px"></div>
     <!-- B-2 象限图 + 数据源 tab -->
     <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:12px">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px">
@@ -150,9 +154,15 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
     <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:12px">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px">
         <div style="font-size:13px;font-weight:700;color:#1e293b">🧩 置顶品牌诊断</div>
-        <div id="pinCardTabs" style="display:flex;gap:6px;flex-wrap:wrap;max-width:80%;overflow-x:auto"></div>
       </div>
-      <div id="pinCardBody" style="min-height:200px"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <input id="pinSearch" type="text" placeholder="🔍 搜索品牌名称 / 品牌ID" oninput="_pinFilterChanged()" style="flex:1;min-width:180px;padding:5px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px">
+        <select id="pinFiltSP" onchange="_pinFilterChanged()" style="padding:5px 8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px"><option value="">经营服务商</option></select>
+        <select id="pinFiltOwner" onchange="_pinFilterChanged()" style="padding:5px 8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px"><option value="">负责人</option></select>
+        <select id="pinFiltAlive" onchange="_pinFilterChanged()" style="padding:5px 8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px"><option value="">存活状态</option><option value="alive">存活</option><option value="dead">未存活</option></select>
+      </div>
+      <div id="pinCardTabs" style="display:flex;gap:6px;flex-wrap:wrap;max-width:100%;overflow-x:auto"></div>
+      <div id="pinCardBody" style="min-height:200px;margin-top:10px"></div>
     </div>
   </div>
 
@@ -399,8 +409,8 @@ function rsop(){
       <div class="sn-sub">四要素具备的品牌上线后，动态监测以下三项指标，及时排查异常</div>
       <div class="sop-factors">
         <div class="sf-card"><h5>📊 存活率 <span style="font-size:9px;font-weight:400;background:var(--b1);color:var(--b);padding:1px 5px;border-radius:3px;margin-left:4px">公线</span><span style="font-size:9px;font-weight:400;background:var(--g1);color:var(--g);padding:1px 5px;border-radius:3px;margin-left:4px">行业</span></h5><div class="sf-std">日均全渠道核销PV / 日均交易笔数 ≥ <span class="sv">1%</span><br><span style="color:var(--x4);font-size:10px">存活率 ≥ 1% 即为存活</span></div></div>
-        <div class="sf-card"><h5>📡 二选一老客流量 <span style="font-size:9px;font-weight:400;background:var(--b1);color:var(--b);padding:1px 5px;border-radius:3px;margin-left:4px">公线</span></h5><div class="sf-std">日均二选一老客尽曝UV / 日均交易笔数 ≥ <span class="sv">1</span><br><span style="color:var(--x4);font-size:10px">老客流量充分度 = 1:1</span></div></div>
-        <div class="sf-card"><h5>🏪 到店核销率 <span style="font-size:9px;font-weight:400;background:var(--g1);color:var(--g);padding:1px 5px;border-radius:3px;margin-left:4px">行业</span></h5><div class="sf-std">到店核销率 ≥ 餐饮腰部中位数 <span class="sv">${((SOP.wol_stats||{}).visitUseRate||{}).med||'—'}%</span><br><span style="color:var(--x4);font-size:10px">按月review，动态更新；低于中位数需排查核销体验</span></div></div>
+        <div class="sf-card"><h5>📡 老客流量 <span style="font-size:9px;font-weight:400;background:var(--b1);color:var(--b);padding:1px 5px;border-radius:3px;margin-left:4px">公线</span></h5><div class="sf-std">日均(高频+低频)尽曝PV / 日均交易笔数 ≥ <span class="sv">1</span><br><span style="color:var(--x4);font-size:10px">老客流量充分度 = 1:1</span></div></div>
+        <div class="sf-card"><h5>🏪 到店核销率 <span style="font-size:9px;font-weight:400;background:var(--g1);color:var(--g);padding:1px 5px;border-radius:3px;margin-left:4px">行业</span></h5><div class="sf-std">到店核销率 ≥ 餐饮腰部中位数 <span class="sv">${((()=>{const a=(BS||[]).filter(b=>b.tierManual==='腰部'&&INTRO_CATERING.has(b.cat4)&&b.onlineToday===true&&b.visitUseRate!=null).map(b=>b.visitUseRate).sort((x,y)=>x-y);if(!a.length)return '—';const m=Math.floor(a.length/2);return (a.length%2?a[m]:(a[m-1]+a[m])/2).toFixed(1)})())}%</span><br><span style="color:var(--x4);font-size:10px">按日报动态计算（筛在线腰部餐饮）</span></div></div>
       </div>
     </div>
   </div>`;
@@ -1318,6 +1328,7 @@ function rintro(D){
   );
   // 已投放 = 跟进表 status ∈ {在线, 流失}
   const deployed = wc.filter(b => b.statusManual === '在线' || b.statusManual === '流失').length;
+  const lost = wc.filter(b => b.statusManual === '流失').length;
   const totalTarget = (F && F.totalTarget) || 800;
   const deployedPct = totalTarget > 0 ? (deployed/totalTarget*100) : 0;
 
@@ -1357,7 +1368,7 @@ function rintro(D){
   }
 
   let html = '';
-  html += card('已投放', '🏁', deployed, '/ ' + totalTarget, depBarHtml, '#2563eb');
+  html += card('已投放', '📦', deployed + '<span style="font-size:14px;color:#94a3b8;font-weight:500;margin-left:4px">（含流失 '+lost+'）</span>', '/ ' + totalTarget, depBarHtml, '#2563eb');
   html += card('在线',   '📡', todayOnline, '家', onlineSub, '#059669');
   html += card('存活',   '✅', todayAlive,  '家', '<div style="font-size:11px;color:#94a3b8;margin-top:6px">当日截面 · 近7日存活率 ≥ 1%</div>', '#059669');
   const rateStr = todayRate != null ? (todayRate*100).toFixed(1)+'%' : '—';
@@ -1405,7 +1416,7 @@ function rintro(D){
     return '';
   };
   _introChart.setOption({
-    grid: {left: 52, right: 56, top: 42, bottom: 36},
+    grid: {left: 52, right: 56, top: 50, bottom: 36},
     tooltip: {
       trigger: 'axis',
       formatter: function(params){
@@ -1437,7 +1448,7 @@ function rintro(D){
         name: '在线',
         position: 'left',
         nameTextStyle: {fontSize: 11, color: '#059669', fontWeight: 600, align: 'right'},
-        nameGap: 14,
+        nameGap: 22,
         axisLabel: {fontSize: 10, color: '#059669'},
         splitLine: {lineStyle: {color: '#e2e8f0', type: 'dashed'}},
         scale: true
@@ -1447,7 +1458,7 @@ function rintro(D){
         name: '已投放',
         position: 'right',
         nameTextStyle: {fontSize: 11, color: '#2563eb', fontWeight: 600, align: 'left'},
-        nameGap: 14,
+        nameGap: 22,
         axisLabel: {fontSize: 10, color: '#2563eb'},
         splitLine: {show: false},
         scale: true
@@ -1590,9 +1601,9 @@ function rfc(){
 
   let html = '';
   html += card('在线',       '📡', online.length,  '家', '腰部 × 餐饮 × 日报在线', '#059669');
-  html += card('系统全达标', '✅', allPass.length, '家', '四要素 biz/price/infra/traffic 全 OK', '#16a34a');
-  html += card('人工打标',   '🏷', manual.length,  '家', '四要素失分但经人工打标（可保留/待跟进等）', '#d97706');
-  html += card('整改中',     '⚠️', pending.length, '家', '理论趋零 → 等待运营反馈', '#dc2626');
+  html += card('系统全达标', '✅', allPass.length, '家', '经营模式 / 价格力 / 商户号 / 门店 全 ok', '#16a34a');
+  html += card('人工打标',   '🏷', manual.length,  '家', '四要素不达标 经人工打标合理保留（不含待跟进）', '#d97706');
+  html += card('整改中',     '⚠️', pending.length, '家', '目标清 0（包含待跟进和未反馈）', '#dc2626');
   el.innerHTML = html;
 }
 
@@ -1802,12 +1813,28 @@ function rpin(){
     '</div>';
   };
 
+  // 顶部 2 大卡（均匀分布）
   let html = '';
   html += card('达标已置顶', '🎯', passPinned.length,   '家', pinBarHtml, '#059669');
   html += card('达标未置顶', '⏳', passUnpinned.length, '家', '<div style="font-size:11px;color:#94a3b8;margin-top:6px">候补补位池 · 50 名额限制</div>', '#0891b2');
-  html += card('已置顶不达标', '⚠️', pinnedNotPass.length, '家', '<div style="font-size:11px;color:#94a3b8;margin-top:6px">建议降级或替换</div>', '#d97706');
-  html += card('已置顶不在线', '🔴', pinnedOffline.length, '家', '<div style="font-size:11px;color:#94a3b8;margin-top:6px">跟进表腰部标记在线但日报不在线</div>', '#dc2626');
   el.innerHTML = html;
+
+  // 下方 2 预警卡（弱化样式，窄扁条）
+  const alertEl = document.getElementById('pinAlert');
+  if (alertEl){
+    const alertCard = function(icon, label, n, desc, color){
+      return '<div style="background:'+color+'10;border:1px solid '+color+'40;border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:12px">' +
+        '<div style="font-size:22px;font-weight:800;color:'+color+';min-width:36px;text-align:center">'+n+'</div>' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-size:12px;font-weight:600;color:'+color+'">'+icon+' '+label+'</div>' +
+          '<div style="font-size:11px;color:#64748b;margin-top:2px">'+desc+'</div>' +
+        '</div>' +
+      '</div>';
+    };
+    alertEl.innerHTML =
+      alertCard('⚠️','已置顶不达标', pinnedNotPass.length, '需要跟进品牌基建维护', '#d97706') +
+      alertCard('🔴','已置顶不在线', pinnedOffline.length, '需核对曝光和活动投放情况', '#dc2626');
+  }
 }
 
 // ========== Tab 1 · B-2 · 置顶流量象限图（含数据源 tab）==========
@@ -1889,7 +1916,9 @@ function rpinq(){
     const x = _pinCalcX(b, _pinDataSource, trendRows);
     const y = b.visitUseRate;
     if (x == null || y == null) return;
-    points.push({name: b.name, bid: b.brandId, sp: b.spMapped, x: x, y: y, b: b});
+    // 气泡大小 = 日均核销 PV (use_pv 或 actByBrand 合计)
+    const usePv = b.usePv || ((b.biz_useD||0)+(b.f2f_useD||0)+(b.fix_useD||0)+(b.nb_useD||0)+(b.zfyl_useD||0));
+    points.push({name: b.name, bid: b.brandId, sp: b.spMapped, x: x, y: y, b: b, size: usePv});
   });
 
   // 数据源提示条
@@ -1921,7 +1950,14 @@ function rpinq(){
   };
   const color = {A:'#059669', B:'#d97706', C:'#2563eb', D:'#dc2626'};
   const groups = {A:[], B:[], C:[], D:[]};
-  points.forEach(p => groups[cls(p)].push([p.x, p.y, p.name, p.sp, p.bid]));
+  // 气泡大小归一化: 按 size 的百分位缩放到 8-30
+  const sizes = points.map(p => p.size||0).filter(s => s > 0);
+  const maxSize = sizes.length ? Math.max.apply(null, sizes) : 1;
+  points.forEach(p => {
+    // 带 size 字段给 ECharts symbolSize 用
+    const sizePx = p.size > 0 ? (8 + Math.sqrt(p.size/maxSize) * 22) : 8;
+    groups[cls(p)].push([p.x, p.y, p.name, p.sp, p.bid, p.size||0, sizePx]);
+  });
 
   if (typeof echarts === 'undefined'){
     el.innerHTML = '<div style="color:#dc2626;padding:20px">ECharts 未加载</div>';
@@ -1937,17 +1973,18 @@ function rpinq(){
       formatter: function(p){
         const d = p.data;
         return '<b>'+d[2]+'</b><br>服务商: '+d[3]+
-               '<br>老客尽曝/日均交易: <b>'+d[0].toFixed(2)+'</b>'+
-               '<br>到店核销率: <b>'+d[1].toFixed(2)+'%</b>';
+               '<br>老客曝光占比: <b>'+(d[0]*100).toFixed(2)+'%</b>'+
+               '<br>到店核销率: <b>'+d[1].toFixed(2)+'%</b>'+
+               '<br>日均核销: <b>'+(d[5]>=10000?(d[5]/10000).toFixed(1)+'w':Math.round(d[5]))+'</b>';
       }
     },
     xAxis: {
       type: 'value',
-      name: '老客尽曝 PV / 日均交易',
+      name: '老客曝光占比 (高频+低频尽曝UV/日均交易笔数)',
       nameLocation: 'middle',
       nameGap: 28,
       nameTextStyle: {fontSize: 11, color: '#64748b'},
-      axisLabel: {fontSize: 10, color: '#64748b'},
+      axisLabel: {fontSize: 10, color: '#64748b', formatter: function(v){return (v*100).toFixed(1)+'%'}},
       splitLine: {lineStyle: {color: '#e2e8f0', type: 'dashed'}}
     },
     yAxis: {
@@ -1960,12 +1997,14 @@ function rpinq(){
       splitLine: {lineStyle: {color: '#e2e8f0', type: 'dashed'}}
     },
     series: [
-      {name:'A 健康',          type:'scatter', symbolSize: 10, itemStyle:{color:color.A, opacity:0.8}, data: groups.A,
+      {name:'A 健康',          type:'scatter',
+       symbolSize: function(v){return v[6]},
+       itemStyle:{color:color.A, opacity:0.65}, data: groups.A,
        markLine: {silent:true, symbol:'none', label:{show:false}, lineStyle:{color:'#94a3b8', type:'dashed', width:1},
          data: [{xAxis: xMed}, {yAxis: yMed}]}},
-      {name:'B 有量无转化',    type:'scatter', symbolSize: 10, itemStyle:{color:color.B, opacity:0.8}, data: groups.B},
-      {name:'C 转化强缺量',    type:'scatter', symbolSize: 10, itemStyle:{color:color.C, opacity:0.8}, data: groups.C},
-      {name:'D 双低',          type:'scatter', symbolSize: 10, itemStyle:{color:color.D, opacity:0.8}, data: groups.D}
+      {name:'B 有量无转化',    type:'scatter', symbolSize: function(v){return v[6]}, itemStyle:{color:color.B, opacity:0.65}, data: groups.B},
+      {name:'C 转化强缺量',    type:'scatter', symbolSize: function(v){return v[6]}, itemStyle:{color:color.C, opacity:0.65}, data: groups.C},
+      {name:'D 双低',          type:'scatter', symbolSize: function(v){return v[6]}, itemStyle:{color:color.D, opacity:0.65}, data: groups.D}
     ],
     legend: {
       top: 2, right: 10,
@@ -1988,20 +2027,13 @@ function rpinq(){
 
 // ========== Tab 1 · B-3 · 置顶品牌诊断卡片池（KA 摇优惠同构）==========
 var _pinActiveBrand = null; // 当前选中的 brand_id
-var _pinActiveQuad = null;  // 当前象限筛选 'A'|'B'|'C'|'D'|null
-function _pinQuadCls(x, y, xMed, yMed){
-  if (x >= xMed && y >= yMed) return 'A';
-  if (x >= xMed && y <  yMed) return 'B';
-  if (x <  xMed && y >= yMed) return 'C';
-  return 'D';
-}
+function _pinFilterChanged(){ _pinActiveBrand = null; rpinc(); }
 function rpinc(){
   const body = document.getElementById('pinCardBody');
   const tabs = document.getElementById('pinCardTabs');
   if (!body || !tabs) return;
 
   const TR = (window._D && window._D.topRecords) || [];
-  const trendRows = (window._D && window._D.trendRows) || [];
   const topBids = new Set(TR.map(r => String(r.brand_id)));
 
   const online = (BS||[]).filter(b =>
@@ -2009,64 +2041,60 @@ function rpinc(){
   );
   const pinnedOnline = online.filter(b => topBids.has(String(b.brandId)));
 
-  // 算所有 brand 的 (x, y) + 象限
-  const pts = pinnedOnline.map(b => {
-    const x = _pinCalcX(b, _pinDataSource, trendRows);
-    const y = b.visitUseRate;
-    return {b: b, x: x, y: y};
-  });
-  const valid = pts.filter(p => p.x != null && p.y != null);
-  const xMed = _median(valid.map(p => p.x));
-  const yMed = _median(valid.map(p => p.y));
-  const byQuad = {A:[], B:[], C:[], D:[], U:[]}; // U=未定(缺数据)
-  pts.forEach(p => {
-    if (p.x == null || p.y == null) byQuad.U.push(p);
-    else byQuad[_pinQuadCls(p.x, p.y, xMed, yMed)].push(p);
-  });
-
-  // 筛选 tab
-  const quadLabels = {
-    A: '🟢 A 健康',
-    B: '🟠 B 有量无转化',
-    C: '🔵 C 转化强缺量',
-    D: '🔴 D 双低',
-    U: '⚪️ 未定'
-  };
-  const quadKeys = ['A','B','C','D','U'].filter(k => byQuad[k].length > 0);
-  tabs.innerHTML =
-    '<button onclick="_pinPickQuad(null)" style="padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid '+(_pinActiveQuad==null?'#2563eb':'#cbd5e1')+';background:'+(_pinActiveQuad==null?'#eff6ff':'#fff')+';color:'+(_pinActiveQuad==null?'#1d4ed8':'#475569')+';font-weight:'+(_pinActiveQuad==null?'700':'500')+'">全部 ('+pts.length+')</button>' +
-    quadKeys.map(k =>
-      '<button onclick="_pinPickQuad(\''+k+'\')" style="padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid '+(_pinActiveQuad===k?'#2563eb':'#cbd5e1')+';background:'+(_pinActiveQuad===k?'#eff6ff':'#fff')+';color:'+(_pinActiveQuad===k?'#1d4ed8':'#475569')+';font-weight:'+(_pinActiveQuad===k?'700':'500')+'">'+quadLabels[k]+' ('+byQuad[k].length+')</button>'
-    ).join('');
-
-  // 品牌列表 (按当前象限过滤)
-  const list = _pinActiveQuad ? byQuad[_pinActiveQuad] : pts;
-  if (!_pinActiveBrand || !list.find(p => String(p.b.brandId) === String(_pinActiveBrand))){
-    _pinActiveBrand = list.length ? list[0].b.brandId : null;
+  // 填 服务商/负责人 下拉
+  const spSel = document.getElementById('pinFiltSP');
+  const ownerSel = document.getElementById('pinFiltOwner');
+  if (spSel && spSel.options.length <= 1){
+    const sps = Array.from(new Set(pinnedOnline.map(b => b.spMapped).filter(Boolean))).sort();
+    sps.forEach(v => { const o=document.createElement('option'); o.value=v; o.textContent=v; spSel.appendChild(o) });
+  }
+  if (ownerSel && ownerSel.options.length <= 1){
+    const owners = Array.from(new Set(pinnedOnline.map(b => b.owner).filter(Boolean))).sort();
+    owners.forEach(v => { const o=document.createElement('option'); o.value=v; o.textContent=v; ownerSel.appendChild(o) });
   }
 
-  // 品牌切换横向 tab 栏 + 卡片
-  const cur = list.find(p => String(p.b.brandId) === String(_pinActiveBrand));
+  // 读筛选器
+  const fQ = ((document.getElementById('pinSearch')||{}).value || '').toLowerCase().trim();
+  const fSP = (document.getElementById('pinFiltSP')||{}).value || '';
+  const fOwner = (document.getElementById('pinFiltOwner')||{}).value || '';
+  const fAlive = (document.getElementById('pinFiltAlive')||{}).value || '';
+
+  let list = pinnedOnline.filter(b => {
+    if (fSP && b.spMapped !== fSP) return false;
+    if (fOwner && b.owner !== fOwner) return false;
+    if (fAlive === 'alive' && b.isAlive !== true) return false;
+    if (fAlive === 'dead' && b.isAlive !== false) return false;
+    if (fQ){
+      const nm = (b.name||'').toLowerCase();
+      const bid = String(b.brandId||'');
+      if (!nm.includes(fQ) && !bid.includes(fQ)) return false;
+    }
+    return true;
+  });
+
+  // 顶部总数提示
+  tabs.innerHTML = '<span style="font-size:11px;color:#64748b;padding:4px 8px">共 <b style="color:#1e293b">'+list.length+'</b> / '+pinnedOnline.length+' 家置顶品牌</span>';
+
+  if (!_pinActiveBrand || !list.find(b => String(b.brandId) === String(_pinActiveBrand))){
+    _pinActiveBrand = list.length ? list[0].brandId : null;
+  }
+
+  const cur = list.find(b => String(b.brandId) === String(_pinActiveBrand));
   if (!cur){
-    body.innerHTML = '<div style="padding:40px;text-align:center;color:#94a3b8;font-size:12px">暂无品牌</div>';
+    body.innerHTML = '<div style="padding:40px;text-align:center;color:#94a3b8;font-size:12px">无匹配品牌</div>';
     return;
   }
 
   body.innerHTML =
     '<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;border-bottom:1px solid #e2e8f0;margin-bottom:12px;scrollbar-width:thin">' +
-    list.map(p => {
-      const active = String(p.b.brandId) === String(_pinActiveBrand);
-      return '<button onclick="_pinPickBrand(\''+p.b.brandId+'\')" style="white-space:nowrap;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid '+(active?'#b45852':'#cbd5e1')+';background:'+(active?'#fef2f2':'#fff')+';color:'+(active?'#b45852':'#475569')+';font-weight:'+(active?'700':'500')+'">'+p.b.name+'</button>';
+    list.map(b => {
+      const active = String(b.brandId) === String(_pinActiveBrand);
+      return '<button onclick="_pinPickBrand(\''+b.brandId+'\')" style="white-space:nowrap;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid '+(active?'#b45852':'#cbd5e1')+';background:'+(active?'#fef2f2':'#fff')+';color:'+(active?'#b45852':'#475569')+';font-weight:'+(active?'700':'500')+'">'+b.name+'</button>';
     }).join('') +
     '</div>' +
-    _pinBuildCard(cur.b);
+    _pinBuildCard(cur);
 }
 
-function _pinPickQuad(k){
-  _pinActiveQuad = k;
-  _pinActiveBrand = null;
-  rpinc();
-}
 function _pinPickBrand(bid){
   _pinActiveBrand = bid;
   rpinc();
@@ -2077,7 +2105,7 @@ function _pinBuildCard(b){
   const survChip = b.isAlive === true ?
     '<span style="background:#d1fae5;color:#065f46;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">✅ 存活</span>' :
     (b.isAlive === false ? '<span style="background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">⚠️ 未存活</span>' : '<span style="background:#e2e8f0;color:#475569;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">—</span>');
-  const head = '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap"><div style="font-size:18px;font-weight:800;color:#1e293b">'+b.name+'</div>'+survChip+'<span style="font-size:11px;color:#64748b">'+(b.assistant||'—')+' · '+(b.cat4||'—')+' · '+b.spMapped+'</span></div>';
+  const head = '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap"><div style="font-size:18px;font-weight:800;color:#1e293b">'+b.name+'</div>'+survChip+'</div>';
 
   // ① 结果指标 3 卡（无目标达成条）
   const daily_exp_w = ((b.biz_expW||0)+(b.f2f_expW||0)+(b.fix_expW||0)+(b.nb_expW||0)+(b.zfyl_expW||0));
