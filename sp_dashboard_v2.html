@@ -88,12 +88,21 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
   <div class="S">
     <div class="ST">引入概览 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:8px">口径：腰部 × 餐饮 · <span id="introDataDate">—</span></span></div>
     <div id="introKg" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px"></div>
-    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:12px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <div style="font-size:13px;font-weight:700;color:#1e293b">📈 引入进度趋势 · 每日截面</div>
-        <div style="font-size:11px;color:#94a3b8">绿线=当日在线 · 蓝线=累计已投放（跟进表腰部在线+流失 ∩ 日报类目∈餐饮）</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-size:13px;font-weight:700;color:#1e293b">📈 在线 vs 已投放</div>
+          <div style="font-size:10px;color:#94a3b8">绿=在线 · 蓝=已投放</div>
+        </div>
+        <div id="introTrendChart" style="width:100%;height:300px"></div>
       </div>
-      <div id="introTrendChart" style="width:100%;height:300px"></div>
+      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-size:13px;font-weight:700;color:#1e293b">📊 存活率趋势</div>
+          <div style="font-size:10px;color:#94a3b8">当日存活 / 当日在线</div>
+        </div>
+        <div id="introAliveChart" style="width:100%;height:300px"></div>
+      </div>
     </div>
   </div>
 
@@ -253,7 +262,7 @@ async function loadDashboardData(targetDate) {
     fetchJSON('sop_snapshot', 'data_date=eq.' + targetDate + '&select=*'),
     fetchJSON('brand_top_records', 'select=*').catch(()=>[]),
     // 近 35 天精简字段（滚动 7 天窗口 + 上期对比）- 用分页避免 1000 上限
-    fetchAllParallel('brand_snapshot', 'select=data_date,brand_id,tier,sub_category,online_today&data_date=gte.' + trendStart + '&data_date=lte.' + targetDate + '&order=data_date.asc').catch(()=>[]),
+    fetchAllParallel('brand_snapshot', 'select=data_date,brand_id,tier,sub_category,online_today,is_alive&data_date=gte.' + trendStart + '&data_date=lte.' + targetDate + '&order=data_date.asc').catch(()=>[]),
   ]);
 
   const spSummary = {};
@@ -1206,6 +1215,7 @@ function rov(){const tb=document.querySelector('#spTbl tbody');tb.innerHTML='';O
 // ========== 引入进度：概览 4 大卡 + 每日折线图（绿线=当日在线 / 蓝线=累计已投放）==========
 const INTRO_CATERING = new Set(['正餐','茶饮咖啡','中式快餐','甜品烘焙','西式快餐','小吃','其他餐饮']);
 var _introChart = null;
+var _aliveChart = null;
 
 function _introAddDays(isoDate, delta){
   const d = new Date(isoDate + 'T00:00:00');
@@ -1453,8 +1463,84 @@ function rintro(D){
   });
   if (!window._introResizeBound){
     window._introResizeBound = true;
-    window.addEventListener('resize', function(){ if (_introChart) _introChart.resize() });
+    window.addEventListener('resize', function(){
+      if (_introChart) _introChart.resize();
+      if (_aliveChart) _aliveChart.resize();
+    });
   }
+
+  // ========== 3. 存活率趋势图（右半）==========
+  // 每日存活率 = (tier=腰部∩餐饮∩online_today=1∩is_alive=true) / (tier=腰部∩餐饮∩online_today=1)
+  const aliveDaily = {};
+  (D.trendRows||[]).forEach(function(r){
+    if (!r) return;
+    if (r.tier !== '腰部') return;
+    if (!INTRO_CATERING.has(r.sub_category)) return;
+    if (r.online_today !== true) return;
+    const d = r.data_date;
+    if (!aliveDaily[d]) aliveDaily[d] = {online:0, alive:0};
+    aliveDaily[d].online++;
+    if (r.is_alive === true) aliveDaily[d].alive++;
+  });
+  const aliveSeries = xDates.map(function(d){
+    const v = aliveDaily[d];
+    if (!v || v.online === 0) return null;
+    return +(v.alive/v.online*100).toFixed(1);
+  });
+  const aliveEl = document.getElementById('introAliveChart');
+  if (!aliveEl) return;
+  if (_aliveChart){ _aliveChart.dispose(); _aliveChart = null; }
+  _aliveChart = echarts.init(aliveEl);
+  _aliveChart.setOption({
+    grid: {left: 48, right: 20, top: 36, bottom: 36},
+    tooltip: {
+      trigger: 'axis',
+      formatter: function(params){
+        const p = params[0];
+        const d = p.axisValue;
+        const v = aliveDaily[d] || {online:0,alive:0};
+        return '<b>'+d+'</b><br>'+p.marker+'存活率: <b>'+p.value+'%</b>'+
+               '<br><span style="color:#94a3b8">存活 '+v.alive+' / 在线 '+v.online+'</span>';
+      }
+    },
+    xAxis: {
+      type: 'category',
+      data: xDates,
+      boundaryGap: false,
+      axisLabel: {fontSize: 10, color: '#64748b', formatter: xLabelFmt, interval: 0},
+      axisLine: {lineStyle: {color: '#cbd5e1'}},
+      axisTick: {show: false}
+    },
+    yAxis: {
+      type: 'value',
+      name: '%',
+      nameTextStyle: {fontSize: 10, color: '#94a3b8', padding: [0,0,0,-10]},
+      axisLabel: {fontSize: 10, color: '#64748b', formatter: '{value}%'},
+      splitLine: {lineStyle: {color: '#e2e8f0', type: 'dashed'}},
+      scale: true,
+      min: 0
+    },
+    series: [{
+      name: '存活率',
+      type: 'line',
+      smooth: false,
+      symbol: 'circle',
+      symbolSize: function(v, p){ return p.dataIndex === xDates.length-1 ? 8 : 4 },
+      lineStyle: {width: 2, color: '#0369a1'},
+      itemStyle: {color: '#0369a1'},
+      areaStyle: {color: {type: 'linear', x:0,y:0,x2:0,y2:1, colorStops: [
+        {offset: 0, color: 'rgba(3,105,161,0.14)'},
+        {offset: 1, color: 'rgba(3,105,161,0.01)'}
+      ]}},
+      data: aliveSeries,
+      markLine: {
+        silent: true,
+        symbol: 'none',
+        lineStyle: {color: '#94a3b8', type: 'dashed', width: 1},
+        data: [{type: 'average', name: '均值', label: {formatter: '均值 {c}%', fontSize: 10, color: '#94a3b8'}}]
+      }
+    }]
+  });
 }
 
 let curS=null,sortD=1;function srt(f){if(curS===f)sortD*=-1;else{curS=f;sortD=1};rbt()}
