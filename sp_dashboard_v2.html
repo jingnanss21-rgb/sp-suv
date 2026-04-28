@@ -1358,8 +1358,18 @@ function rintro(D){
   }
   if (_introChart){ _introChart.dispose(); _introChart = null; }
   _introChart = echarts.init(el);
+  // X 轴稀疏：只显示周一、周四和首尾日期
+  const xLabelFmt = function(val, idx){
+    const isFirst = idx === 0;
+    const isLast = idx === xDates.length - 1;
+    const dow = new Date(val + 'T00:00:00').getDay(); // 0=Sun..6=Sat
+    if (isFirst || isLast || dow === 1 || dow === 4){
+      return val.substring(5);
+    }
+    return '';
+  };
   _introChart.setOption({
-    grid: {left: 48, right: 24, top: 42, bottom: 40},
+    grid: {left: 52, right: 56, top: 42, bottom: 36},
     legend: {
       top: 4, right: 12,
       textStyle: {fontSize: 11, color: '#475569'},
@@ -1372,9 +1382,11 @@ function rintro(D){
         params.forEach(function(p){
           s += '<br>'+p.marker+p.seriesName+': <b>'+p.value+'</b> 家';
         });
-        // gap
-        if (params.length === 2){
-          const gap = params[1].value - params[0].value;
+        // gap: 蓝 - 绿
+        const green = params.find(p => p.seriesName.indexOf('在线') >= 0);
+        const blue  = params.find(p => p.seriesName.indexOf('已投放') >= 0);
+        if (green && blue){
+          const gap = blue.value - green.value;
           s += '<br><span style="color:#94a3b8">池中当日未在线: <b>'+gap+'</b></span>';
         }
         return s;
@@ -1384,22 +1396,35 @@ function rintro(D){
       type: 'category',
       data: xDates,
       boundaryGap: false,
-      axisLabel: {fontSize: 10, color: '#64748b', formatter: v => v.substring(5)},
+      axisLabel: {fontSize: 10, color: '#64748b', formatter: xLabelFmt, interval: 0},
       axisLine: {lineStyle: {color: '#cbd5e1'}},
       axisTick: {show: false}
     },
-    yAxis: {
-      type: 'value',
-      name: '品牌数',
-      nameTextStyle: {fontSize: 10, color: '#94a3b8', padding: [0,0,0,30]},
-      axisLabel: {fontSize: 10, color: '#64748b'},
-      splitLine: {lineStyle: {color: '#e2e8f0', type: 'dashed'}},
-      scale: true
-    },
+    yAxis: [
+      {
+        type: 'value',
+        name: '在线',
+        position: 'left',
+        nameTextStyle: {fontSize: 10, color: '#059669', padding: [0,0,0,-20]},
+        axisLabel: {fontSize: 10, color: '#059669'},
+        splitLine: {lineStyle: {color: '#e2e8f0', type: 'dashed'}},
+        scale: true
+      },
+      {
+        type: 'value',
+        name: '已投放',
+        position: 'right',
+        nameTextStyle: {fontSize: 10, color: '#2563eb', padding: [0,-20,0,0]},
+        axisLabel: {fontSize: 10, color: '#2563eb'},
+        splitLine: {show: false},
+        scale: true
+      }
+    ],
     series: [
       {
         name: '当日在线（腰部×餐饮）',
         type: 'line',
+        yAxisIndex: 0,
         smooth: false,
         symbol: 'circle',
         symbolSize: function(v, p){ return p.dataIndex === xDates.length-1 ? 8 : 4 },
@@ -1414,6 +1439,7 @@ function rintro(D){
       {
         name: '累计已投放（跟进表·腰部×在线+流失）',
         type: 'line',
+        yAxisIndex: 1,
         smooth: false,
         symbol: 'circle',
         symbolSize: function(v, p){ return p.dataIndex === xDates.length-1 ? 8 : 4 },
