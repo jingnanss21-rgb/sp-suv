@@ -1341,14 +1341,34 @@ function rintro(D){
   const todayRate = todayOnline > 0 ? todayAlive/todayOnline : null;
 
   // 0426 后在线骤降提示：若 targetDate >= 2026-04-26 且 跟进表在线 > 日报在线，挂⚠️悬浮
+  // 方案B: 仅把"真腰部×餐饮×离线"算入"实际在线"(曝光<100 被误伤)，
+  //         日报分层/类目/字段异常的另外归一类（待校正），不并入在线数
   try {
     const warnEl = document.getElementById('introTrendWarn');
     if (warnEl){
       if (targetDate >= '2026-04-26' && followOnlineCnt > todayOnline){
-        const y = followOnlineCnt, x = y - todayOnline;
+        // 从 wc (跟进表腰部) 里拆: 非在线 且 属于餐饮 且 按审核通过门店数判仍为腰部 → 误伤
+        const CAT = INTRO_CATERING;
+        const ZHENGCAN = new Set(['正餐']);
+        const _offline = wc.filter(b => b.onlineToday !== true && b.statusManual === '在线');
+        let realWaistOffline = 0, needFix = 0;
+        _offline.forEach(b => {
+          const cat = b.cat4;
+          const sc = b.storeCount;
+          if (!CAT.has(cat)){ needFix++; return; }           // 非餐饮类目
+          if (sc == null){ needFix++; return; }              // 门店数缺失
+          const thr = ZHENGCAN.has(cat) ? 5 : 20;
+          if (sc >= thr) realWaistOffline++;                 // 符合腰部阈值 → 真误伤
+          else needFix++;                                     // 不达阈值 → 待校正
+        });
+        const realTotal = todayOnline + realWaistOffline;
         warnEl.style.display = 'inline';
         warnEl.textContent = '⚠️';
-        warnEl.title = '0426 起因周末线上全量上线周边，挤占线下流量，导致 '+x+' 个品牌曝光<100，被误判为流失。实际在线品牌 '+y+' 个（跟进表腰部×在线）';
+        warnEl.title =
+          '实际在线 '+todayOnline+'+'+realWaistOffline+' = '+realTotal+' 家\n'+
+          '看板在线 '+todayOnline+' 家；'+(followOnlineCnt-todayOnline)+' 家未被统计到：\n'+
+          '1）'+realWaistOffline+' 家因曝光<100 被误伤（周末线上全量上线周边挤占线下流量）\n'+
+          '2）'+needFix+' 家因日报分层/类目/字段异常，需运营在跟进表或公线校正后纳入';
       } else {
         warnEl.style.display = 'none';
       }
