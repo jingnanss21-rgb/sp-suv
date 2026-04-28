@@ -132,8 +132,8 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
   <!-- ========== 板块 B · 引入后 · 达标商户置顶 ========== -->
   <div class="S">
     <div class="ST">📦 B · 上线后 · 达标商户置顶</div>
-    <!-- B-1 总览 4 卡（占位）-->
-    <div id="pinKg" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px;color:#94a3b8;font-size:12px;padding:16px;text-align:center;background:#f8fafc;border-radius:6px">置顶总览 — 待实现</div>
+    <!-- B-1 总览 4 卡 -->
+    <div id="pinKg" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px"></div>
     <!-- B-2 象限图 + 数据源 tab（占位）-->
     <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:12px">
       <div id="pinQuadrant" style="color:#94a3b8;font-size:12px;padding:16px;text-align:center">象限图 + mock 数据源 tab — 待实现</div>
@@ -1584,6 +1584,57 @@ function rfc(){
   el.innerHTML = html;
 }
 
+// ========== Tab 1 · B-1 · 达标商户置顶总览 4 卡 ==========
+function rpin(){
+  const el = document.getElementById('pinKg');
+  if (!el) return;
+  const TR = (window._D && window._D.topRecords) || [];
+  const topBids = new Set(TR.map(r => String(r.brand_id)));
+  const TOP_QUOTA = 50;
+
+  // 口径与 A-1 对齐：腰部 × 餐饮 × 日报在线
+  const online = (BS||[]).filter(b =>
+    b.tierManual === '腰部' && INTRO_CATERING.has(b.cat4) && b.onlineToday === true
+  );
+  // 达标 = 系统全达标 OR 人工打标
+  const hasMark = function(b){
+    const bid = b.brandId;
+    if (!bid) return false;
+    return !!(_fbCache[bid+'_screen_biz'] || _fbCache[bid+'_screen_price']
+           || _fbCache[bid+'_screen_infra'] || _fbCache[bid+'_screen_store']);
+  };
+  const isPass = b => (b.bizOk===true && b.priceOk===true && b.infraOk===true && b.trafficOk===true) || hasMark(b);
+
+  // 达标 & 已置顶
+  const passPinned = online.filter(b => isPass(b) && topBids.has(String(b.brandId)));
+  // 达标 & 未置顶
+  const passUnpinned = online.filter(b => isPass(b) && !topBids.has(String(b.brandId)));
+  // 已置顶 & 不达标（仍在线但未达标）
+  const pinnedNotPass = online.filter(b => topBids.has(String(b.brandId)) && !isPass(b));
+  // 已置顶 & 不在线：topRecords 里有 brand_id 但不在当日 online 集合里
+  const onlineBids = new Set(online.map(b => String(b.brandId)));
+  const pinnedOffline = Array.from(topBids).filter(bid => !onlineBids.has(bid));
+
+  const pinPct = TOP_QUOTA > 0 ? (topBids.size / TOP_QUOTA * 100) : 0;
+  const pinBarHtml = '<div style="margin-top:8px"><div style="height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden"><div style="height:100%;width:'+Math.min(pinPct,100).toFixed(1)+'%;background:linear-gradient(90deg,#10b981,#059669);transition:width .4s"></div></div><div style="font-size:11px;color:#64748b;margin-top:4px">占用 <b style="color:#059669">'+topBids.size+' / '+TOP_QUOTA+'</b> ('+pinPct.toFixed(1)+'%)</div></div>';
+
+  const card = function(label, icon, value, unit, sub, color){
+    return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px 18px">' +
+      '<div style="font-size:12px;color:#64748b;font-weight:600">'+icon+' '+label+'</div>' +
+      '<div style="font-size:32px;font-weight:800;color:'+(color||'#1e293b')+';margin-top:6px;line-height:1.1">' +
+        value + (unit ? '<span style="font-size:14px;color:#94a3b8;font-weight:500;margin-left:4px">'+unit+'</span>' : '') +
+      '</div>' + (sub||'') +
+    '</div>';
+  };
+
+  let html = '';
+  html += card('达标已置顶', '🎯', passPinned.length,   '家', pinBarHtml, '#059669');
+  html += card('达标未置顶', '⏳', passUnpinned.length, '家', '<div style="font-size:11px;color:#94a3b8;margin-top:6px">候补补位池 · 50 名额限制</div>', '#0891b2');
+  html += card('已置顶不达标', '⚠️', pinnedNotPass.length, '家', '<div style="font-size:11px;color:#94a3b8;margin-top:6px">建议降级或替换</div>', '#d97706');
+  html += card('已置顶不在线', '🔴', pinnedOffline.length, '家', '<div style="font-size:11px;color:#94a3b8;margin-top:6px">跟进表腰部标记在线但日报不在线</div>', '#dc2626');
+  el.innerHTML = html;
+}
+
 let curS=null,sortD=1;function srt(f){if(curS===f)sortD*=-1;else{curS=f;sortD=1};rbt()}
 function rbt(){const fSP=document.getElementById('fSP').value,fOwner=document.getElementById('fOwner').value,fAsst=document.getElementById('fAsst').value,fCat=document.getElementById('fCat').value,fTier=document.getElementById('fTier').value,fSt=document.getElementById('fSt').value,fOnline=document.getElementById('fOnline').value,fScr=document.getElementById('fScr').value,fQ=document.getElementById('fQ').value.toLowerCase(),fM=document.getElementById('fMetric').value,fOp=document.getElementById('fOp').value,fVr=document.getElementById('fVal').value,fVn=fVr!==''?parseFloat(fVr):null;
 let fl=BS.filter(b=>{if(b.displayLevel==='ka_self')return false;if(fSP&&b.spMapped!==fSP)return false;if(fOwner&&b.owner!==fOwner)return false;if(fAsst&&b.assistant!==fAsst)return false;if(fCat&&b.cat4!==fCat)return false;if(fTier&&b.tierManual!==fTier)return false;if(fSt==='alive'&&b.isAlive!==true)return false;if(fSt==='dead'&&b.isAlive!==false)return false;if(fOnline==='online'&&b.onlineStatus!=='在线')return false;if(fOnline==='pending'&&b.onlineStatus!=='在线待确认')return false;if(fOnline==='nodata'&&b.onlineStatus!=='未更新')return false;if(fOnline==='lost'&&b.statusManual!=='流失')return false;if(fScr==='biz_f'&&b.bizOk!==false)return false;if(fScr==='price_f'&&b.priceOk!==false)return false;if(fScr==='infra_f'&&b.infraOk!==false)return false;if(fScr==='traffic_f'&&b.trafficOk!==false)return false;if(fScr==='all_p'&&!(b.bizOk===true&&b.priceOk===true&&b.infraOk===true&&b.trafficOk===true))return false;if(fScr==='no_data'&&b.hasDailyData)return false;if(fQ&&!b.name.toLowerCase().includes(fQ))return false;if(fM&&fVn!==null){const v=b[fM];if(v==null)return false;if(fOp==='lt'&&!(v<fVn))return false;if(fOp==='lte'&&!(v<=fVn))return false;if(fOp==='gt'&&!(v>fVn))return false;if(fOp==='gte'&&!(v>=fVn))return false}return true});
@@ -1633,9 +1684,10 @@ async function initDashboard(targetDate) {
     const D = await loadDashboardData(targetDate);
 
     F=D.final,BS=F.brands,SPS=F.spSummary,SOP=D.sop,BC=D.bc,ACTS=D.acts;
+    window._D=D;
 W=BS.filter(b=>b.tierManual==='腰部'),KA=BS.filter(b=>b.tierManual==='KA');
     actByBrand={};ACTS.forEach(a=>{const n=a.brandName;if(!actByBrand[n])actByBrand[n]=[];actByBrand[n].push(a)});
-const ss=[...new Set(BS.map(b=>b.spMapped))].sort();['fSP'].forEach(id=>{const s=document.getElementById(id);if(!s)return;ss.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o)})});[...new Set(BS.map(b=>b.owner).filter(Boolean))].sort().forEach(v=>{const s=document.getElementById('fOwner');if(s)s.innerHTML+=`<option value="${v}">${v}</option>`});[...new Set(BS.map(b=>b.assistant).filter(Boolean))].sort().forEach(v=>{const s=document.getElementById('fAsst');if(s)s.innerHTML+=`<option value="${v}">${v}</option>`});const catCnt={};BS.forEach(b=>{const c=b.cat4;if(c){catCnt[c]=(catCnt[c]||0)+1}});const cats=Object.keys(catCnt).filter(c=>catCnt[c]>=3).sort();['fCat'].forEach(id=>{const s=document.getElementById(id);if(!s)return;cats.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v+' ('+catCnt[v]+')';s.appendChild(o)})});rsop();rov();rintro(D);rfc();document.getElementById('loading').style.display='none'
+const ss=[...new Set(BS.map(b=>b.spMapped))].sort();['fSP'].forEach(id=>{const s=document.getElementById(id);if(!s)return;ss.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o)})});[...new Set(BS.map(b=>b.owner).filter(Boolean))].sort().forEach(v=>{const s=document.getElementById('fOwner');if(s)s.innerHTML+=`<option value="${v}">${v}</option>`});[...new Set(BS.map(b=>b.assistant).filter(Boolean))].sort().forEach(v=>{const s=document.getElementById('fAsst');if(s)s.innerHTML+=`<option value="${v}">${v}</option>`});const catCnt={};BS.forEach(b=>{const c=b.cat4;if(c){catCnt[c]=(catCnt[c]||0)+1}});const cats=Object.keys(catCnt).filter(c=>catCnt[c]>=3).sort();['fCat'].forEach(id=>{const s=document.getElementById(id);if(!s)return;cats.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v+' ('+catCnt[v]+')';s.appendChild(o)})});rsop();rov();rintro(D);rfc();rpin();document.getElementById('loading').style.display='none'
 
     // ── 活动明细数据延迟加载（原 Tab2 → 现附录 Tab4）──
     const tabBtns = document.querySelectorAll('.tab');
