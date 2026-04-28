@@ -1631,7 +1631,7 @@ function rfc(){
 
 // ========== Tab 1 · A-2 · 人工打标三层折叠矩阵 ==========
 // 展开状态缓存
-var _markExpanded = { cell: null, reason: null }; // cell: '经营模式_keep', reason: '经营模式_keep_会员占比超过50%'
+var _markExpanded = { activeClass: null }; // 当前激活的分类 tab: 'keep'|'progress'|'nofb'|'offline'|null
 
 // 四要素 × 分类 的规则 (复制自 rsop 内部, 保持一致)
 const _mkIssue2Field = {'经营模式':'screen_biz','货盘':'screen_price','基建-商户号':'screen_infra','基建-门店':'screen_store'};
@@ -1712,37 +1712,49 @@ function rfcmark(){
   if (!el) return;
   const M = _mkBuildMatrix();
 
-  // ===== 第一层: 矩阵表 =====
-  let h = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:separate;border-spacing:4px;font-size:12px">';
-  h += '<thead><tr><th style="padding:8px;text-align:left;color:#64748b;font-weight:600">维度</th>';
-  _mkClasses.forEach(cls => {
-    const cc = _mkClsColor[cls];
-    h += '<th style="padding:8px;text-align:center;color:'+cc.fg+';font-weight:700;background:'+cc.bg+';border:1px solid '+cc.bd+';border-radius:6px">'+cc.label+'</th>';
-  });
-  h += '</tr></thead><tbody>';
-  _mkIssues.forEach(iss => {
-    h += '<tr><td style="padding:8px;font-weight:700;color:'+_mkIssueColor[iss]+';border-left:3px solid '+_mkIssueColor[iss]+';background:#f8fafc">'+iss+'</td>';
-    _mkClasses.forEach(cls => {
-      const n = M[iss][cls].length;
-      const cc = _mkClsColor[cls];
-      const key = iss + '_' + cls;
-      const active = _markExpanded.cell === key;
-      const cursor = n > 0 ? 'pointer' : 'default';
-      const click = n > 0 ? 'onclick="_mkToggleCell(\''+key+'\')"' : '';
-      h += '<td style="padding:14px 8px;text-align:center;cursor:'+cursor+';background:'+(active?'#dbeafe':'#fff')+';border:1px solid '+(active?'#2563eb':cc.bd)+';border-radius:6px;transition:all .2s" '+click+'>'+
-        '<div style="font-size:22px;font-weight:800;color:'+(n>0?cc.fg:'#cbd5e1')+'">'+n+'</div>'+
-        (n>0 ? '<div style="font-size:10px;color:#94a3b8;margin-top:2px">点击展开 ▾</div>' : '<div style="font-size:10px;color:#cbd5e1;margin-top:2px">—</div>') +
-      '</td>';
-    });
-    h += '</tr>';
-  });
-  h += '</tbody></table></div>';
+  // ===== 动态计算哪些分类当前有数据 =====
+  const clsCount = {nofb:0, keep:0, progress:0, offline:0};
+  _mkIssues.forEach(iss => _mkClasses.forEach(cls => { clsCount[cls] += M[iss][cls].length; }));
+  const activeClasses = _mkClasses.filter(c => clsCount[c] > 0);
 
-  // ===== 第二层: 二级原因聚合 =====
-  if (_markExpanded.cell){
-    const [iss, cls] = _markExpanded.cell.split('_');
+  // 合规分类全集（除当前有的之外，还要"偷偷监测"nofb/progress/offline 是否冒头）
+  // 如果 keep 以外的任一分类 >0，顶部加 ⚠️ highlight
+  const unexpectedCls = activeClasses.filter(c => c !== 'keep' && clsCount[c] > 0);
+
+  // 活跃分类 tab 切换状态
+  if (!_markExpanded.activeClass || clsCount[_markExpanded.activeClass] === 0){
+    _markExpanded.activeClass = activeClasses[0] || null;
+  }
+
+  let h = '';
+  // ===== 头部: 分类 tab =====
+  if (activeClasses.length === 0){
+    el.innerHTML = '<div style="padding:40px;text-align:center;color:#94a3b8;font-size:12px">当前无任何人工打标数据</div>';
+    return;
+  }
+  h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">';
+  h += '<span style="font-size:11px;color:#64748b">分类：</span>';
+  activeClasses.forEach(cls => {
     const cc = _mkClsColor[cls];
-    const items = M[iss][cls];
+    const active = _markExpanded.activeClass === cls;
+    h += '<button onclick="_mkPickCls(\''+cls+'\')" style="padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;border:1px solid '+(active?cc.fg:cc.bd)+';background:'+(active?cc.bg:'#fff')+';color:'+(active?cc.fg:'#475569')+';font-weight:'+(active?'700':'500')+'">'+cc.label+' <b>'+clsCount[cls]+'</b></button>';
+  });
+  // 提醒 bar
+  if (unexpectedCls.length > 0){
+    h += '<div style="margin-left:auto;padding:5px 10px;background:#fef3c7;border:1px solid #fbbf24;border-radius:6px;font-size:11px;color:#92400e;font-weight:600">⚠️ 新出现：'+unexpectedCls.map(c=>_mkClsColor[c].label+' '+clsCount[c]).join(' · ')+' 需人工复核</div>';
+  }
+  h += '</div>';
+
+  // ===== 当前分类下: 按维度 + 原因的紧凑列表 =====
+  const curCls = _markExpanded.activeClass;
+  if (!curCls){ el.innerHTML = h; return; }
+  const cc = _mkClsColor[curCls];
+
+  // 按 issue 分组, 每 issue 下按 reason 再分组
+  h += '<div style="display:flex;flex-direction:column;gap:14px">';
+  _mkIssues.forEach(iss => {
+    const items = M[iss][curCls];
+    if (!items.length) return;
     // 按 reason 聚合
     const byReason = {};
     items.forEach(it => {
@@ -1750,45 +1762,37 @@ function rfcmark(){
       if (!byReason[r]) byReason[r] = [];
       byReason[r].push(it);
     });
-    h += '<div style="margin-top:14px;padding:12px;background:'+cc.bg+';border:1px solid '+cc.bd+';border-radius:8px">';
-    h += '<div style="font-size:12px;font-weight:700;color:'+cc.fg+';margin-bottom:10px">🔍 '+iss+' · '+cc.label+' · <b>'+items.length+'</b> 家 · 按原因分组：</div>';
     const reasons = Object.keys(byReason).sort((a,b) => byReason[b].length - byReason[a].length);
-    reasons.forEach(reason => {
+
+    h += '<div style="border:1px solid '+cc.bd+';border-radius:8px;overflow:hidden">';
+    // issue 标题条
+    h += '<div style="padding:8px 12px;background:'+cc.bg+';display:flex;align-items:center;justify-content:space-between">' +
+         '<div style="font-size:12px;font-weight:700;color:'+_mkIssueColor[iss]+'">● '+iss+'</div>' +
+         '<div style="font-size:11px;color:'+cc.fg+';font-weight:600">'+items.length+' 家</div>' +
+         '</div>';
+    // 原因分组
+    h += '<div style="background:#fff">';
+    reasons.forEach((reason, ri) => {
       const brands = byReason[reason];
-      const rkey = _markExpanded.cell + '_' + reason;
-      const active = _markExpanded.reason === rkey;
-      h += '<div style="margin-bottom:6px">' +
-        '<div onclick="_mkToggleReason(\''+rkey.replace(/'/g,"\\\'")+'\')" style="cursor:pointer;padding:8px 12px;background:#fff;border:1px solid '+cc.bd+';border-radius:6px;display:flex;justify-content:space-between;align-items:center">' +
-          '<div><span style="color:'+cc.fg+';font-weight:600;margin-right:8px">'+(active?'▾':'▸')+'</span><span style="font-size:12px;color:#1e293b">'+reason+'</span></div>' +
-          '<div style="font-size:11px;color:#64748b"><b style="color:'+cc.fg+';font-size:14px">'+brands.length+'</b> 家</div>' +
-        '</div>';
-      // 第三层: 品牌列表
-      if (active){
-        h += '<div style="margin-top:6px;padding:10px;background:#fff;border:1px dashed '+cc.bd+';border-radius:6px">' +
-          '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px">' +
-          brands.map(b => '<div style="background:#f8fafc;border-radius:6px;padding:10px">' +
-            '<div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:4px">'+b.name+'</div>' +
-            '<div style="font-size:10px;color:#64748b;margin-bottom:4px">'+(b.sp||'—')+' · ID '+b.bid+'</div>' +
-            '<div style="font-size:11px;color:#475569">'+b.metric+'</div>' +
-          '</div>').join('') +
-          '</div>' +
-        '</div>';
-      }
-      h += '</div>';
+      h += '<div style="'+(ri>0?'border-top:1px solid #f1f5f9;':'')+'padding:10px 12px">' +
+        '<div style="font-size:12px;color:#1e293b;margin-bottom:6px">' +
+          '<b>'+reason+'</b><span style="color:#94a3b8;font-weight:400;margin-left:6px">'+brands.length+' 家</span>' +
+        '</div>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:4px 10px;font-size:11px;color:#475569">' +
+          brands.map(b => '<span style="white-space:nowrap"><b style="color:#1e293b">'+b.name+'</b><span style="color:#94a3b8;margin-left:4px">· '+(b.sp||'—')+'</span></span>').join('<span style="color:#cbd5e1">|</span>') +
+        '</div>' +
+      '</div>';
     });
     h += '</div>';
-  }
+    h += '</div>';
+  });
+  h += '</div>';
 
   el.innerHTML = h;
 }
 
-function _mkToggleCell(key){
-  _markExpanded.cell = (_markExpanded.cell === key) ? null : key;
-  _markExpanded.reason = null;
-  rfcmark();
-}
-function _mkToggleReason(key){
-  _markExpanded.reason = (_markExpanded.reason === key) ? null : key;
+function _mkPickCls(c){
+  _markExpanded.activeClass = c;
   rfcmark();
 }
 
