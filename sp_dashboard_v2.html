@@ -97,7 +97,6 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
       <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
           <div style="font-size:13px;font-weight:700;color:#1e293b">📊 存活率趋势</div>
-          <div style="font-size:10px;color:#94a3b8">当日存活 / 当日在线</div>
         </div>
         <div id="introAliveChart" style="width:100%;height:300px"></div>
       </div>
@@ -187,7 +186,6 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
 
 <!-- ========== Tab 2: 活动明细（iframe）========== -->
 <div class="P" id="t2">
-  <div style="margin:-8px 0 8px 0;font-size:11px;color:#64748b">📌 活动明细实时看板（来自 <code>act-temp.pages.dev</code>）</div>
   <iframe src="https://v2-frontend.act-temp.pages.dev?embed=1" style="width:100%;height:calc(100vh - 180px);min-height:680px;border:0;border-radius:6px;background:#fff"></iframe>
 </div>
 
@@ -1602,20 +1600,22 @@ function rintro(D){
     yAxis: [
       {
         type: 'value',
-        name: '家',
+        name: '存活',
         position: 'left',
-        nameTextStyle: {fontSize: 10, color: '#94a3b8', padding: [0,20,0,0]},
-        axisLabel: {fontSize: 10, color: '#64748b', margin: 12},
+        nameTextStyle: {fontSize: 11, color: '#10b981', fontWeight: 600, align: 'right'},
+        nameGap: 22,
+        axisLabel: {fontSize: 10, color: '#10b981'},
         splitLine: {lineStyle: {color: '#e2e8f0', type: 'dashed'}},
         scale: true,
         min: 0
       },
       {
         type: 'value',
-        name: '%',
+        name: '存活率',
         position: 'right',
-        nameTextStyle: {fontSize: 10, color: '#94a3b8', padding: [0,0,0,20]},
-        axisLabel: {fontSize: 10, color: '#64748b', margin: 12, formatter: '{value}%'},
+        nameTextStyle: {fontSize: 11, color: '#0369a1', fontWeight: 600, align: 'left'},
+        nameGap: 22,
+        axisLabel: {fontSize: 10, color: '#0369a1', formatter: '{value}%'},
         splitLine: {show: false},
         scale: true,
         min: 0
