@@ -134,9 +134,14 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
     <div class="ST">📦 B · 上线后 · 达标商户置顶</div>
     <!-- B-1 总览 4 卡 -->
     <div id="pinKg" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px"></div>
-    <!-- B-2 象限图 + 数据源 tab（占位）-->
+    <!-- B-2 象限图 + 数据源 tab -->
     <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:12px">
-      <div id="pinQuadrant" style="color:#94a3b8;font-size:12px;padding:16px;text-align:center">象限图 + mock 数据源 tab — 待实现</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px">
+        <div style="font-size:13px;font-weight:700;color:#1e293b">📊 置顶流量象限 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:4px">X=老客尽曝/日均交易 · Y=到店核销率</span></div>
+        <div id="pinDsTabs" style="display:flex;gap:6px"></div>
+      </div>
+      <div id="pinQuadrantAlert" style="display:none;margin-bottom:10px;padding:8px 12px;background:#fef3c7;border:1px solid #fbbf24;border-radius:6px;font-size:12px;color:#92400e;line-height:1.5"></div>
+      <div id="pinQuadrant" style="width:100%;height:400px"></div>
     </div>
     <!-- B-3 品牌卡片池（占位）-->
     <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:12px">
@@ -234,7 +239,7 @@ async function loadDashboardData(targetDate) {
     fetchJSON('sop_snapshot', 'data_date=eq.' + targetDate + '&select=*'),
     fetchJSON('brand_top_records', 'select=*').catch(()=>[]),
     // 近 35 天精简字段（滚动 7 天窗口 + 上期对比）- 用分页避免 1000 上限
-    fetchAllParallel('brand_snapshot', 'select=data_date,brand_id,tier,sub_category,online_today,is_alive&data_date=gte.' + trendStart + '&data_date=lte.' + targetDate + '&order=data_date.asc').catch(()=>[]),
+    fetchAllParallel('brand_snapshot', 'select=data_date,brand_id,tier,sub_category,online_today,is_alive,hi_exp_uv_all,lo_exp_uv_all,visit_use_rate,daily_tx&data_date=gte.' + trendStart + '&data_date=lte.' + targetDate + '&order=data_date.asc').catch(()=>[]),
   ]);
 
   const spSummary = {};
@@ -1635,6 +1640,182 @@ function rpin(){
   el.innerHTML = html;
 }
 
+// ========== Tab 1 · B-2 · 置顶流量象限图（含数据源 tab）==========
+var _pinChart = null;
+var _pinDataSource = 'realtime'; // 'realtime' | 'mock'
+function _pinRenderDsTabs(){
+  const el = document.getElementById('pinDsTabs');
+  if (!el) return;
+  const tabs = [
+    {key:'realtime', label:'📡 实时数据', desc:'当日 hi_exp_uv_all + lo_exp_uv_all'},
+    {key:'mock',     label:'🔧 0420前7日UV估算 (mock)', desc:'0413-0419 老客UV 均值 / 7'}
+  ];
+  el.innerHTML = tabs.map(t =>
+    '<button onclick="_pinSwitchDs(\''+t.key+'\')" style="padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid '+
+    (_pinDataSource===t.key?'#2563eb':'#cbd5e1')+';background:'+
+    (_pinDataSource===t.key?'#eff6ff':'#fff')+';color:'+
+    (_pinDataSource===t.key?'#1d4ed8':'#475569')+';font-weight:'+
+    (_pinDataSource===t.key?'700':'500')+'">'+t.label+'</button>'
+  ).join('');
+}
+function _pinSwitchDs(k){
+  _pinDataSource = k;
+  _pinRenderDsTabs();
+  rpinq();
+}
+
+// 计算日均老客尽曝 (X 轴数值) - 根据数据源
+function _pinCalcX(b, dataSource, trendRows){
+  if (dataSource === 'realtime'){
+    // 当日 hi_exp_uv_all + lo_exp_uv_all / 日均交易笔数
+    const hi = (typeof b.hiExpUV_all === 'number' ? b.hiExpUV_all : null);
+    const lo = (typeof b.loExpUV_all === 'number' ? b.loExpUV_all : null);
+    if ((hi == null || hi === 0) && (lo == null || lo === 0)) return null;
+    const exp = (hi||0) + (lo||0);
+    const tx = b.dailyTx;
+    if (tx == null || tx <= 0) return null;
+    return exp / (tx * 10000);  // dailyTx 单位是"万笔"
+  } else {
+    // mock: 从 trendRows 取该 brand 的 0413-0419 hi_exp_uv_all + lo_exp_uv_all 均值 / 7
+    const bid = b.brandId;
+    const samples = (trendRows||[]).filter(r =>
+      String(r.brand_id)===String(bid) &&
+      r.data_date >= '2026-04-13' && r.data_date <= '2026-04-19' &&
+      r.hi_exp_uv_all != null
+    );
+    if (samples.length === 0) return null;
+    const avg = samples.reduce((s,r) => s + (r.hi_exp_uv_all||0) + (r.lo_exp_uv_all||0), 0) / samples.length;
+    const tx = b.dailyTx;
+    if (tx == null || tx <= 0) return null;
+    return avg / (tx * 10000);
+  }
+}
+
+function _median(arr){
+  if (!arr.length) return 0;
+  const s = [...arr].sort((a,b)=>a-b);
+  const m = Math.floor(s.length/2);
+  return s.length % 2 ? s[m] : (s[m-1]+s[m])/2;
+}
+
+function rpinq(){
+  const el = document.getElementById('pinQuadrant');
+  if (!el) return;
+  _pinRenderDsTabs();
+
+  const TR = (window._D && window._D.topRecords) || [];
+  const trendRows = (window._D && window._D.trendRows) || [];
+  const topBids = new Set(TR.map(r => String(r.brand_id)));
+
+  // 口径：腰部 × 餐饮 × 日报在线 × 已置顶
+  const online = (BS||[]).filter(b =>
+    b.tierManual === '腰部' && INTRO_CATERING.has(b.cat4) && b.onlineToday === true
+  );
+  const pinnedOnline = online.filter(b => topBids.has(String(b.brandId)));
+
+  // 计算每个品牌 (x, y)
+  const points = [];
+  pinnedOnline.forEach(b => {
+    const x = _pinCalcX(b, _pinDataSource, trendRows);
+    const y = b.visitUseRate;
+    if (x == null || y == null) return;
+    points.push({name: b.name, bid: b.brandId, sp: b.spMapped, x: x, y: y, b: b});
+  });
+
+  // 数据源提示条
+  const alert = document.getElementById('pinQuadrantAlert');
+  if (_pinDataSource === 'mock'){
+    alert.style.display = 'block';
+    alert.innerHTML = '⚠️ <b>当前为 mock 数据</b>：老客日均尽曝PV字段暂无；7日累计UV自 0420 起产品 bug 缺失。临时用 <b>0413-0419 (高频+低频)尽曝UV 均值 / 日均交易笔数</b> 估算老客曝光。<br>底表恢复后自动切回实时数据源。';
+  } else {
+    alert.style.display = 'block';
+    alert.innerHTML = '⚠️ <b>实时数据源 0420 起 hi_exp_uv_all / lo_exp_uv_all 字段因产品 bug 缺失</b>，当前象限内可能为空 → 请切换到 mock tab 查看 0413-0419 估算。';
+  }
+
+  if (points.length === 0){
+    if (typeof echarts !== 'undefined' && _pinChart){ _pinChart.dispose(); _pinChart = null; }
+    el.innerHTML = '<div style="padding:60px;text-align:center;color:#94a3b8;font-size:13px">暂无可用数据点（已置顶品牌 ' + pinnedOnline.length + ' 家，当前数据源下均无老客UV数据）<br><span style="font-size:11px">切换到 mock tab 查看估算</span></div>';
+    return;
+  }
+
+  // 中位数
+  const xMed = _median(points.map(p=>p.x));
+  const yMed = _median(points.map(p=>p.y));
+
+  // 四象限分类
+  const cls = function(p){
+    if (p.x >= xMed && p.y >= yMed) return 'A'; // 健康
+    if (p.x >= xMed && p.y <  yMed) return 'B'; // 有量无转化
+    if (p.x <  xMed && p.y >= yMed) return 'C'; // 转化强缺量
+    return 'D'; // 双低
+  };
+  const color = {A:'#059669', B:'#d97706', C:'#2563eb', D:'#dc2626'};
+  const groups = {A:[], B:[], C:[], D:[]};
+  points.forEach(p => groups[cls(p)].push([p.x, p.y, p.name, p.sp, p.bid]));
+
+  if (typeof echarts === 'undefined'){
+    el.innerHTML = '<div style="color:#dc2626;padding:20px">ECharts 未加载</div>';
+    return;
+  }
+  if (_pinChart){ _pinChart.dispose(); }
+  el.innerHTML = '';
+  _pinChart = echarts.init(el);
+  _pinChart.setOption({
+    grid: {left: 60, right: 30, top: 30, bottom: 50},
+    tooltip: {
+      trigger: 'item',
+      formatter: function(p){
+        const d = p.data;
+        return '<b>'+d[2]+'</b><br>服务商: '+d[3]+
+               '<br>老客尽曝/日均交易: <b>'+d[0].toFixed(2)+'</b>'+
+               '<br>到店核销率: <b>'+d[1].toFixed(2)+'%</b>';
+      }
+    },
+    xAxis: {
+      type: 'value',
+      name: '老客尽曝 PV / 日均交易',
+      nameLocation: 'middle',
+      nameGap: 28,
+      nameTextStyle: {fontSize: 11, color: '#64748b'},
+      axisLabel: {fontSize: 10, color: '#64748b'},
+      splitLine: {lineStyle: {color: '#e2e8f0', type: 'dashed'}}
+    },
+    yAxis: {
+      type: 'value',
+      name: '到店核销率 %',
+      nameLocation: 'middle',
+      nameGap: 42,
+      nameTextStyle: {fontSize: 11, color: '#64748b'},
+      axisLabel: {fontSize: 10, color: '#64748b', formatter: '{value}%'},
+      splitLine: {lineStyle: {color: '#e2e8f0', type: 'dashed'}}
+    },
+    series: [
+      {name:'A 健康',          type:'scatter', symbolSize: 10, itemStyle:{color:color.A, opacity:0.8}, data: groups.A,
+       markLine: {silent:true, symbol:'none', label:{show:false}, lineStyle:{color:'#94a3b8', type:'dashed', width:1},
+         data: [{xAxis: xMed}, {yAxis: yMed}]}},
+      {name:'B 有量无转化',    type:'scatter', symbolSize: 10, itemStyle:{color:color.B, opacity:0.8}, data: groups.B},
+      {name:'C 转化强缺量',    type:'scatter', symbolSize: 10, itemStyle:{color:color.C, opacity:0.8}, data: groups.C},
+      {name:'D 双低',          type:'scatter', symbolSize: 10, itemStyle:{color:color.D, opacity:0.8}, data: groups.D}
+    ],
+    legend: {
+      top: 2, right: 10,
+      textStyle: {fontSize: 11, color: '#475569'},
+      icon: 'circle', itemWidth: 10, itemHeight: 10,
+      data: [
+        {name:'A 健康 ('+groups.A.length+')'},
+        {name:'B 有量无转化 ('+groups.B.length+')'},
+        {name:'C 转化强缺量 ('+groups.C.length+')'},
+        {name:'D 双低 ('+groups.D.length+')'}
+      ]
+    }
+  });
+  // 同步绑 resize
+  if (!window._pinResizeBound){
+    window._pinResizeBound = true;
+    window.addEventListener('resize', function(){ if (_pinChart) _pinChart.resize() });
+  }
+}
+
 let curS=null,sortD=1;function srt(f){if(curS===f)sortD*=-1;else{curS=f;sortD=1};rbt()}
 function rbt(){const fSP=document.getElementById('fSP').value,fOwner=document.getElementById('fOwner').value,fAsst=document.getElementById('fAsst').value,fCat=document.getElementById('fCat').value,fTier=document.getElementById('fTier').value,fSt=document.getElementById('fSt').value,fOnline=document.getElementById('fOnline').value,fScr=document.getElementById('fScr').value,fQ=document.getElementById('fQ').value.toLowerCase(),fM=document.getElementById('fMetric').value,fOp=document.getElementById('fOp').value,fVr=document.getElementById('fVal').value,fVn=fVr!==''?parseFloat(fVr):null;
 let fl=BS.filter(b=>{if(b.displayLevel==='ka_self')return false;if(fSP&&b.spMapped!==fSP)return false;if(fOwner&&b.owner!==fOwner)return false;if(fAsst&&b.assistant!==fAsst)return false;if(fCat&&b.cat4!==fCat)return false;if(fTier&&b.tierManual!==fTier)return false;if(fSt==='alive'&&b.isAlive!==true)return false;if(fSt==='dead'&&b.isAlive!==false)return false;if(fOnline==='online'&&b.onlineStatus!=='在线')return false;if(fOnline==='pending'&&b.onlineStatus!=='在线待确认')return false;if(fOnline==='nodata'&&b.onlineStatus!=='未更新')return false;if(fOnline==='lost'&&b.statusManual!=='流失')return false;if(fScr==='biz_f'&&b.bizOk!==false)return false;if(fScr==='price_f'&&b.priceOk!==false)return false;if(fScr==='infra_f'&&b.infraOk!==false)return false;if(fScr==='traffic_f'&&b.trafficOk!==false)return false;if(fScr==='all_p'&&!(b.bizOk===true&&b.priceOk===true&&b.infraOk===true&&b.trafficOk===true))return false;if(fScr==='no_data'&&b.hasDailyData)return false;if(fQ&&!b.name.toLowerCase().includes(fQ))return false;if(fM&&fVn!==null){const v=b[fM];if(v==null)return false;if(fOp==='lt'&&!(v<fVn))return false;if(fOp==='lte'&&!(v<=fVn))return false;if(fOp==='gt'&&!(v>fVn))return false;if(fOp==='gte'&&!(v>=fVn))return false}return true});
@@ -1687,7 +1868,7 @@ async function initDashboard(targetDate) {
     window._D=D;
 W=BS.filter(b=>b.tierManual==='腰部'),KA=BS.filter(b=>b.tierManual==='KA');
     actByBrand={};ACTS.forEach(a=>{const n=a.brandName;if(!actByBrand[n])actByBrand[n]=[];actByBrand[n].push(a)});
-const ss=[...new Set(BS.map(b=>b.spMapped))].sort();['fSP'].forEach(id=>{const s=document.getElementById(id);if(!s)return;ss.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o)})});[...new Set(BS.map(b=>b.owner).filter(Boolean))].sort().forEach(v=>{const s=document.getElementById('fOwner');if(s)s.innerHTML+=`<option value="${v}">${v}</option>`});[...new Set(BS.map(b=>b.assistant).filter(Boolean))].sort().forEach(v=>{const s=document.getElementById('fAsst');if(s)s.innerHTML+=`<option value="${v}">${v}</option>`});const catCnt={};BS.forEach(b=>{const c=b.cat4;if(c){catCnt[c]=(catCnt[c]||0)+1}});const cats=Object.keys(catCnt).filter(c=>catCnt[c]>=3).sort();['fCat'].forEach(id=>{const s=document.getElementById(id);if(!s)return;cats.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v+' ('+catCnt[v]+')';s.appendChild(o)})});rsop();rov();rintro(D);rfc();rpin();document.getElementById('loading').style.display='none'
+const ss=[...new Set(BS.map(b=>b.spMapped))].sort();['fSP'].forEach(id=>{const s=document.getElementById(id);if(!s)return;ss.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o)})});[...new Set(BS.map(b=>b.owner).filter(Boolean))].sort().forEach(v=>{const s=document.getElementById('fOwner');if(s)s.innerHTML+=`<option value="${v}">${v}</option>`});[...new Set(BS.map(b=>b.assistant).filter(Boolean))].sort().forEach(v=>{const s=document.getElementById('fAsst');if(s)s.innerHTML+=`<option value="${v}">${v}</option>`});const catCnt={};BS.forEach(b=>{const c=b.cat4;if(c){catCnt[c]=(catCnt[c]||0)+1}});const cats=Object.keys(catCnt).filter(c=>catCnt[c]>=3).sort();['fCat'].forEach(id=>{const s=document.getElementById(id);if(!s)return;cats.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v+' ('+catCnt[v]+')';s.appendChild(o)})});rsop();rov();rintro(D);rfc();rpin();rpinq();document.getElementById('loading').style.display='none'
 
     // ── 活动明细数据延迟加载（原 Tab2 → 现附录 Tab4）──
     const tabBtns = document.querySelectorAll('.tab');
