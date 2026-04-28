@@ -397,11 +397,13 @@ function rsop(){
   const S=SOP;
   const fv4=S.factors_v4||{};
   (document.getElementById('fcScrHost')||{innerHTML:''}).innerHTML=`
-    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-        <div style="font-size:13px;font-weight:700;color:#1e293b">📋 四要素待排查商户清单 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:4px">（<span id="scrHdrCnt">—</span> 个 · 口径 腰部×餐饮×日报在线）</span></div>
-      </div>
-      <div style="margin-bottom:10px">
+    <details style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px">
+      <summary style="cursor:pointer;list-style:none">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="font-size:13px;font-weight:700;color:#1e293b">📋 四要素待排查商户清单 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:4px">（<span id="scrHdrCnt">—</span> 个 · 口径 腰部×餐饮×日报在线）· 点击展开 ▾</span></div>
+        </div>
+      </summary>
+      <div style="margin-top:12px">
         <div class="fb"><span class="fl">筛选</span>
           <select id="scrSP" onchange="renderScreen()"><option value="">服务商</option></select>
           <select id="scrOwner" onchange="renderScreen()"><option value="">负责人</option></select>
@@ -410,7 +412,7 @@ function rsop(){
           <input id="scrQ" type="text" placeholder="搜索品牌" oninput="renderScreen()" style="width:100px">
         </div>
       </div>
-      <div class="tw" style="max-height:600px;overflow:auto;position:relative"><table id="scrTbl" class="an-tbl" style="font-size:13px"><thead style="position:sticky;top:0;z-index:2;background:#fff"><tr>
+      <div class="tw" style="max-height:600px;overflow:auto;position:relative;margin-top:8px"><table id="scrTbl" class="an-tbl" style="font-size:13px"><thead style="position:sticky;top:0;z-index:2;background:#fff"><tr>
         <th style="text-align:left;position:sticky;left:0;z-index:3;background:#f8fafc">品牌</th><th>品牌ID</th><th>服务商</th><th>负责人</th><th>助理</th><th>业态</th><th>存活</th>
         <th class="nc">门店数</th><th class="nc">日均交易</th><th class="nc">1店几笔</th><th class="nc">小程序占比</th><th class="nc">价格力</th><th class="nc">门店完整度</th><th>待排查问题</th>
         <th style="background:#b45852;color:#fff;min-width:130px">经营模式反馈</th>
@@ -422,10 +424,8 @@ function rsop(){
         <th style="min-width:160px;background:#0d9488;color:#fff">0412-0417反馈</th>
       </tr></thead><tbody></tbody></table></div>
       <div id="scrCnt" style="font-size:10px;color:var(--x4);margin-top:3px"></div>
-      ${(()=>{const dm=S.data_missing_brands||[];if(!dm.length)return'';
-        let rows='';dm.forEach(b=>{rows+='<tr><td style="padding:4px 8px;font-weight:600">'+b.name+'</td><td style="padding:4px 8px">'+(b.brandId||'—')+'</td><td style="padding:4px 8px">'+(b.sp||'—')+'</td><td style="padding:4px 8px">'+(b.owner||'—')+'</td><td style="padding:4px 8px">'+(b.assistant||'—')+'</td><td style="padding:4px 8px">'+(b.cat4||'—')+'</td><td style="padding:4px 8px">'+(b.isAlive===true?'<span class="bd b-ok">存活</span>':(b.isAlive===false?'<span class="bd b-d">未存活</span>':'—'))+'</td><td style="padding:4px 8px" class="nc">'+(b.storeCount!=null?b.storeCount:'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.dailyTx?b.dailyTx.toLocaleString():'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.txPerStore!=null?b.txPerStore:'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.miniApp!=null?_P(b.miniApp):'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.priceForce!=null?(b.priceForce>0?'+':'')+_P(b.priceForce).replace('—',''):'—')+'</td></tr>'});
-        return '<details style="margin-top:12px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--x4);margin-bottom:6px">⚠️ 小程序交易占比无数据品牌（'+dm.length+'个）— 待日报更新 ▾</summary><div class="tw"><table style="width:100%;font-size:11px;border-collapse:collapse"><thead><tr style="background:var(--x0)"><th style="padding:5px 8px;text-align:left">品牌</th><th style="padding:5px 8px">品牌ID</th><th style="padding:5px 8px">服务商</th><th style="padding:5px 8px">负责人</th><th style="padding:5px 8px">助理</th><th style="padding:5px 8px">业态</th><th style="padding:5px 8px">存活</th><th style="padding:5px 8px" class="nc">门店数</th><th style="padding:5px 8px" class="nc">日均交易</th><th style="padding:5px 8px" class="nc">1店几笔</th><th style="padding:5px 8px" class="nc">小程序占比</th><th style="padding:5px 8px" class="nc">价格力</th></tr></thead><tbody>'+rows+'</tbody></table></div></details>'})()}
-    </div>`;
+      <div id="scrMissing" style="font-size:11px;color:#d97706;margin-top:6px;padding:6px 10px;background:#fef3c7;border-radius:6px;display:none"></div>
+    </details>`;
 
   // 继续原 rsop 以下渲染（SCR 填充 + 监听等）——保留原逻辑
   // === 四要素扫描 ===
@@ -554,6 +554,40 @@ function rsop(){
     });
     document.getElementById('scrCnt').textContent=fl.length+'/'+SCR.length+' 品牌';
     var _sh=document.getElementById('scrHdrCnt');if(_sh)_sh.textContent=fl.length;
+    // 数据缺失商户备注：口径内(腰部×餐饮×在线) 但四要素任一为 null & 不在 scr_filtered 里的
+    var _missing=(BS||[]).filter(function(b){
+      if(b.tierManual!=='腰部')return false;
+      if(!INTRO_CATERING.has(b.cat4))return false;
+      if(b.onlineToday!==true)return false;
+      var hasNull=(b.bizOk===null||b.priceOk===null||b.infraOk===null||b.trafficOk===null||
+                   b.bizOk===undefined||b.priceOk===undefined||b.infraOk===undefined||b.trafficOk===undefined);
+      if(!hasNull)return false;
+      return true;
+    });
+    // 再加"系统漏判"：有 false 但未进 SCR 的
+    var _scrBids=new Set(fl.map(function(x){return String(x.brandId)}));
+    var _allScrBids=new Set((SCR||[]).map(function(x){return String(x.brandId)}));
+    var _gap=(BS||[]).filter(function(b){
+      if(b.tierManual!=='腰部')return false;
+      if(!INTRO_CATERING.has(b.cat4))return false;
+      if(b.onlineToday!==true)return false;
+      if(b.bizOk===true && b.priceOk===true && b.infraOk===true && b.trafficOk===true)return false; // 达标的不算
+      if(_allScrBids.has(String(b.brandId)))return false; // 已在 SCR 里的不算（无论是否被过滤）
+      if(b.bizOk===null||b.priceOk===null||b.infraOk===null||b.trafficOk===null)return false; // 已纳入 missing
+      return true;
+    });
+    var _total=_missing.length+_gap.length;
+    var _sm=document.getElementById('scrMissing');
+    if(_sm){
+      if(_total>0){
+        _sm.style.display='block';
+        _sm.innerHTML='⚠️ <b>'+_total+' 个数据缺失商户</b> 待底表更新：'+
+          _missing.concat(_gap).slice(0,10).map(function(b){return b.name}).join(' · ')+
+          (_total>10?' 等':'');
+      }else{
+        _sm.style.display='none';
+      }
+    }
     // 反馈汇总
     if(_fbLoaded){
       const bizC={},priceC={},infraC={};
