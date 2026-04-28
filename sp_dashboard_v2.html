@@ -74,7 +74,7 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
 @media(max-width:900px){.sop-factors{grid-template-columns:1fr}.kg{grid-template-columns:repeat(2,1fr)}}
 </style></head><body>
 <div id="loading" style="position:fixed;top:0;left:0;right:0;bottom:0;background:#eef2f7;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column"><div style="font-size:16px;color:#475569;font-weight:600">🍜 加载中...</div><div style="font-size:11px;color:#94a3b8;margin-top:6px">正在渲染数据</div></div>
-<div class="hdr" style="position:sticky;top:0;z-index:900;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><h1>🍜 餐饮服务商 · 运营看板</h1><p>数据 <span id="hdrDataDate">加载中...</span> · v6.0 重构版</p></div><div style="padding:4px 8px"><select id="dateSelector" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px"></select></div></div><div class="W">
+<div class="hdr" style="position:sticky;top:0;z-index:900;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><h1>🍜 餐饮服务商 · 运营看板</h1><p>数据 <span id="hdrDataDate"></span></p></div><div style="padding:4px 8px"><select id="dateSelector" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px"></select></div></div><div class="W">
 <div class="tabs">
   <button class="tab on" onclick="stab(0)">📈 引入进度</button>
   <button class="tab" onclick="stab(1)">🎯 运营策略</button>
@@ -90,7 +90,7 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
       <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-          <div style="font-size:13px;font-weight:700;color:#1e293b">📈 投放品牌趋势</div>
+          <div style="font-size:13px;font-weight:700;color:#1e293b">📈 投放品牌趋势 <span id="introTrendWarn" style="display:none;margin-left:6px;font-size:12px;cursor:help;color:#d97706" title=""></span></div>
         </div>
         <div id="introTrendChart" style="width:100%;height:300px"></div>
       </div>
@@ -118,7 +118,7 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
 
   <!-- ========== 板块 A · 引入前 · 四要素检查 ========== -->
   <div class="S">
-    <div class="ST">🚀 A · 上线前 · 四要素检查 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:8px">口径：腰部 × 餐饮 × 当日在线</span></div>
+    <div class="ST">🚀 上线前 · 四要素检查 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:8px">口径：腰部 × 餐饮 × 当日在线</span></div>
     <!-- A-1 总览 4 卡 -->
     <div id="fcKg" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px"></div>
     <!-- A-2 人工打标三层折叠 -->
@@ -136,13 +136,13 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
 
   <!-- ========== 板块 B · 引入后 · 达标商户置顶 ========== -->
   <div class="S">
-    <div class="ST">🎯 B · 上线后 · 达标商户置顶</div>
+    <div class="ST">🎯 上线后 · 达标商户置顶</div>
     <!-- B-1 总览 2 卡 -->
     <div id="pinKg" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px"></div>
     <!-- B-2 象限图 + 数据源 tab -->
     <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:12px">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px">
-        <div style="font-size:13px;font-weight:700;color:#1e293b">📊 置顶流量象限 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:4px">X=老客尽曝/日均交易 · Y=到店核销率</span></div>
+        <div style="font-size:13px;font-weight:700;color:#1e293b">📊 置顶流量象限 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:4px">X=老客曝光占比（日均老客尽曝PV/日均交易） · Y=到店核销率</span></div>
         <div id="pinDsTabs" style="display:flex;gap:6px"></div>
       </div>
       <div id="pinQuadrantAlert" style="display:none"></div>
@@ -171,7 +171,7 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
 <!-- ========== Tab 2: 活动明细（iframe）========== -->
 <div class="P" id="t2">
   <div style="margin:-8px 0 8px 0;font-size:11px;color:#64748b">📌 活动明细实时看板（来自 <code>act-temp.pages.dev</code>）</div>
-  <iframe src="https://act-temp.pages.dev/" style="width:100%;height:calc(100vh - 180px);min-height:680px;border:0;border-radius:6px;background:#fff"></iframe>
+  <iframe src="https://v2-frontend.act-temp.pages.dev?embed=1" style="width:100%;height:calc(100vh - 180px);min-height:680px;border:0;border-radius:6px;background:#fff"></iframe>
 </div>
 
 <script>/**
@@ -1329,6 +1329,8 @@ function rintro(D){
   const deployed = wc.filter(b => b.statusManual === '在线' || b.statusManual === '流失').length;
   // 流失 = 已投放 - 当日在线（日报口径：跟进表腰部×餐饮投放池里今日不在线的）
   const lost = deployed - wc.filter(b => b.onlineToday === true).length;
+  // 跟进表在线 = 跟进表腰部×餐饮×status=在线（用于 0426+ 骤降提示：y=跟进表在线，x=y-日报在线）
+  const followOnlineCnt = wc.filter(b => b.statusManual === '在线').length;
   const totalTarget = (F && F.totalTarget) || 800;
   const deployedPct = totalTarget > 0 ? (deployed/totalTarget*100) : 0;
 
@@ -1338,6 +1340,21 @@ function rintro(D){
   const todayOnline = onlineBS.length;
   const todayAlive = aliveBS.length;
   const todayRate = todayOnline > 0 ? todayAlive/todayOnline : null;
+
+  // 0426 后在线骤降提示：若 targetDate >= 2026-04-26 且 跟进表在线 > 日报在线，挂⚠️悬浮
+  try {
+    const warnEl = document.getElementById('introTrendWarn');
+    if (warnEl){
+      if (targetDate >= '2026-04-26' && followOnlineCnt > todayOnline){
+        const y = followOnlineCnt, x = y - todayOnline;
+        warnEl.style.display = 'inline';
+        warnEl.textContent = '⚠️';
+        warnEl.title = '0426 起因周末线上全量上线周边，挤占线下流量，导致 '+x+' 个品牌曝光<100，被误判为流失。实际在线品牌 '+y+' 个（跟进表腰部×在线）';
+      } else {
+        warnEl.style.display = 'none';
+      }
+    }
+  } catch(e){}
 
   // 上周同期（仅绿线口径可算）
   const greenMap = _introGreenMap((D && D.trendRows) || []);
@@ -1519,20 +1536,29 @@ function rintro(D){
     if (!v || v.online === 0) return null;
     return +(v.alive/v.online*100).toFixed(1);
   });
+  const aliveCntSeries = xDates.map(function(d){
+    const v = aliveDaily[d];
+    return v ? v.alive : 0;
+  });
   const aliveEl = document.getElementById('introAliveChart');
   if (!aliveEl) return;
   if (_aliveChart){ _aliveChart.dispose(); _aliveChart = null; }
   _aliveChart = echarts.init(aliveEl);
   _aliveChart.setOption({
-    grid: {left: 48, right: 20, top: 36, bottom: 36},
+    grid: {left: 56, right: 56, top: 36, bottom: 36},
+    legend: {show: false},
     tooltip: {
       trigger: 'axis',
       formatter: function(params){
-        const p = params[0];
-        const d = p.axisValue;
+        const d = params[0].axisValue;
         const v = aliveDaily[d] || {online:0,alive:0};
-        return '<b>'+d+'</b><br>'+p.marker+'存活率: <b>'+p.value+'%</b>'+
-               '<br><span style="color:#94a3b8">存活 '+v.alive+' / 在线 '+v.online+'</span>';
+        let s = '<b>'+d+'</b>';
+        params.forEach(function(p){
+          const unit = p.seriesName === '存活率' ? '%' : '家';
+          s += '<br>'+p.marker+p.seriesName+': <b>'+p.value+unit+'</b>';
+        });
+        s += '<br><span style="color:#94a3b8">存活 '+v.alive+' / 在线 '+v.online+'</span>';
+        return s;
       }
     },
     xAxis: {
@@ -1543,18 +1569,42 @@ function rintro(D){
       axisLine: {lineStyle: {color: '#cbd5e1'}},
       axisTick: {show: false}
     },
-    yAxis: {
-      type: 'value',
-      name: '%',
-      nameTextStyle: {fontSize: 10, color: '#94a3b8', padding: [0,0,0,-10]},
-      axisLabel: {fontSize: 10, color: '#64748b', formatter: '{value}%'},
-      splitLine: {lineStyle: {color: '#e2e8f0', type: 'dashed'}},
-      scale: true,
-      min: 0
-    },
+    yAxis: [
+      {
+        type: 'value',
+        name: '家',
+        position: 'left',
+        nameTextStyle: {fontSize: 10, color: '#94a3b8', padding: [0,20,0,0]},
+        axisLabel: {fontSize: 10, color: '#64748b', margin: 12},
+        splitLine: {lineStyle: {color: '#e2e8f0', type: 'dashed'}},
+        scale: true,
+        min: 0
+      },
+      {
+        type: 'value',
+        name: '%',
+        position: 'right',
+        nameTextStyle: {fontSize: 10, color: '#94a3b8', padding: [0,0,0,20]},
+        axisLabel: {fontSize: 10, color: '#64748b', margin: 12, formatter: '{value}%'},
+        splitLine: {show: false},
+        scale: true,
+        min: 0
+      }
+    ],
     series: [{
+      name: '存活品牌数',
+      type: 'line',
+      yAxisIndex: 0,
+      smooth: false,
+      symbol: 'circle',
+      symbolSize: function(v, p){ return p.dataIndex === xDates.length-1 ? 8 : 4 },
+      lineStyle: {width: 2, color: '#10b981'},
+      itemStyle: {color: '#10b981'},
+      data: aliveCntSeries
+    },{
       name: '存活率',
       type: 'line',
+      yAxisIndex: 1,
       smooth: false,
       symbol: 'circle',
       symbolSize: function(v, p){ return p.dataIndex === xDates.length-1 ? 8 : 4 },
@@ -1632,7 +1682,7 @@ function rfc(){
   if (offlineN > 0) subOnline += '<br><span style="color:#94a3b8">（已扣除计划下线 '+offlineN+' 家）</span>';
   html += card('在线',       '📡', onlineCorrected, '家', subOnline, '#059669');
   html += card('系统全达标', '✅', allPass.length, '家', '经营 / 价格力 / 商户号 / 门店 全 ok', '#16a34a');
-  html += card('人工打标',   '🏷', keepN,  '家', '四要素失分 经人工打标合理保留', '#d97706');
+  html += card('人工打标',   '🏷', keepN,  '家', '四要素失分 经人工打标合理保留', '#0d9488');
   html += card('整改中',     '⚠️', pendingN, '家', '待跟进 + 未反馈 · 目标清 0'+(missingN>0?'<br><span style="color:#94a3b8">（数据缺失 '+missingN+' 家未计入）</span>':''), '#dc2626');
   el.innerHTML = html;
 }
@@ -1728,10 +1778,10 @@ function _mkBuildMatrix(){
 
     // 检查每个维度是否 null，只把 null 的维度归 missing
     const dimsNull = [];
-    if (b.bizOk == null) dimsNull.push(['经营模式', b.miniApp != null ? '小程序 '+b.miniApp.toFixed(1)+'%' : '数据缺失']);
-    if (b.priceOk == null) dimsNull.push(['货盘', b.priceForce != null ? '价格力 '+(b.priceForce>0?'+':'')+b.priceForce.toFixed(2)+'%' : '数据缺失']);
-    if (b.infraOk == null) dimsNull.push(['基建-商户号', b.txPerStore != null ? '1店几笔 '+b.txPerStore.toFixed(1) : '数据缺失']);
-    if (b.trafficOk == null) dimsNull.push(['基建-门店', b.storeComplete != null ? '完整度 '+b.storeComplete.toFixed(1)+'%' : '数据缺失']);
+    if (b.bizOk == null) dimsNull.push(['经营模式', (b.miniApp != null && !Number.isNaN(b.miniApp)) ? '小程序 '+b.miniApp.toFixed(1)+'%' : '数据缺失']);
+    if (b.priceOk == null) dimsNull.push(['货盘', (b.priceForce != null && !Number.isNaN(b.priceForce)) ? '价格力 '+(b.priceForce>0?'+':'')+b.priceForce.toFixed(2)+'%' : '数据缺失']);
+    if (b.infraOk == null) dimsNull.push(['基建-商户号', (b.txPerStore != null && !Number.isNaN(b.txPerStore)) ? '1店几笔 '+b.txPerStore.toFixed(1) : '数据缺失']);
+    if (b.trafficOk == null) dimsNull.push(['基建-门店', (b.storeComplete != null && !Number.isNaN(b.storeComplete)) ? '完整度 '+b.storeComplete.toFixed(1)+'%' : '数据缺失']);
     if (!dimsNull.length) return;
     dimsNull.forEach(pair => {
       const iss = pair[0], metric = pair[1];
@@ -1767,7 +1817,7 @@ function rfcmark(){
     h += '<button onclick="_mkPickCls(\''+cls+'\')" style="padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer;border:'+(isHl?'2px':'1px')+' solid '+(active?cc.fg:(isHl?cc.fg:cc.bd))+';background:'+(active?cc.bg:(isHl?cc.bg:'#fff'))+';color:'+(active?cc.fg:(isHl?cc.fg:'#475569'))+';font-weight:'+(active||isHl?'700':'500')+';position:relative">'+cc.label+' <b>'+clsCount[cls]+'</b>'+(isHl?'<span style="position:absolute;top:-4px;right:-4px;width:8px;height:8px;background:'+cc.fg+';border-radius:50%;border:2px solid #fff"></span>':'')+'</button>';
   });
   if (hasAbnormal){
-    h += '<span style="margin-left:6px;padding:4px 10px;background:#fef3c7;border-radius:12px;font-size:11px;color:#92400e;font-weight:600">⚠️ 非 keep 分类有数据，需人工复核</span>';
+    h += '<span style="margin-left:6px;padding:4px 10px;background:#fef3c7;border-radius:12px;font-size:11px;color:#92400e;font-weight:600">⚠️ 非"可保留"分类有数据，需跟进</span>';
   }
   h += '</div>';
 
@@ -1886,18 +1936,19 @@ function rpin(){
   };
   const isPass = b => (b.bizOk===true && b.priceOk===true && b.infraOk===true && b.trafficOk===true) || hasMark(b);
 
-  // 达标 & 已置顶
-  const passPinned = online.filter(b => isPass(b) && topBids.has(String(b.brandId)));
-  // 达标 & 未置顶
-  const passUnpinned = online.filter(b => isPass(b) && !topBids.has(String(b.brandId)));
-  // 已置顶 & 不达标（仍在线但未达标）
-  const pinnedNotPass = online.filter(b => topBids.has(String(b.brandId)) && !isPass(b));
-  // 已置顶 & 不在线：topRecords 里有 brand_id 但不在当日 online 集合里
-  const onlineBids = new Set(online.map(b => String(b.brandId)));
-  const pinnedOffline = Array.from(topBids).filter(bid => !onlineBids.has(bid));
+  // 已置顶（以 topBids 为准, 50 坑位限制）
+  // 已置顶 & 在线 (日报在线)
+  const pinnedOnline = online.filter(b => topBids.has(String(b.brandId)));
+  // 已置顶 & 不在线：topRecords 里有但不在当日 online
+  const onlineBidsSet = new Set(online.map(b => String(b.brandId)));
+  const pinnedOfflineBids = Array.from(topBids).filter(bid => !onlineBidsSet.has(bid));
+  const pinnedTotal = topBids.size;
 
-  const pinPct = TOP_QUOTA > 0 ? (topBids.size / TOP_QUOTA * 100) : 0;
-  const pinBarHtml = '<div style="margin-top:8px"><div style="height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden"><div style="height:100%;width:'+Math.min(pinPct,100).toFixed(1)+'%;background:linear-gradient(90deg,#10b981,#059669);transition:width .4s"></div></div><div style="font-size:11px;color:#64748b;margin-top:4px">占用 <b style="color:#059669">'+topBids.size+' / '+TOP_QUOTA+'</b> ('+pinPct.toFixed(1)+'%)</div></div>';
+  const pinPct = TOP_QUOTA > 0 ? (pinnedTotal / TOP_QUOTA * 100) : 0;
+  const pinBarHtml = '<div style="margin-top:10px"><div style="height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden"><div style="height:100%;width:'+Math.min(pinPct,100).toFixed(1)+'%;background:linear-gradient(90deg,#10b981,#059669);transition:width .4s"></div></div><div style="font-size:11px;color:#64748b;margin-top:4px">占用 <b style="color:#059669">'+pinnedTotal+' / '+TOP_QUOTA+'</b> · 在线 <b style="color:#059669">'+pinnedOnline.length+'</b> · 不在线 <b style="color:#dc2626">'+pinnedOfflineBids.length+'</b> <span style="color:#94a3b8">（曝光&lt;100）</span></div></div>';
+
+  // 未置顶 = 候补补位池：达标 & 未置顶
+  const passUnpinned = online.filter(b => isPass(b) && !topBids.has(String(b.brandId)));
 
   const card = function(label, icon, value, unit, sub, color){
     return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px 18px">' +
@@ -1910,8 +1961,8 @@ function rpin(){
 
   // 顶部 2 大卡（均匀分布）
   let html = '';
-  html += card('达标已置顶', '🎯', passPinned.length,   '家', pinBarHtml, '#059669');
-  html += card('达标未置顶', '⏳', passUnpinned.length, '家', '<div style="font-size:11px;color:#94a3b8;margin-top:6px">候补补位池 · 50 名额限制</div>', '#0891b2');
+  html += card('已置顶', '🎯', pinnedTotal,   '家', pinBarHtml, '#059669');
+  html += card('未置顶', '⏳', passUnpinned.length, '家', '<div style="font-size:11px;color:#94a3b8;margin-top:6px">候补补位池 · 50 名额限制</div>', '#0891b2');
   el.innerHTML = html;
 }
 
@@ -1941,7 +1992,7 @@ function _pinSwitchDs(k){
 
 // 计算日均老客尽曝 (X 轴数值) - 根据数据源
 function _pinCalcX(b, dataSource, trendRows){
-  // 公式: (7日高频尽曝UV + 7日低频尽曝UV) / 7 / 日均交易笔数
+  // 公式: 日均老客尽曝PV / 日均交易 = (7日高频尽曝UV + 7日低频尽曝UV) / 7 / 日均交易笔数
   // realtime: 当日 brand_snapshot 字段 (7日累计) —— 0420 起因产品 bug 缺失
   // mock:     0413-0419 期间 7日累计字段 取均值
   if (dataSource === 'realtime'){
@@ -2076,7 +2127,7 @@ function rpinq(){
     },
     xAxis: {
       type: 'value',
-      name: '老客曝光占比 (高频+低频尽曝UV/日均交易笔数)',
+      name: '老客曝光占比（日均老客尽曝PV/日均交易）',
       nameLocation: 'middle',
       nameGap: 28,
       nameTextStyle: {fontSize: 11, color: '#64748b'},
