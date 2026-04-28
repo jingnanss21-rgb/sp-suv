@@ -426,7 +426,7 @@ function rsop(){
       <div class="sop-factors">
         <div class="sf-card"><h5>📊 存活率 <span style="font-size:9px;font-weight:400;background:var(--b1);color:var(--b);padding:1px 5px;border-radius:3px;margin-left:4px">公线</span><span style="font-size:9px;font-weight:400;background:var(--g1);color:var(--g);padding:1px 5px;border-radius:3px;margin-left:4px">行业</span></h5><div class="sf-std">日均全渠道核销PV / 日均交易笔数 ≥ <span class="sv">1%</span><br><span style="color:var(--x4);font-size:10px">存活率 ≥ 1% 即为存活</span></div></div>
         <div class="sf-card"><h5>📡 老客流量 <span style="font-size:9px;font-weight:400;background:var(--b1);color:var(--b);padding:1px 5px;border-radius:3px;margin-left:4px">公线</span></h5><div class="sf-std">日均(高频+低频)尽曝PV / 日均交易笔数 ≥ <span class="sv">1</span><br><span style="color:var(--x4);font-size:10px">老客流量充分度 = 1:1</span></div></div>
-        <div class="sf-card"><h5>🏪 到店核销率 <span style="font-size:9px;font-weight:400;background:var(--g1);color:var(--g);padding:1px 5px;border-radius:3px;margin-left:4px">行业</span></h5><div class="sf-std">到店核销率 ≥ 餐饮腰部中位数 <span class="sv">${((()=>{const a=(BS||[]).filter(b=>b.tierManual==='腰部'&&INTRO_CATERING.has(b.cat4)&&b.onlineToday===true&&b.visitUseRate!=null).map(b=>b.visitUseRate).sort((x,y)=>x-y);if(!a.length)return '—';const m=Math.floor(a.length/2);return (a.length%2?a[m]:(a[m-1]+a[m])/2).toFixed(1)})())}%</span><br><span style="color:var(--x4);font-size:10px">按日报动态计算（筛在线腰部餐饮）</span></div></div>
+        <div class="sf-card"><h5>🏪 到店核销率 <span style="font-size:9px;font-weight:400;background:var(--g1);color:var(--g);padding:1px 5px;border-radius:3px;margin-left:4px">行业</span></h5><div class="sf-std">到店核销率 ≥ 腰部中位数 <span class="sv">${((()=>{const a=(BS||[]).filter(b=>b.tierManual==='腰部'&&b.onlineToday===true&&b.visitUseRate!=null).map(b=>b.visitUseRate).sort((x,y)=>x-y);if(!a.length)return '—';const m=Math.floor(a.length/2);return (a.length%2?a[m]:(a[m-1]+a[m])/2).toFixed(1)})())}%</span><br><span style="color:var(--x4);font-size:10px">按日报动态计算（筛腰部在线）</span></div></div>
       </div>
     </div>
   </div>`;
@@ -546,7 +546,7 @@ function rsop(){
     // screen_brands 本身 tierManual/online_today 为空, 从 BS 按 brandId 补
     const _bsMap={};(BS||[]).forEach(function(x){if(x&&x.brandId!=null)_bsMap[String(x.brandId)]=x;});
     let fl=SCR.filter(b=>{
-      if(!INTRO_CATERING.has(b.cat4))return false; // 过滤餐饮类目
+      // 不再筛 cat4 (和 Tab0 一致, 只信跟进表)
       const bs=_bsMap[String(b.brandId)];
       if(!bs)return false;
       if(bs.tierManual!=='腰部')return false;
@@ -592,10 +592,9 @@ function rsop(){
     });
     document.getElementById('scrCnt').textContent=fl.length+'/'+SCR.length+' 品牌';
     var _sh=document.getElementById('scrHdrCnt');if(_sh)_sh.textContent=fl.length;
-    // 数据缺失商户备注：口径内(腰部×餐饮×在线) 但四要素任一为 null & 不在 scr_filtered 里的
+    // 数据缺失商户备注：口径内(腰部×跟进在线×日报在线) 但四要素任一为 null & 不在 scr_filtered 里的
     var _missing=(BS||[]).filter(function(b){
       if(b.tierManual!=='腰部')return false;
-      if(!INTRO_CATERING.has(b.cat4))return false;
       if(b.onlineToday!==true)return false;
       var hasNull=(b.bizOk===null||b.priceOk===null||b.infraOk===null||b.trafficOk===null||
                    b.bizOk===undefined||b.priceOk===undefined||b.infraOk===undefined||b.trafficOk===undefined);
@@ -607,7 +606,6 @@ function rsop(){
     var _allScrBids=new Set((SCR||[]).map(function(x){return String(x.brandId)}));
     var _gap=(BS||[]).filter(function(b){
       if(b.tierManual!=='腰部')return false;
-      if(!INTRO_CATERING.has(b.cat4))return false;
       if(b.onlineToday!==true)return false;
       if(b.bizOk===true && b.priceOk===true && b.infraOk===true && b.trafficOk===true)return false; // 达标的不算
       if(_allScrBids.has(String(b.brandId)))return false; // 已在 SCR 里的不算（无论是否被过滤）
@@ -1280,7 +1278,6 @@ function _introGreenMap(trendRows){
   (trendRows||[]).forEach(function(r){
     if (!r) return;
     if (r.tier !== '腰部') return;
-    if (!INTRO_CATERING.has(r.sub_category)) return;
     if (r.online_today !== true) return;
     const d = r.data_date;
     if (!m[d]) m[d] = new Set();
@@ -1558,7 +1555,6 @@ function rintro(D){
   (D.trendRows||[]).forEach(function(r){
     if (!r) return;
     if (r.tier !== '腰部') return;
-    if (!INTRO_CATERING.has(r.sub_category)) return;
     if (r.online_today !== true) return;
     const d = r.data_date;
     if (!aliveDaily[d]) aliveDaily[d] = {online:0, alive:0};
@@ -1660,7 +1656,6 @@ function rfc(){
   // 口径：腰部 × 餐饮 × 跟进表 status='在线'（过滤流失和筹备中）× 日报 online_today
   const wc = (BS||[]).filter(b =>
     b.tierManual === '腰部' &&
-    INTRO_CATERING.has(b.cat4) &&
     b.statusManual === '在线'
   );
   const online = wc.filter(b => b.onlineToday === true);
@@ -1779,12 +1774,11 @@ function _mkBuildMatrix(){
   // 已在 SCR 中的品牌（按原逻辑分类: keep/progress/nofb/offline）
   const seenBids = new Set();
   SCR.forEach(b => {
-    // 过滤: 腰部×餐饮×跟进在线×日报在线
-    if (!INTRO_CATERING.has(b.cat4)) return;
+    // 过滤: 腰部×跟进在线×日报在线 (不再筛 cat4, 和 Tab0 对齐)
     const bs = _bsMap[String(b.brandId)];
     if (!bs) return;
     if (bs.tierManual !== '腰部') return;
-    if (bs.statusManual !== '在线') return; // 过滤流失和筹备中
+    if (bs.statusManual !== '在线') return;
     if (bs.onlineToday !== true) return;
 
     seenBids.add(String(b.brandId));
@@ -1805,7 +1799,6 @@ function _mkBuildMatrix(){
   // 数据缺失: 从 BS 里扫 符合口径 但四要素任一为 null 的品牌
   (BS||[]).forEach(b => {
     if (b.tierManual !== '腰部') return;
-    if (!INTRO_CATERING.has(b.cat4)) return;
     if (b.statusManual !== '在线') return;
     if (b.onlineToday !== true) return;
     if (seenBids.has(String(b.brandId))) return; // 已被 SCR 归类的跳过
@@ -1957,9 +1950,9 @@ function rpin(){
   const topBids = new Set(TR.map(r => String(r.brand_id)));
   const TOP_QUOTA = 50;
 
-  // 口径与 A-1 对齐：腰部 × 餐饮 × 日报在线
+  // 口径与 A-1 对齐：腰部 × 跟进在线 × 日报在线 (不筛 cat4)
   const online = (BS||[]).filter(b =>
-    b.tierManual === '腰部' && INTRO_CATERING.has(b.cat4) && b.onlineToday === true
+    b.tierManual === '腰部' && b.statusManual === '在线' && b.onlineToday === true
   );
   // 达标 = 系统全达标 OR 人工打标
   const hasMark = function(b){
@@ -2070,9 +2063,9 @@ function rpinq(){
   const trendRows = (window._D && window._D.trendRows) || [];
   const topBids = new Set(TR.map(r => String(r.brand_id)));
 
-  // 口径：腰部 × 餐饮 × 日报在线 × 已置顶
+  // 口径：腰部 × 跟进在线 × 日报在线 × 已置顶 (不筛 cat4, 和 Tab0/A-1 一致)
   const online = (BS||[]).filter(b =>
-    b.tierManual === '腰部' && INTRO_CATERING.has(b.cat4) && b.onlineToday === true
+    b.tierManual === '腰部' && b.statusManual === '在线' && b.onlineToday === true
   );
   const pinnedOnline = online.filter(b => topBids.has(String(b.brandId)));
 
@@ -2226,7 +2219,7 @@ function rpinc(){
   const topBids = new Set(TR.map(r => String(r.brand_id)));
 
   const online = (BS||[]).filter(b =>
-    b.tierManual === '腰部' && INTRO_CATERING.has(b.cat4) && b.onlineToday === true
+    b.tierManual === '腰部' && b.statusManual === '在线' && b.onlineToday === true
   );
   const pinnedOnline = online.filter(b => topBids.has(String(b.brandId)));
 
