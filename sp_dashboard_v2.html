@@ -120,10 +120,13 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
     <div class="ST">📦 A · 上线前 · 四要素检查 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:8px">口径：腰部 × 餐饮 × 当日在线</span></div>
     <!-- A-1 总览 4 卡 -->
     <div id="fcKg" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px"></div>
-    <!-- A-2 人工打标三层折叠（占位，下一步实现）-->
+    <!-- A-2 人工打标三层折叠 -->
     <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:12px">
-      <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:8px">🏷 人工打标明细</div>
-      <div id="fcMarkMatrix" style="color:#94a3b8;font-size:12px;padding:16px;text-align:center;background:#f8fafc;border-radius:6px">三层折叠矩阵 — 待实现</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-size:13px;font-weight:700;color:#1e293b">🏷 人工打标明细 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:4px">· 四要素 × 4 分类</span></div>
+        <div style="font-size:11px;color:#94a3b8">点击 cell 展开二级原因 · 再点原因展开品牌</div>
+      </div>
+      <div id="fcMarkMatrix"></div>
     </div>
     <!-- A-3 四要素待排查商户清单（保留原 scrTbl）-->
     <div id="fcScrHost" style="margin-top:12px"></div>
@@ -1593,6 +1596,169 @@ function rfc(){
   el.innerHTML = html;
 }
 
+// ========== Tab 1 · A-2 · 人工打标三层折叠矩阵 ==========
+// 展开状态缓存
+var _markExpanded = { cell: null, reason: null }; // cell: '经营模式_keep', reason: '经营模式_keep_会员占比超过50%'
+
+// 四要素 × 分类 的规则 (复制自 rsop 内部, 保持一致)
+const _mkIssue2Field = {'经营模式':'screen_biz','货盘':'screen_price','基建-商户号':'screen_infra','基建-门店':'screen_store'};
+const _mkKeepRules = {
+  '经营模式': ['会员占比超过50%','沟通确认后希望在线','准备切代金券投放','代金券投放中'],
+  '货盘': ['全场券','已更新更优货盘，价格力更新延迟'],
+  '基建-商户号': ['经营规模小，1店<10笔合理'],
+  '基建-门店': ['公线真实门店不准需修正','服务商仅覆盖部分门店，已全部上传','已整改，待内部确认']
+};
+const _mkOffRules = {
+  '经营模式': ['不接受代金券，计划下线'],
+  '货盘': ['商家无法提供，计划下线'],
+  '基建-商户号': ['商家无法获取，计划下线'],
+  '基建-门店': ['商家无法上传，计划下线']
+};
+const _mkProgRules = {
+  '经营模式': ['沟通确认中','已沟通，整改中','已沟通，未回复'],
+  '货盘': ['沟通确认中','已沟通，整改中','已沟通，未回复'],
+  '基建-商户号': ['沟通确认中','基建沟通中','已沟通，整改中','已沟通，未回复','总部拿不到商户号，待沟通pos商或门店给420单号方案'],
+  '基建-门店': ['沟通确认中','已沟通，整改中','已沟通，未回复']
+};
+
+function _mkClassify(issue, val){
+  if (!val) return 'nofb';
+  if ((_mkOffRules[issue]||[]).includes(val)) return 'offline';
+  if ((_mkKeepRules[issue]||[]).includes(val)) return 'keep';
+  if ((_mkProgRules[issue]||[]).includes(val)) return 'progress';
+  return 'progress'; // 默认走待跟进
+}
+
+const _mkClsColor = {
+  'nofb':    {bg:'#f8fafc', bd:'#e2e8f0', fg:'#64748b', label:'未反馈'},
+  'keep':    {bg:'#ecfdf5', bd:'#a7f3d0', fg:'#059669', label:'可保留'},
+  'progress':{bg:'#fffbeb', bd:'#fde68a', fg:'#d97706', label:'待跟进'},
+  'offline': {bg:'#fef2f2', bd:'#fecaca', fg:'#dc2626', label:'计划下线'}
+};
+const _mkIssueColor = {'经营模式':'#c07064','货盘':'#c09e64','基建-商户号':'#6a9ab8','基建-门店':'#7c7ef0'};
+const _mkIssues = ['经营模式','货盘','基建-商户号','基建-门店'];
+const _mkClasses = ['nofb','keep','progress','offline'];
+
+// 聚合: {issue: {cls: [{bid, name, sp, reason, metric}, ...]}}
+function _mkBuildMatrix(){
+  const matrix = {};
+  _mkIssues.forEach(iss => {
+    matrix[iss] = {nofb:[], keep:[], progress:[], offline:[]};
+  });
+  // 取原 screen_brands (SOP.screen_brands 里是 SCR), 但也按 Tab 0 口径过滤
+  const SCR = (SOP && SOP.screen_brands) || [];
+  const _bsMap = {};
+  (BS||[]).forEach(x => { if (x && x.brandId != null) _bsMap[String(x.brandId)] = x; });
+  SCR.forEach(b => {
+    // 过滤: 腰部×餐饮×日报在线 (对齐 Tab 0)
+    if (!INTRO_CATERING.has(b.cat4)) return;
+    const bs = _bsMap[String(b.brandId)];
+    if (!bs) return;
+    if (bs.tierManual !== '腰部') return;
+    if (bs.onlineToday !== true) return;
+
+    (b.issues||[]).forEach(iss => {
+      if (!_mkIssues.includes(iss)) return;
+      const fkey = _mkIssue2Field[iss];
+      const val = (_fbCache[b.brandId+'_'+fkey]||'').trim();
+      const cls = _mkClassify(iss, val);
+      // metric: 当前数值
+      let metric = '';
+      if (iss === '经营模式') metric = b.miniApp != null ? '小程序 '+b.miniApp.toFixed(1)+'%' : '—';
+      else if (iss === '货盘') metric = b.priceForce != null ? '价格力 '+(b.priceForce>0?'+':'')+b.priceForce.toFixed(2)+'%' : '—';
+      else if (iss === '基建-商户号') metric = b.txPerStore != null ? '1店几笔 '+b.txPerStore.toFixed(1) : '—';
+      else if (iss === '基建-门店') metric = b.storeComplete != null ? '完整度 '+b.storeComplete.toFixed(1)+'%' : '—';
+      matrix[iss][cls].push({bid:b.brandId, name:b.name, sp:b.sp, reason:val, metric:metric});
+    });
+  });
+  return matrix;
+}
+
+function rfcmark(){
+  const el = document.getElementById('fcMarkMatrix');
+  if (!el) return;
+  const M = _mkBuildMatrix();
+
+  // ===== 第一层: 矩阵表 =====
+  let h = '<div style="overflow-x:auto"><table style="width:100%;border-collapse:separate;border-spacing:4px;font-size:12px">';
+  h += '<thead><tr><th style="padding:8px;text-align:left;color:#64748b;font-weight:600">维度</th>';
+  _mkClasses.forEach(cls => {
+    const cc = _mkClsColor[cls];
+    h += '<th style="padding:8px;text-align:center;color:'+cc.fg+';font-weight:700;background:'+cc.bg+';border:1px solid '+cc.bd+';border-radius:6px">'+cc.label+'</th>';
+  });
+  h += '</tr></thead><tbody>';
+  _mkIssues.forEach(iss => {
+    h += '<tr><td style="padding:8px;font-weight:700;color:'+_mkIssueColor[iss]+';border-left:3px solid '+_mkIssueColor[iss]+';background:#f8fafc">'+iss+'</td>';
+    _mkClasses.forEach(cls => {
+      const n = M[iss][cls].length;
+      const cc = _mkClsColor[cls];
+      const key = iss + '_' + cls;
+      const active = _markExpanded.cell === key;
+      const cursor = n > 0 ? 'pointer' : 'default';
+      const click = n > 0 ? 'onclick="_mkToggleCell(\''+key+'\')"' : '';
+      h += '<td style="padding:14px 8px;text-align:center;cursor:'+cursor+';background:'+(active?'#dbeafe':'#fff')+';border:1px solid '+(active?'#2563eb':cc.bd)+';border-radius:6px;transition:all .2s" '+click+'>'+
+        '<div style="font-size:22px;font-weight:800;color:'+(n>0?cc.fg:'#cbd5e1')+'">'+n+'</div>'+
+        (n>0 ? '<div style="font-size:10px;color:#94a3b8;margin-top:2px">点击展开 ▾</div>' : '<div style="font-size:10px;color:#cbd5e1;margin-top:2px">—</div>') +
+      '</td>';
+    });
+    h += '</tr>';
+  });
+  h += '</tbody></table></div>';
+
+  // ===== 第二层: 二级原因聚合 =====
+  if (_markExpanded.cell){
+    const [iss, cls] = _markExpanded.cell.split('_');
+    const cc = _mkClsColor[cls];
+    const items = M[iss][cls];
+    // 按 reason 聚合
+    const byReason = {};
+    items.forEach(it => {
+      const r = it.reason || '(未填)';
+      if (!byReason[r]) byReason[r] = [];
+      byReason[r].push(it);
+    });
+    h += '<div style="margin-top:14px;padding:12px;background:'+cc.bg+';border:1px solid '+cc.bd+';border-radius:8px">';
+    h += '<div style="font-size:12px;font-weight:700;color:'+cc.fg+';margin-bottom:10px">🔍 '+iss+' · '+cc.label+' · <b>'+items.length+'</b> 家 · 按原因分组：</div>';
+    const reasons = Object.keys(byReason).sort((a,b) => byReason[b].length - byReason[a].length);
+    reasons.forEach(reason => {
+      const brands = byReason[reason];
+      const rkey = _markExpanded.cell + '_' + reason;
+      const active = _markExpanded.reason === rkey;
+      h += '<div style="margin-bottom:6px">' +
+        '<div onclick="_mkToggleReason(\''+rkey.replace(/'/g,"\\\'")+'\')" style="cursor:pointer;padding:8px 12px;background:#fff;border:1px solid '+cc.bd+';border-radius:6px;display:flex;justify-content:space-between;align-items:center">' +
+          '<div><span style="color:'+cc.fg+';font-weight:600;margin-right:8px">'+(active?'▾':'▸')+'</span><span style="font-size:12px;color:#1e293b">'+reason+'</span></div>' +
+          '<div style="font-size:11px;color:#64748b"><b style="color:'+cc.fg+';font-size:14px">'+brands.length+'</b> 家</div>' +
+        '</div>';
+      // 第三层: 品牌列表
+      if (active){
+        h += '<div style="margin-top:6px;padding:10px;background:#fff;border:1px dashed '+cc.bd+';border-radius:6px">' +
+          '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px">' +
+          brands.map(b => '<div style="background:#f8fafc;border-radius:6px;padding:10px">' +
+            '<div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:4px">'+b.name+'</div>' +
+            '<div style="font-size:10px;color:#64748b;margin-bottom:4px">'+(b.sp||'—')+' · ID '+b.bid+'</div>' +
+            '<div style="font-size:11px;color:#475569">'+b.metric+'</div>' +
+          '</div>').join('') +
+          '</div>' +
+        '</div>';
+      }
+      h += '</div>';
+    });
+    h += '</div>';
+  }
+
+  el.innerHTML = h;
+}
+
+function _mkToggleCell(key){
+  _markExpanded.cell = (_markExpanded.cell === key) ? null : key;
+  _markExpanded.reason = null;
+  rfcmark();
+}
+function _mkToggleReason(key){
+  _markExpanded.reason = (_markExpanded.reason === key) ? null : key;
+  rfcmark();
+}
+
 // ========== Tab 1 · B-1 · 达标商户置顶总览 4 卡 ==========
 function rpin(){
   const el = document.getElementById('pinKg');
@@ -2066,7 +2232,7 @@ async function initDashboard(targetDate) {
     window._D=D;
 W=BS.filter(b=>b.tierManual==='腰部'),KA=BS.filter(b=>b.tierManual==='KA');
     actByBrand={};ACTS.forEach(a=>{const n=a.brandName;if(!actByBrand[n])actByBrand[n]=[];actByBrand[n].push(a)});
-const ss=[...new Set(BS.map(b=>b.spMapped))].sort();['fSP'].forEach(id=>{const s=document.getElementById(id);if(!s)return;ss.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o)})});[...new Set(BS.map(b=>b.owner).filter(Boolean))].sort().forEach(v=>{const s=document.getElementById('fOwner');if(s)s.innerHTML+=`<option value="${v}">${v}</option>`});[...new Set(BS.map(b=>b.assistant).filter(Boolean))].sort().forEach(v=>{const s=document.getElementById('fAsst');if(s)s.innerHTML+=`<option value="${v}">${v}</option>`});const catCnt={};BS.forEach(b=>{const c=b.cat4;if(c){catCnt[c]=(catCnt[c]||0)+1}});const cats=Object.keys(catCnt).filter(c=>catCnt[c]>=3).sort();['fCat'].forEach(id=>{const s=document.getElementById(id);if(!s)return;cats.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v+' ('+catCnt[v]+')';s.appendChild(o)})});rsop();rov();rintro(D);rfc();rpin();rpinq();rpinc();document.getElementById('loading').style.display='none'
+const ss=[...new Set(BS.map(b=>b.spMapped))].sort();['fSP'].forEach(id=>{const s=document.getElementById(id);if(!s)return;ss.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o)})});[...new Set(BS.map(b=>b.owner).filter(Boolean))].sort().forEach(v=>{const s=document.getElementById('fOwner');if(s)s.innerHTML+=`<option value="${v}">${v}</option>`});[...new Set(BS.map(b=>b.assistant).filter(Boolean))].sort().forEach(v=>{const s=document.getElementById('fAsst');if(s)s.innerHTML+=`<option value="${v}">${v}</option>`});const catCnt={};BS.forEach(b=>{const c=b.cat4;if(c){catCnt[c]=(catCnt[c]||0)+1}});const cats=Object.keys(catCnt).filter(c=>catCnt[c]>=3).sort();['fCat'].forEach(id=>{const s=document.getElementById(id);if(!s)return;cats.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v+' ('+catCnt[v]+')';s.appendChild(o)})});rsop();rov();rintro(D);rfc();rfcmark();rpin();rpinq();rpinc();document.getElementById('loading').style.display='none'
 
     // ── 活动明细数据延迟加载（原 Tab2 → 现附录 Tab4）──
     const tabBtns = document.querySelectorAll('.tab');
