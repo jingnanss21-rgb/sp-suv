@@ -147,8 +147,9 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
         <div style="font-size:13px;font-weight:700;color:#1e293b">📊 置顶流量象限 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:4px">X=老客尽曝/日均交易 · Y=到店核销率</span></div>
         <div id="pinDsTabs" style="display:flex;gap:6px"></div>
       </div>
-      <div id="pinQuadrantAlert" style="display:none;margin-bottom:10px;padding:8px 12px;background:#fef3c7;border:1px solid #fbbf24;border-radius:6px;font-size:12px;color:#92400e;line-height:1.5"></div>
+      <div id="pinQuadrantAlert" style="display:none"></div>
       <div id="pinQuadrant" style="width:100%;height:400px"></div>
+      <div id="pinQuadrantEmpty" style="display:none;margin-top:10px;padding:10px 14px;background:#fef2f2;border:1px solid #fca5a5;border-radius:6px;font-size:12px;color:#991b1b;line-height:1.7"></div>
     </div>
     <!-- B-3 品牌卡片池 -->
     <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:12px">
@@ -1863,17 +1864,18 @@ function _pinSwitchDs(k){
 
 // 计算日均老客尽曝 (X 轴数值) - 根据数据源
 function _pinCalcX(b, dataSource, trendRows){
+  // 公式: (7日高频尽曝UV + 7日低频尽曝UV) / 7 / 日均交易笔数
+  // realtime: 当日 brand_snapshot 字段 (7日累计) —— 0420 起因产品 bug 缺失
+  // mock:     0413-0419 期间 7日累计字段 取均值
   if (dataSource === 'realtime'){
-    // 当日 hi_exp_uv_all + lo_exp_uv_all / 日均交易笔数
     const hi = (typeof b.hiExpUV_all === 'number' ? b.hiExpUV_all : null);
     const lo = (typeof b.loExpUV_all === 'number' ? b.loExpUV_all : null);
     if ((hi == null || hi === 0) && (lo == null || lo === 0)) return null;
-    const exp = (hi||0) + (lo||0);
+    const avg7 = ((hi||0) + (lo||0)) / 7;
     const tx = b.dailyTx;
     if (tx == null || tx <= 0) return null;
-    return exp / (tx * 10000);  // dailyTx 单位是"万笔"
+    return avg7 / (tx * 10000);  // dailyTx 单位是"万笔"
   } else {
-    // mock: 从 trendRows 取该 brand 的 0413-0419 hi_exp_uv_all + lo_exp_uv_all 均值 / 7
     const bid = b.brandId;
     const samples = (trendRows||[]).filter(r =>
       String(r.brand_id)===String(bid) &&
@@ -1881,10 +1883,12 @@ function _pinCalcX(b, dataSource, trendRows){
       r.hi_exp_uv_all != null
     );
     if (samples.length === 0) return null;
-    const avg = samples.reduce((s,r) => s + (r.hi_exp_uv_all||0) + (r.lo_exp_uv_all||0), 0) / samples.length;
+    // samples 每行 hi_exp_uv_all 本身是 7日累计, 取均值代表该 brand 在这段的 7日UV, 再 /7 得日均
+    const avg7dUV = samples.reduce((s,r) => s + (r.hi_exp_uv_all||0) + (r.lo_exp_uv_all||0), 0) / samples.length;
+    const avgDailyUV = avg7dUV / 7;
     const tx = b.dailyTx;
     if (tx == null || tx <= 0) return null;
-    return avg / (tx * 10000);
+    return avgDailyUV / (tx * 10000);
   }
 }
 
@@ -1921,21 +1925,29 @@ function rpinq(){
     points.push({name: b.name, bid: b.brandId, sp: b.spMapped, x: x, y: y, b: b, size: usePv});
   });
 
-  // 数据源提示条
+  // 去掉顶部 alert（移入空态显示）
   const alert = document.getElementById('pinQuadrantAlert');
-  if (_pinDataSource === 'mock'){
-    alert.style.display = 'block';
-    alert.innerHTML = '⚠️ <b>当前为 mock 数据</b>：老客日均尽曝PV字段暂无；7日累计UV自 0420 起产品 bug 缺失。临时用 <b>0413-0419 (高频+低频)尽曝UV 均值 / 日均交易笔数</b> 估算老客曝光。<br>底表恢复后自动切回实时数据源。';
-  } else {
-    alert.style.display = 'block';
-    alert.innerHTML = '⚠️ <b>实时数据源 0420 起 hi_exp_uv_all / lo_exp_uv_all 字段因产品 bug 缺失</b>，当前象限内可能为空 → 请切换到 mock tab 查看 0413-0419 估算。';
-  }
+  if (alert){ alert.style.display = 'none'; alert.innerHTML = ''; }
+
+  const emptyEl = document.getElementById('pinQuadrantEmpty');
 
   if (points.length === 0){
     if (typeof echarts !== 'undefined' && _pinChart){ _pinChart.dispose(); _pinChart = null; }
-    el.innerHTML = '<div style="padding:60px;text-align:center;color:#94a3b8;font-size:13px">暂无可用数据点（已置顶品牌 ' + pinnedOnline.length + ' 家，当前数据源下均无老客UV数据）<br><span style="font-size:11px">切换到 mock tab 查看估算</span></div>';
+    el.innerHTML = '<div style="padding:60px;text-align:center;color:#94a3b8;font-size:13px">暂无可用数据点（已置顶 ' + pinnedOnline.length + ' 家，当前数据源下无数据）</div>';
+    if (emptyEl){
+      emptyEl.style.display = 'block';
+      if (_pinDataSource === 'realtime'){
+        emptyEl.innerHTML =
+          '<div style="font-weight:700;margin-bottom:4px">❗️ 暂无可用数据点（已置顶品牌 '+pinnedOnline.length+' 家，当前数据源下无「老客日均PV」数据）</div>' +
+          '<div style="margin-bottom:4px"><b>待排期：</b>老客日均曝光PV 字段暂无。</div>' +
+          '<div><b>待修复：</b>当前「老客7日累计UV」字段自 0420 起因产品 bug 缺失，尚未恢复，且无法体现日均曝光充分度。</div>';
+      } else {
+        emptyEl.innerHTML = '❗️ mock 数据源下也无可用数据点（0413-0419 期间该批品牌无老客UV数据）';
+      }
+    }
     return;
   }
+  if (emptyEl){ emptyEl.style.display = 'none'; }
 
   // 中位数
   const xMed = _median(points.map(p=>p.x));
@@ -2027,19 +2039,44 @@ function rpinq(){
 
 // ========== Tab 1 · B-3 · 置顶品牌诊断卡片池（KA 摇优惠同构）==========
 var _pinActiveBrand = null; // 当前选中的 brand_id
+var _pinActiveQuad = null;  // 当前象限筛选 'A'|'B'|'C'|'D'|'U'|null
 function _pinFilterChanged(){ _pinActiveBrand = null; rpinc(); }
+function _pinQuadCls(x, y, xMed, yMed){
+  if (x >= xMed && y >= yMed) return 'A';
+  if (x >= xMed && y <  yMed) return 'B';
+  if (x <  xMed && y >= yMed) return 'C';
+  return 'D';
+}
 function rpinc(){
   const body = document.getElementById('pinCardBody');
   const tabs = document.getElementById('pinCardTabs');
   if (!body || !tabs) return;
 
   const TR = (window._D && window._D.topRecords) || [];
+  const trendRows = (window._D && window._D.trendRows) || [];
   const topBids = new Set(TR.map(r => String(r.brand_id)));
 
   const online = (BS||[]).filter(b =>
     b.tierManual === '腰部' && INTRO_CATERING.has(b.cat4) && b.onlineToday === true
   );
   const pinnedOnline = online.filter(b => topBids.has(String(b.brandId)));
+
+  // 先算象限 (跟 rpinq 一致)
+  const pts = pinnedOnline.map(b => {
+    const x = _pinCalcX(b, _pinDataSource, trendRows);
+    const y = b.visitUseRate;
+    return {b: b, x: x, y: y};
+  });
+  const valid = pts.filter(p => p.x != null && p.y != null);
+  const xMed = _median(valid.map(p => p.x));
+  const yMed = _median(valid.map(p => p.y));
+  const quadOf = {};
+  pts.forEach(p => {
+    if (p.x == null || p.y == null) quadOf[p.b.brandId] = 'U';
+    else quadOf[p.b.brandId] = _pinQuadCls(p.x, p.y, xMed, yMed);
+  });
+  const byQuad = {A:0,B:0,C:0,D:0,U:0};
+  pinnedOnline.forEach(b => byQuad[quadOf[b.brandId]]++);
 
   // 填 服务商/负责人 下拉
   const spSel = document.getElementById('pinFiltSP');
@@ -2060,6 +2097,8 @@ function rpinc(){
   const fAlive = (document.getElementById('pinFiltAlive')||{}).value || '';
 
   let list = pinnedOnline.filter(b => {
+    // 象限过滤
+    if (_pinActiveQuad && quadOf[b.brandId] !== _pinActiveQuad) return false;
     if (fSP && b.spMapped !== fSP) return false;
     if (fOwner && b.owner !== fOwner) return false;
     if (fAlive === 'alive' && b.isAlive !== true) return false;
@@ -2072,8 +2111,15 @@ function rpinc(){
     return true;
   });
 
-  // 顶部总数提示
-  tabs.innerHTML = '<span style="font-size:11px;color:#64748b;padding:4px 8px">共 <b style="color:#1e293b">'+list.length+'</b> / '+pinnedOnline.length+' 家置顶品牌</span>';
+  // 象限 tab + 总数
+  const quadLabels = {A:'🟢 A 健康', B:'🟠 B 有量无转化', C:'🔵 C 转化强缺量', D:'🔴 D 双低', U:'⚪️ 未定'};
+  const quadKeys = ['A','B','C','D','U'].filter(k => byQuad[k] > 0);
+  let tabsHtml = '<button onclick="_pinPickQuad(null)" style="padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid '+(_pinActiveQuad==null?'#2563eb':'#cbd5e1')+';background:'+(_pinActiveQuad==null?'#eff6ff':'#fff')+';color:'+(_pinActiveQuad==null?'#1d4ed8':'#475569')+';font-weight:'+(_pinActiveQuad==null?'700':'500')+'">全部 ('+pinnedOnline.length+')</button>';
+  tabsHtml += quadKeys.map(k =>
+    '<button onclick="_pinPickQuad(\''+k+'\')" style="padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid '+(_pinActiveQuad===k?'#2563eb':'#cbd5e1')+';background:'+(_pinActiveQuad===k?'#eff6ff':'#fff')+';color:'+(_pinActiveQuad===k?'#1d4ed8':'#475569')+';font-weight:'+(_pinActiveQuad===k?'700':'500')+'">'+quadLabels[k]+' ('+byQuad[k]+')</button>'
+  ).join('');
+  tabsHtml += '<span style="font-size:11px;color:#64748b;padding:4px 8px;align-self:center">· 当前筛选 <b style="color:#1e293b">'+list.length+'</b> / '+pinnedOnline.length+'</span>';
+  tabs.innerHTML = tabsHtml;
 
   if (!_pinActiveBrand || !list.find(b => String(b.brandId) === String(_pinActiveBrand))){
     _pinActiveBrand = list.length ? list[0].brandId : null;
@@ -2095,6 +2141,11 @@ function rpinc(){
     _pinBuildCard(cur);
 }
 
+function _pinPickQuad(k){
+  _pinActiveQuad = k;
+  _pinActiveBrand = null;
+  rpinc();
+}
 function _pinPickBrand(bid){
   _pinActiveBrand = bid;
   rpinc();
