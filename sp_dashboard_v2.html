@@ -1321,20 +1321,19 @@ function rintro(D){
   if (dd) dd.textContent = targetDate;
 
   // ========== 1. 概览 4 大卡 ==========
-  // 口径：腰部 × 餐饮
-  const wc = (BS||[]).filter(b =>
-    b.tierManual === '腰部' && INTRO_CATERING.has(b.cat4)
-  );
-  // 已投放 = 跟进表 status ∈ {在线, 流失}
+  // 口径：以跟进表为锚（腰部×(在线+流失)），不再用日报 cat4 过滤
+  // 理由：跟进表里腰部商户默认都是餐饮，日报类目/分层可能有打标误差；跟进表是引入进展的真实源
+  const wc = (BS||[]).filter(b => b.tierManual === '腰部');
+  // 已投放 = 跟进表腰部×(在线+流失)
   const deployed = wc.filter(b => b.statusManual === '在线' || b.statusManual === '流失').length;
-  // 流失 = 已投放 - 当日在线（日报口径：跟进表腰部×餐饮投放池里今日不在线的）
+  // 流失 = 已投放 - 当日日报在线（跟进表池里今日日报不在线的）
   const lost = deployed - wc.filter(b => b.onlineToday === true).length;
-  // 跟进表在线 = 跟进表腰部×餐饮×status=在线（用于 0426+ 骤降提示：y=跟进表在线，x=y-日报在线）
+  // 跟进表在线 = 跟进表腰部×status=在线（用于 0426+ 骤降提示：y=跟进表在线，x=y-日报在线）
   const followOnlineCnt = wc.filter(b => b.statusManual === '在线').length;
   const totalTarget = (F && F.totalTarget) || 800;
   const deployedPct = totalTarget > 0 ? (deployed/totalTarget*100) : 0;
 
-  // 在线 / 存活 = 品牌日报 online_today
+  // 在线 / 存活 = 跟进表池 ∩ 日报 online_today=true（保留日报口径）
   const onlineBS = wc.filter(b => b.onlineToday === true);
   const aliveBS = onlineBS.filter(b => b.isAlive === true);
   const todayOnline = onlineBS.length;
@@ -1395,13 +1394,11 @@ function rintro(D){
   if (kg) kg.innerHTML = html;
 
   // ========== 2. 每日折线图：绿线=当日在线 / 蓝线=累计已投放 ==========
-  // 蓝线口径对齐概览卡：跟进表腰部×(在线+流失) ∩ 日报类目∈餐饮
-  // 日报类目用 BS.cat4（来自品牌日报 四级类目名称）
+  // 蓝线口径对齐概览卡：跟进表腰部×(在线+流失)，不再筛日报 cat4
   const followBids = new Set();
   (BS||[]).forEach(function(b){
     if (b && b.tierManual === '腰部'
         && (b.statusManual === '在线' || b.statusManual === '流失')
-        && INTRO_CATERING.has(b.cat4)
         && b.brandId != null){
       followBids.add(Number(b.brandId));
     }
