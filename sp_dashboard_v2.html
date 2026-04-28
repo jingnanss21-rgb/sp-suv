@@ -1631,7 +1631,7 @@ function rfc(){
 
 // ========== Tab 1 · A-2 · 人工打标三层折叠矩阵 ==========
 // 展开状态缓存
-var _markExpanded = { activeClass: null }; // 当前激活的分类 tab: 'keep'|'progress'|'nofb'|'offline'|null
+var _markExpanded = { activeClass: 'keep', activeIssue: null }; // 一级: 分类, 二级: 四要素维度
 
 // 四要素 × 分类 的规则 (复制自 rsop 内部, 保持一致)
 const _mkIssue2Field = {'经营模式':'screen_biz','货盘':'screen_price','基建-商户号':'screen_infra','基建-门店':'screen_store'};
@@ -1648,14 +1648,15 @@ const _mkOffRules = {
   '基建-门店': ['商家无法上传，计划下线']
 };
 const _mkProgRules = {
-  '经营模式': ['沟通确认中','已沟通，整改中','已沟通，未回复'],
-  '货盘': ['沟通确认中','已沟通，整改中','已沟通，未回复'],
-  '基建-商户号': ['沟通确认中','基建沟通中','已沟通，整改中','已沟通，未回复','总部拿不到商户号，待沟通pos商或门店给420单号方案'],
-  '基建-门店': ['沟通确认中','已沟通，整改中','已沟通，未回复']
+  '经营模式': ['沟通确认中','已沟通，整改中'],
+  '货盘': ['沟通确认中','已沟通，整改中'],
+  '基建-商户号': ['沟通确认中','基建沟通中','已沟通，整改中','总部拿不到商户号，待沟通pos商或门店给420单号方案'],
+  '基建-门店': ['沟通确认中','已沟通，整改中']
 };
 
 function _mkClassify(issue, val){
   if (!val) return 'nofb';
+  if (val === '已沟通，未回复') return 'nofb'; // 无实质反馈 → 归入未反馈
   if ((_mkOffRules[issue]||[]).includes(val)) return 'offline';
   if ((_mkKeepRules[issue]||[]).includes(val)) return 'keep';
   if ((_mkProgRules[issue]||[]).includes(val)) return 'progress';
@@ -1712,75 +1713,88 @@ function rfcmark(){
   if (!el) return;
   const M = _mkBuildMatrix();
 
-  // ===== 动态计算哪些分类当前有数据 =====
-  const clsCount = {nofb:0, keep:0, progress:0, offline:0};
+  // 各分类总数 (不论维度)
+  const clsCount = {keep:0, nofb:0, offline:0, progress:0};
   _mkIssues.forEach(iss => _mkClasses.forEach(cls => { clsCount[cls] += M[iss][cls].length; }));
-  const activeClasses = _mkClasses.filter(c => clsCount[c] > 0);
 
-  // 合规分类全集（除当前有的之外，还要"偷偷监测"nofb/progress/offline 是否冒头）
-  // 如果 keep 以外的任一分类 >0，顶部加 ⚠️ highlight
-  const unexpectedCls = activeClasses.filter(c => c !== 'keep' && clsCount[c] > 0);
+  // 一级 tab 顺序: 可保留 / 未反馈 / 计划下线 / 整改中 (按你要求)
+  const tier1 = ['keep','nofb','offline','progress'];
 
-  // 活跃分类 tab 切换状态
-  if (!_markExpanded.activeClass || clsCount[_markExpanded.activeClass] === 0){
-    _markExpanded.activeClass = activeClasses[0] || null;
-  }
+  // 新出现 highlight: keep 之外任一 > 0
+  const hasAbnormal = (clsCount.nofb + clsCount.offline + clsCount.progress) > 0;
 
   let h = '';
-  // ===== 头部: 分类 tab =====
-  if (activeClasses.length === 0){
-    el.innerHTML = '<div style="padding:40px;text-align:center;color:#94a3b8;font-size:12px">当前无任何人工打标数据</div>';
-    return;
-  }
+  // ===== 一级 tab: 固定 4 分类 =====
   h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">';
-  h += '<span style="font-size:11px;color:#64748b">分类：</span>';
-  activeClasses.forEach(cls => {
+  tier1.forEach(cls => {
     const cc = _mkClsColor[cls];
     const active = _markExpanded.activeClass === cls;
-    h += '<button onclick="_mkPickCls(\''+cls+'\')" style="padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;border:1px solid '+(active?cc.fg:cc.bd)+';background:'+(active?cc.bg:'#fff')+';color:'+(active?cc.fg:'#475569')+';font-weight:'+(active?'700':'500')+'">'+cc.label+' <b>'+clsCount[cls]+'</b></button>';
+    const isHl = cls !== 'keep' && clsCount[cls] > 0;
+    h += '<button onclick="_mkPickCls(\''+cls+'\')" style="padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer;border:'+(isHl?'2px':'1px')+' solid '+(active?cc.fg:(isHl?cc.fg:cc.bd))+';background:'+(active?cc.bg:(isHl?cc.bg:'#fff'))+';color:'+(active?cc.fg:(isHl?cc.fg:'#475569'))+';font-weight:'+(active||isHl?'700':'500')+';position:relative">'+cc.label+' <b>'+clsCount[cls]+'</b>'+(isHl?'<span style="position:absolute;top:-4px;right:-4px;width:8px;height:8px;background:'+cc.fg+';border-radius:50%;border:2px solid #fff"></span>':'')+'</button>';
   });
-  // 提醒 bar
-  if (unexpectedCls.length > 0){
-    h += '<div style="margin-left:auto;padding:5px 10px;background:#fef3c7;border:1px solid #fbbf24;border-radius:6px;font-size:11px;color:#92400e;font-weight:600">⚠️ 新出现：'+unexpectedCls.map(c=>_mkClsColor[c].label+' '+clsCount[c]).join(' · ')+' 需人工复核</div>';
+  if (hasAbnormal){
+    h += '<span style="margin-left:6px;padding:4px 10px;background:#fef3c7;border-radius:12px;font-size:11px;color:#92400e;font-weight:600">⚠️ 非 keep 分类有数据，需人工复核</span>';
   }
   h += '</div>';
 
-  // ===== 当前分类下: 按维度 + 原因的紧凑列表 =====
-  const curCls = _markExpanded.activeClass;
-  if (!curCls){ el.innerHTML = h; return; }
+  const curCls = _markExpanded.activeClass || 'keep';
   const cc = _mkClsColor[curCls];
 
-  // 按 issue 分组, 每 issue 下按 reason 再分组
-  h += '<div style="display:flex;flex-direction:column;gap:14px">';
-  _mkIssues.forEach(iss => {
-    const items = M[iss][curCls];
-    if (!items.length) return;
-    // 按 reason 聚合
-    const byReason = {};
-    items.forEach(it => {
-      const r = it.reason || '(未填)';
-      if (!byReason[r]) byReason[r] = [];
-      byReason[r].push(it);
+  // ===== 二级 tab: 四要素维度 (当前分类下有数据的) =====
+  const issuesWithData = _mkIssues.filter(iss => M[iss][curCls].length > 0);
+  if (!issuesWithData.length){
+    h += '<div style="padding:30px;text-align:center;color:#94a3b8;font-size:12px;background:#f8fafc;border-radius:8px">当前分类「'+cc.label+'」下无数据</div>';
+    el.innerHTML = h;
+    return;
+  }
+  // 默认激活第一个有数据的维度（如果当前维度在此分类下没数据就切回）
+  if (!_markExpanded.activeIssue || M[_markExpanded.activeIssue][curCls].length === 0){
+    _markExpanded.activeIssue = issuesWithData[0];
+  }
+  h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;flex-wrap:wrap;padding-left:4px">';
+  h += '<span style="font-size:11px;color:#64748b;margin-right:4px">维度：</span>';
+  issuesWithData.forEach(iss => {
+    const n = M[iss][curCls].length;
+    const active = _markExpanded.activeIssue === iss;
+    const ic = _mkIssueColor[iss];
+    h += '<button onclick="_mkPickIssue(\''+iss+'\')" style="padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid '+(active?ic:'#cbd5e1')+';background:'+(active?ic+'15':'#fff')+';color:'+(active?ic:'#475569')+';font-weight:'+(active?'700':'500')+'">'+iss+' <b>'+n+'</b></button>';
+  });
+  h += '</div>';
+
+  // ===== 三级内容: 按反馈原因分组 → 按服务商聚合品牌 =====
+  const curIss = _markExpanded.activeIssue;
+  const items = M[curIss][curCls];
+  const byReason = {};
+  items.forEach(it => {
+    const r = it.reason || '(未填)';
+    if (!byReason[r]) byReason[r] = [];
+    byReason[r].push(it);
+  });
+  const reasons = Object.keys(byReason).sort((a,b) => byReason[b].length - byReason[a].length);
+
+  h += '<div style="display:flex;flex-direction:column;gap:10px">';
+  reasons.forEach(reason => {
+    const brands = byReason[reason];
+    // 按服务商分组
+    const bySp = {};
+    brands.forEach(b => {
+      const sp = b.sp || '(未知服务商)';
+      if (!bySp[sp]) bySp[sp] = [];
+      bySp[sp].push(b);
     });
-    const reasons = Object.keys(byReason).sort((a,b) => byReason[b].length - byReason[a].length);
+    const spList = Object.keys(bySp).sort((a,b) => bySp[b].length - bySp[a].length);
 
     h += '<div style="border:1px solid '+cc.bd+';border-radius:8px;overflow:hidden">';
-    // issue 标题条
     h += '<div style="padding:8px 12px;background:'+cc.bg+';display:flex;align-items:center;justify-content:space-between">' +
-         '<div style="font-size:12px;font-weight:700;color:'+_mkIssueColor[iss]+'">● '+iss+'</div>' +
-         '<div style="font-size:11px;color:'+cc.fg+';font-weight:600">'+items.length+' 家</div>' +
+         '<div style="font-size:12px;font-weight:700;color:'+cc.fg+'">'+reason+'</div>' +
+         '<div style="font-size:11px;color:'+cc.fg+';font-weight:600">'+brands.length+' 家</div>' +
          '</div>';
-    // 原因分组
-    h += '<div style="background:#fff">';
-    reasons.forEach((reason, ri) => {
-      const brands = byReason[reason];
-      h += '<div style="'+(ri>0?'border-top:1px solid #f1f5f9;':'')+'padding:10px 12px">' +
-        '<div style="font-size:12px;color:#1e293b;margin-bottom:6px">' +
-          '<b>'+reason+'</b><span style="color:#94a3b8;font-weight:400;margin-left:6px">'+brands.length+' 家</span>' +
-        '</div>' +
-        '<div style="display:flex;flex-wrap:wrap;gap:4px 10px;font-size:11px;color:#475569">' +
-          brands.map(b => '<span style="white-space:nowrap"><b style="color:#1e293b">'+b.name+'</b><span style="color:#94a3b8;margin-left:4px">· '+(b.sp||'—')+'</span></span>').join('<span style="color:#cbd5e1">|</span>') +
-        '</div>' +
+    h += '<div style="background:#fff;padding:10px 12px;display:flex;flex-direction:column;gap:6px">';
+    spList.forEach(sp => {
+      const brs = bySp[sp];
+      h += '<div style="font-size:12px;color:#475569;line-height:1.7">' +
+        '<b style="color:#1e293b">'+sp+'</b>: ' +
+        brs.map(b => '<span style="white-space:nowrap;color:#1e293b">'+b.name+'<span style="color:#94a3b8">（'+b.bid+'）</span></span>').join('<span style="color:#cbd5e1;margin:0 4px">·</span>') +
       '</div>';
     });
     h += '</div>';
@@ -1793,6 +1807,11 @@ function rfcmark(){
 
 function _mkPickCls(c){
   _markExpanded.activeClass = c;
+  _markExpanded.activeIssue = null; // 切分类时重置维度
+  rfcmark();
+}
+function _mkPickIssue(iss){
+  _markExpanded.activeIssue = iss;
   rfcmark();
 }
 
