@@ -126,7 +126,6 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
       <summary style="cursor:pointer;list-style:none">
         <div style="display:flex;justify-content:space-between;align-items:center">
           <div style="font-size:13px;font-weight:700;color:#1e293b">🏷 人工打标明细 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:4px">· 四要素 × 4 分类 · 点击展开 ▾</span></div>
-          <div style="font-size:11px;color:#94a3b8">点击 cell 展开二级原因 · 再点原因展开品牌</div>
         </div>
       </summary>
       <div id="fcMarkMatrix" style="margin-top:12px"></div>
@@ -1631,7 +1630,7 @@ function rfc(){
 
 // ========== Tab 1 · A-2 · 人工打标三层折叠矩阵 ==========
 // 展开状态缓存
-var _markExpanded = { activeClass: 'keep', activeIssue: null }; // 一级: 分类, 二级: 四要素维度
+var _markExpanded = { activeClass: 'keep', activeIssue: null, activeSp: {} }; // 一级: 分类, 二级: 四要素维度, 三级: {reason: sp}
 
 // 四要素 × 分类 的规则 (复制自 rsop 内部, 保持一致)
 const _mkIssue2Field = {'经营模式':'screen_biz','货盘':'screen_price','基建-商户号':'screen_infra','基建-门店':'screen_store'};
@@ -1784,19 +1783,31 @@ function rfcmark(){
     });
     const spList = Object.keys(bySp).sort((a,b) => bySp[b].length - bySp[a].length);
 
+    // 默认激活第一个服务商
+    const reasonKey = curCls + '|' + curIss + '|' + reason;
+    let curSp = _markExpanded.activeSp[reasonKey];
+    if (!curSp || !bySp[curSp]) curSp = spList[0];
+
     h += '<div style="border:1px solid '+cc.bd+';border-radius:8px;overflow:hidden">';
+    // 原因标题
     h += '<div style="padding:8px 12px;background:'+cc.bg+';display:flex;align-items:center;justify-content:space-between">' +
          '<div style="font-size:12px;font-weight:700;color:'+cc.fg+'">'+reason+'</div>' +
          '<div style="font-size:11px;color:'+cc.fg+';font-weight:600">'+brands.length+' 家</div>' +
          '</div>';
-    h += '<div style="background:#fff;padding:10px 12px;display:flex;flex-direction:column;gap:6px">';
+    // 服务商 tab 行
+    const spKeyEsc = reasonKey.replace(/'/g, "\\'");
+    h += '<div style="background:#fff;padding:10px 12px">';
+    h += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">';
     spList.forEach(sp => {
-      const brs = bySp[sp];
-      h += '<div style="font-size:12px;color:#475569;line-height:1.7">' +
-        '<b style="color:#1e293b">'+sp+'</b>: ' +
-        brs.map(b => '<span style="white-space:nowrap;color:#1e293b">'+b.name+'<span style="color:#94a3b8">（'+b.bid+'）</span></span>').join('<span style="color:#cbd5e1;margin:0 4px">·</span>') +
-      '</div>';
+      const active = sp === curSp;
+      const n = bySp[sp].length;
+      h += '<button onclick="_mkPickSp(\''+spKeyEsc+'\',\''+sp.replace(/'/g,"\\\'")+'\')" style="padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;border:1px solid '+(active?cc.fg:'#e2e8f0')+';background:'+(active?cc.bg:'#f8fafc')+';color:'+(active?cc.fg:'#475569')+';font-weight:'+(active?'700':'500')+'">'+sp+' <b>'+n+'</b></button>';
     });
+    h += '</div>';
+    // 当前服务商下的品牌列表
+    h += '<div style="font-size:12px;color:#475569;line-height:1.8;padding-left:2px">' +
+      bySp[curSp].map(b => '<span style="white-space:nowrap;color:#1e293b">'+b.name+'<span style="color:#94a3b8">（'+b.bid+'）</span></span>').join('<span style="color:#cbd5e1;margin:0 6px">·</span>') +
+    '</div>';
     h += '</div>';
     h += '</div>';
   });
@@ -1812,6 +1823,10 @@ function _mkPickCls(c){
 }
 function _mkPickIssue(iss){
   _markExpanded.activeIssue = iss;
+  rfcmark();
+}
+function _mkPickSp(reasonKey, sp){
+  _markExpanded.activeSp[reasonKey] = sp;
   rfcmark();
 }
 
