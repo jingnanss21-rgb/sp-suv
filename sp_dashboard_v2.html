@@ -165,6 +165,23 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
     </div>
   </div>
 
+  <!-- ========== 板块 C · 数据对账 ========== -->
+  <div class="S">
+    <div class="ST">🔧 数据对账 <span id="rcTotalBadge" style="margin-left:8px;padding:2px 8px;background:#fef3c7;color:#92400e;border-radius:10px;font-size:11px;font-weight:600">—</span></div>
+    <!-- 筛选器 -->
+    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:12px;margin-top:8px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input id="rcSearch" type="text" placeholder="🔍 搜索品牌名称/ID" oninput="_rcFilterChanged()" style="flex:1;min-width:200px;padding:5px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px">
+        <select id="rcFiltSP" onchange="_rcFilterChanged()" style="padding:5px 8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px"><option value="">全部经营服务商</option></select>
+        <select id="rcFiltAssistant" onchange="_rcFilterChanged()" style="padding:5px 8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px"><option value="">全部对接助理</option></select>
+        <label style="font-size:12px;color:#64748b;display:flex;align-items:center;gap:4px;margin-left:6px"><input id="rcShowAcked" type="checkbox" onchange="_rcFilterChanged()">显示已处理</label>
+        <button onclick="_rcExportCSV()" style="padding:5px 12px;background:#1e293b;color:#fff;border:0;border-radius:6px;font-size:12px;cursor:pointer">📥 导出CSV</button>
+      </div>
+    </div>
+    <!-- 分组容器 -->
+    <div id="rcBody" style="margin-top:10px"></div>
+  </div>
+
   <!-- （原 全量失分品牌底表 已删除, 由 A-3 scrTbl 替代）-->
 </div>
 
@@ -273,7 +290,7 @@ async function loadDashboardData(targetDate) {
     const sc=s.store_count||0, dTx=s.daily_tx, dTxAbs=(dTx||0)*10000, expPv=s.exp_pv;
     return {
       name:s.brand_name, brandId:s.brand_id, sp:s.sp_name||'', spMapped:s.sp_name||'',
-      statusManual:s.status||'', tierManual:s.tier_human||s.tier||'', tierDaily:s.tier||'',
+      statusManual:s.status||'', tierManual:s.tier_human||s.tier||'', tierDaily:s.tier||'', dailyTierRaw:s.daily_tier_raw||'',
       assistant:s.assistant||'', owner:s.owner||'', couponSP:s.coupon_sp||'',
       hasDailyData:s.daily_tx!=null, cat2:s.category||'', cat4:s.sub_category||'',
       displayLevel:s.display_level||'other',
@@ -2411,6 +2428,236 @@ function _pinBuildCard(b){
   '</div>';
 }
 
+// ========== Tab 1 · C · 数据对账 ==========
+// 6 个场景: #2 分层分歧 #3 类目分歧 #4 日报分层空 #7 周报未覆盖 #8 四要素数据缺失 #5 公线打标偏差
+// 负责人: 行业={#2}, 公线={#3,#4,#7,#8,#5}
+// 存已处理标记用 localStorage: key = 'rc_ack_' + data_date + '_' + brand_id + '_' + issue_type
+
+const RC_CATERING = INTRO_CATERING;
+const RC_ZHENGCAN = new Set(['正餐']);
+
+const RC_ISSUE_META = {
+  tier_mismatch:   { label: '分层分歧',       desc: '跟进表=腰部 ∩ 日报=尾部',                owner: '行业', priority: 'P0', color: '#dc2626' },
+  cat_mismatch:    { label: '类目分歧',       desc: '跟进表腰部(默认餐饮) ∩ 日报类目非餐饮', owner: '公线', priority: 'P0', color: '#dc2626' },
+  tier_empty:      { label: '日报分层字段空', desc: '日报「品牌分层」= "/" 或空',            owner: '公线', priority: 'P0', color: '#dc2626' },
+  factor_missing:  { label: '四要素数据缺失', desc: 'factor_biz/price/infra/store 任一为 null', owner: '公线', priority: 'P0', color: '#dc2626' },
+  wr_miss:         { label: '周报未覆盖',     desc: '跟进表腰部 ∩ 真实门店数缺失',             owner: '公线', priority: 'P1', color: '#d97706' },
+  tier_wrong:      { label: '公线分层打标偏差', desc: '日报分层 ≠ 按审核通过门店数阈值推算',   owner: '公线', priority: 'P2', color: '#0891b2' },
+};
+
+function _rcAckKey(bid, issueType){
+  const dd = (F && F.dataDate) || '';
+  return 'rc_ack_' + dd + '_' + bid + '_' + issueType;
+}
+function _rcIsAcked(bid, issueType){
+  try { return localStorage.getItem(_rcAckKey(bid, issueType)) === '1'; } catch(e){ return false; }
+}
+function _rcToggleAck(bid, issueType){
+  try {
+    const k = _rcAckKey(bid, issueType);
+    if (localStorage.getItem(k) === '1') localStorage.removeItem(k);
+    else localStorage.setItem(k, '1');
+  } catch(e){}
+  rrc();
+}
+
+// 扫描 BS 生成对账项数组
+function _rcBuildItems(){
+  const items = []; // { bid, name, sp, assistant, issue, detail, sortKey }
+  const wc = (BS||[]).filter(b => b.tierManual === '腰部' && b.statusManual === '在线');
+
+  wc.forEach(b => {
+    const base = {
+      bid: b.brandId, name: b.name, sp: b.spMapped || '',
+      assistant: b.assistant || '', cat4: b.cat4, storeCount: b.storeCount,
+      storeComplete: b.storeComplete, onlineToday: b.onlineToday,
+      dailyTier: b.dailyTierRaw || '',
+    };
+
+    // #2 分层分歧: 跟进表腰部 + 日报分层 = "3-尾部"
+    if (base.dailyTier === '3-尾部'){
+      items.push({ ...base, issue: 'tier_mismatch',
+        detail: '跟进表=腰部 / 日报=尾部' + (b.storeCount != null ? ' (审核通过门店数 '+b.storeCount+')' : '')
+      });
+    }
+    // #3 类目分歧: cat4 非餐饮 (且不是空)
+    if (base.cat4 && !RC_CATERING.has(base.cat4)){
+      items.push({ ...base, issue: 'cat_mismatch',
+        detail: '跟进表腰部(默认餐饮) / 日报类目=' + base.cat4
+      });
+    }
+    // #4 日报分层字段空
+    if (!base.dailyTier || base.dailyTier === '/' || base.dailyTier === ''){
+      items.push({ ...base, issue: 'tier_empty',
+        detail: '日报「品牌分层」字段为空' + (base.cat4 ? ' / 类目=' + base.cat4 : '')
+      });
+    }
+    // #8 四要素数据缺失 (任一 factor == null, 且在餐饮腰部口径)
+    if (RC_CATERING.has(base.cat4) && b.onlineToday === true){
+      const nullDims = [];
+      if (b.bizOk == null) nullDims.push('经营');
+      if (b.priceOk == null) nullDims.push('货盘');
+      if (b.infraOk == null) nullDims.push('基建-商户号');
+      if (b.trafficOk == null) nullDims.push('基建-门店');
+      if (nullDims.length){
+        items.push({ ...base, issue: 'factor_missing',
+          detail: '缺失维度: ' + nullDims.join(', ')
+        });
+      }
+    }
+    // #7 周报未覆盖: storeCount != null AND storeComplete == null (审核通过有但 realStore 缺)
+    if (b.storeCount != null && b.storeComplete == null){
+      items.push({ ...base, issue: 'wr_miss',
+        detail: '审核通过 '+b.storeCount+' 家, 真实门店数缺失'
+      });
+    }
+    // #5 公线打标偏差: 日报分层=腰部 但按审核通过推算应尾部
+    if (base.dailyTier === '2-腰部' && b.storeCount != null && RC_CATERING.has(base.cat4)){
+      const thr = RC_ZHENGCAN.has(base.cat4) ? 5 : 20;
+      if (b.storeCount < thr){
+        items.push({ ...base, issue: 'tier_wrong',
+          detail: '日报标腰部 / 按审核通过门店数 '+b.storeCount+' ('+base.cat4+' 阈值 '+thr+') 应为尾部'
+        });
+      }
+    }
+  });
+  return items;
+}
+
+function _rcApplyFilter(items){
+  const q = (document.getElementById('rcSearch')?.value || '').trim().toLowerCase();
+  const fSP = document.getElementById('rcFiltSP')?.value || '';
+  const fAsst = document.getElementById('rcFiltAssistant')?.value || '';
+  const showAck = document.getElementById('rcShowAcked')?.checked;
+  return items.filter(it => {
+    if (!showAck && _rcIsAcked(it.bid, it.issue)) return false;
+    if (q){
+      const s = (it.name + ' ' + it.bid).toLowerCase();
+      if (!s.includes(q)) return false;
+    }
+    if (fSP && it.sp !== fSP) return false;
+    if (fAsst && it.assistant !== fAsst) return false;
+    return true;
+  });
+}
+
+function _rcFilterChanged(){ rrc(); }
+
+function _rcExportCSV(){
+  const items = _rcApplyFilter(_rcBuildItems());
+  const rows = [['优先级','负责人','问题类型','品牌ID','品牌名称','经营服务商','对接助理','跟进表分层','日报分层','日报类目','审核通过门店数','当日在线','说明']];
+  items.forEach(it => {
+    const m = RC_ISSUE_META[it.issue];
+    rows.push([
+      m.priority, m.owner, m.label,
+      it.bid, it.name, it.sp, it.assistant,
+      '腰部', it.dailyTier, it.cat4, it.storeCount != null ? it.storeCount : '',
+      it.onlineToday === true ? '在线' : (it.onlineToday === false ? '不在线' : '—'),
+      it.detail,
+    ]);
+  });
+  const csv = '\ufeff' + rows.map(r => r.map(c => '"'+String(c==null?'':c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'reconcile_' + ((F && F.dataDate) || 'today') + '.csv';
+  a.click();
+}
+
+function rrc(){
+  const body = document.getElementById('rcBody');
+  if (!body) return;
+
+  const allItems = _rcBuildItems();
+  const visible = _rcApplyFilter(allItems);
+
+  // 填筛选器 (只填一次)
+  const spSel = document.getElementById('rcFiltSP');
+  const astSel = document.getElementById('rcFiltAssistant');
+  if (spSel && spSel.options.length <= 1){
+    const sps = Array.from(new Set(allItems.map(it => it.sp).filter(Boolean))).sort();
+    sps.forEach(v => { const o=document.createElement('option'); o.value=v; o.textContent=v; spSel.appendChild(o) });
+  }
+  if (astSel && astSel.options.length <= 1){
+    const asts = Array.from(new Set(allItems.map(it => it.assistant).filter(Boolean))).sort();
+    asts.forEach(v => { const o=document.createElement('option'); o.value=v; o.textContent=v; astSel.appendChild(o) });
+  }
+
+  // 总数 badge
+  const badge = document.getElementById('rcTotalBadge');
+  if (badge){
+    const unacked = allItems.filter(it => !_rcIsAcked(it.bid, it.issue)).length;
+    badge.textContent = '共 ' + unacked + ' 条待处理 · 总 ' + allItems.length;
+  }
+
+  // 按 owner 分组
+  const byOwner = { '行业': [], '公线': [] };
+  visible.forEach(it => {
+    const owner = RC_ISSUE_META[it.issue].owner;
+    if (byOwner[owner]) byOwner[owner].push(it);
+  });
+
+  let h = '';
+  ['行业', '公线'].forEach(owner => {
+    const list = byOwner[owner];
+    const ownerColor = owner === '行业' ? { bg:'#fff7ed', bd:'#fdba74', fg:'#c2410c', icon:'🟧' } :
+                                            { bg:'#eff6ff', bd:'#93c5fd', fg:'#1d4ed8', icon:'🟦' };
+    // 按 issue type 聚合
+    const byIss = {};
+    list.forEach(it => {
+      if (!byIss[it.issue]) byIss[it.issue] = [];
+      byIss[it.issue].push(it);
+    });
+    // P 统计
+    const priCnt = { P0:0, P1:0, P2:0 };
+    list.forEach(it => { priCnt[RC_ISSUE_META[it.issue].priority]++; });
+    const priStr = ['P0','P1','P2'].filter(p => priCnt[p]>0).map(p => p+':'+priCnt[p]).join(' · ');
+
+    h += '<details open style="background:'+ownerColor.bg+';border:1px solid '+ownerColor.bd+';border-radius:8px;padding:10px 14px;margin-bottom:10px">';
+    h += '<summary style="cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center">';
+    h += '<div style="font-size:13px;font-weight:700;color:'+ownerColor.fg+'">'+ownerColor.icon+' '+owner+'跟进 <span style="font-size:11px;font-weight:400;margin-left:6px">'+list.length+' 条'+(priStr?' ('+priStr+')':'')+'</span></div>';
+    h += '<span style="font-size:11px;color:#94a3b8">▾ 展开/收起</span></summary>';
+    h += '<div style="margin-top:10px">';
+    if (list.length === 0){
+      h += '<div style="padding:20px;text-align:center;color:#94a3b8;font-size:12px">✅ 该分组下无未处理项</div>';
+    } else {
+      Object.keys(byIss).sort((a,b) => {
+        const pa = RC_ISSUE_META[a].priority, pb = RC_ISSUE_META[b].priority;
+        return pa < pb ? -1 : pa > pb ? 1 : 0;
+      }).forEach(iss => {
+        const meta = RC_ISSUE_META[iss];
+        const sub = byIss[iss];
+        h += '<details style="background:#fff;border:1px solid '+meta.color+'40;border-radius:6px;padding:8px 12px;margin-bottom:8px">';
+        h += '<summary style="cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center">';
+        h += '<div><span style="display:inline-block;padding:2px 6px;background:'+meta.color+'20;color:'+meta.color+';border-radius:4px;font-size:10px;font-weight:700;margin-right:6px">'+meta.priority+'</span>';
+        h += '<b style="font-size:12px;color:#1e293b">'+meta.label+'</b>';
+        h += ' <span style="font-size:11px;color:#94a3b8;margin-left:4px">· '+meta.desc+' · '+sub.length+' 家</span></div>';
+        h += '<span style="font-size:11px;color:#94a3b8">▸</span></summary>';
+        h += '<div style="margin-top:8px;border-top:1px dashed #e2e8f0;padding-top:8px">';
+        h += '<table style="width:100%;font-size:11px;border-collapse:collapse">';
+        h += '<thead><tr style="color:#64748b;font-weight:600"><th style="text-align:left;padding:4px 6px">品牌</th><th style="text-align:left;padding:4px 6px">ID</th><th style="text-align:left;padding:4px 6px">经营服务商</th><th style="text-align:left;padding:4px 6px">对接助理</th><th style="text-align:left;padding:4px 6px">详情</th><th style="text-align:center;padding:4px 6px;width:90px">操作</th></tr></thead><tbody>';
+        sub.sort((a,b) => a.name.localeCompare(b.name));
+        sub.forEach(it => {
+          const acked = _rcIsAcked(it.bid, it.issue);
+          h += '<tr style="border-top:1px solid #f1f5f9'+(acked?';opacity:.5':'')+'">';
+          h += '<td style="padding:4px 6px"><b>'+it.name+'</b></td>';
+          h += '<td style="padding:4px 6px;color:#64748b">'+it.bid+'</td>';
+          h += '<td style="padding:4px 6px">'+(it.sp||'—')+'</td>';
+          h += '<td style="padding:4px 6px">'+(it.assistant||'—')+'</td>';
+          h += '<td style="padding:4px 6px;color:#475569">'+it.detail+'</td>';
+          h += '<td style="padding:4px 6px;text-align:center"><button onclick="_rcToggleAck(\''+it.bid+'\',\''+it.issue+'\')" style="padding:3px 8px;font-size:10px;border-radius:4px;cursor:pointer;border:1px solid '+(acked?'#cbd5e1':meta.color)+';background:'+(acked?'#f1f5f9':'#fff')+';color:'+(acked?'#64748b':meta.color)+'">'+(acked?'↩ 撤销':'✓ 标记处理')+'</button></td>';
+          h += '</tr>';
+        });
+        h += '</tbody></table>';
+        h += '</div></details>';
+      });
+    }
+    h += '</div></details>';
+  });
+
+  body.innerHTML = h;
+}
+
 let curS=null,sortD=1;function srt(f){if(curS===f)sortD*=-1;else{curS=f;sortD=1};rbt()}
 function rbt(){const fSP=document.getElementById('fSP').value,fOwner=document.getElementById('fOwner').value,fAsst=document.getElementById('fAsst').value,fCat=document.getElementById('fCat').value,fTier=document.getElementById('fTier').value,fSt=document.getElementById('fSt').value,fOnline=document.getElementById('fOnline').value,fScr=document.getElementById('fScr').value,fQ=document.getElementById('fQ').value.toLowerCase(),fM=document.getElementById('fMetric').value,fOp=document.getElementById('fOp').value,fVr=document.getElementById('fVal').value,fVn=fVr!==''?parseFloat(fVr):null;
 let fl=BS.filter(b=>{if(b.displayLevel==='ka_self')return false;if(fSP&&b.spMapped!==fSP)return false;if(fOwner&&b.owner!==fOwner)return false;if(fAsst&&b.assistant!==fAsst)return false;if(fCat&&b.cat4!==fCat)return false;if(fTier&&b.tierManual!==fTier)return false;if(fSt==='alive'&&b.isAlive!==true)return false;if(fSt==='dead'&&b.isAlive!==false)return false;if(fOnline==='online'&&b.onlineStatus!=='在线')return false;if(fOnline==='pending'&&b.onlineStatus!=='在线待确认')return false;if(fOnline==='nodata'&&b.onlineStatus!=='未更新')return false;if(fOnline==='lost'&&b.statusManual!=='流失')return false;if(fScr==='biz_f'&&b.bizOk!==false)return false;if(fScr==='price_f'&&b.priceOk!==false)return false;if(fScr==='infra_f'&&b.infraOk!==false)return false;if(fScr==='traffic_f'&&b.trafficOk!==false)return false;if(fScr==='all_p'&&!(b.bizOk===true&&b.priceOk===true&&b.infraOk===true&&b.trafficOk===true))return false;if(fScr==='no_data'&&b.hasDailyData)return false;if(fQ&&!b.name.toLowerCase().includes(fQ))return false;if(fM&&fVn!==null){const v=b[fM];if(v==null)return false;if(fOp==='lt'&&!(v<fVn))return false;if(fOp==='lte'&&!(v<=fVn))return false;if(fOp==='gt'&&!(v>fVn))return false;if(fOp==='gte'&&!(v>=fVn))return false}return true});
@@ -2463,7 +2710,7 @@ async function initDashboard(targetDate) {
     window._D=D;
 W=BS.filter(b=>b.tierManual==='腰部'),KA=BS.filter(b=>b.tierManual==='KA');
     actByBrand={};ACTS.forEach(a=>{const n=a.brandName;if(!actByBrand[n])actByBrand[n]=[];actByBrand[n].push(a)});
-const ss=[...new Set(BS.map(b=>b.spMapped))].sort();['fSP'].forEach(id=>{const s=document.getElementById(id);if(!s)return;ss.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o)})});[...new Set(BS.map(b=>b.owner).filter(Boolean))].sort().forEach(v=>{const s=document.getElementById('fOwner');if(s)s.innerHTML+=`<option value="${v}">${v}</option>`});[...new Set(BS.map(b=>b.assistant).filter(Boolean))].sort().forEach(v=>{const s=document.getElementById('fAsst');if(s)s.innerHTML+=`<option value="${v}">${v}</option>`});const catCnt={};BS.forEach(b=>{const c=b.cat4;if(c){catCnt[c]=(catCnt[c]||0)+1}});const cats=Object.keys(catCnt).filter(c=>catCnt[c]>=3).sort();['fCat'].forEach(id=>{const s=document.getElementById(id);if(!s)return;cats.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v+' ('+catCnt[v]+')';s.appendChild(o)})});rsop();rov();rintro(D);rfc();rfcmark();rpin();rpinq();rpinc();document.getElementById('loading').style.display='none'
+const ss=[...new Set(BS.map(b=>b.spMapped))].sort();['fSP'].forEach(id=>{const s=document.getElementById(id);if(!s)return;ss.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o)})});[...new Set(BS.map(b=>b.owner).filter(Boolean))].sort().forEach(v=>{const s=document.getElementById('fOwner');if(s)s.innerHTML+=`<option value="${v}">${v}</option>`});[...new Set(BS.map(b=>b.assistant).filter(Boolean))].sort().forEach(v=>{const s=document.getElementById('fAsst');if(s)s.innerHTML+=`<option value="${v}">${v}</option>`});const catCnt={};BS.forEach(b=>{const c=b.cat4;if(c){catCnt[c]=(catCnt[c]||0)+1}});const cats=Object.keys(catCnt).filter(c=>catCnt[c]>=3).sort();['fCat'].forEach(id=>{const s=document.getElementById(id);if(!s)return;cats.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v+' ('+catCnt[v]+')';s.appendChild(o)})});rsop();rov();rintro(D);rfc();rfcmark();rpin();rpinq();rpinc();rrc();document.getElementById('loading').style.display='none'
 
     // ── 活动明细数据延迟加载（原 Tab2 → 现附录 Tab4）──
     const tabBtns = document.querySelectorAll('.tab');
