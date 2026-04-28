@@ -143,9 +143,13 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
       <div id="pinQuadrantAlert" style="display:none;margin-bottom:10px;padding:8px 12px;background:#fef3c7;border:1px solid #fbbf24;border-radius:6px;font-size:12px;color:#92400e;line-height:1.5"></div>
       <div id="pinQuadrant" style="width:100%;height:400px"></div>
     </div>
-    <!-- B-3 品牌卡片池（占位）-->
+    <!-- B-3 品牌卡片池 -->
     <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:12px">
-      <div id="pinBrandCards" style="color:#94a3b8;font-size:12px;padding:16px;text-align:center">品牌卡片池（KA 摇优惠同构）— 待实现</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px">
+        <div style="font-size:13px;font-weight:700;color:#1e293b">🧩 置顶品牌诊断</div>
+        <div id="pinCardTabs" style="display:flex;gap:6px;flex-wrap:wrap;max-width:80%;overflow-x:auto"></div>
+      </div>
+      <div id="pinCardBody" style="min-height:200px"></div>
     </div>
   </div>
 
@@ -1816,6 +1820,199 @@ function rpinq(){
   }
 }
 
+// ========== Tab 1 · B-3 · 置顶品牌诊断卡片池（KA 摇优惠同构）==========
+var _pinActiveBrand = null; // 当前选中的 brand_id
+var _pinActiveQuad = null;  // 当前象限筛选 'A'|'B'|'C'|'D'|null
+function _pinQuadCls(x, y, xMed, yMed){
+  if (x >= xMed && y >= yMed) return 'A';
+  if (x >= xMed && y <  yMed) return 'B';
+  if (x <  xMed && y >= yMed) return 'C';
+  return 'D';
+}
+function rpinc(){
+  const body = document.getElementById('pinCardBody');
+  const tabs = document.getElementById('pinCardTabs');
+  if (!body || !tabs) return;
+
+  const TR = (window._D && window._D.topRecords) || [];
+  const trendRows = (window._D && window._D.trendRows) || [];
+  const topBids = new Set(TR.map(r => String(r.brand_id)));
+
+  const online = (BS||[]).filter(b =>
+    b.tierManual === '腰部' && INTRO_CATERING.has(b.cat4) && b.onlineToday === true
+  );
+  const pinnedOnline = online.filter(b => topBids.has(String(b.brandId)));
+
+  // 算所有 brand 的 (x, y) + 象限
+  const pts = pinnedOnline.map(b => {
+    const x = _pinCalcX(b, _pinDataSource, trendRows);
+    const y = b.visitUseRate;
+    return {b: b, x: x, y: y};
+  });
+  const valid = pts.filter(p => p.x != null && p.y != null);
+  const xMed = _median(valid.map(p => p.x));
+  const yMed = _median(valid.map(p => p.y));
+  const byQuad = {A:[], B:[], C:[], D:[], U:[]}; // U=未定(缺数据)
+  pts.forEach(p => {
+    if (p.x == null || p.y == null) byQuad.U.push(p);
+    else byQuad[_pinQuadCls(p.x, p.y, xMed, yMed)].push(p);
+  });
+
+  // 筛选 tab
+  const quadLabels = {
+    A: '🟢 A 健康',
+    B: '🟠 B 有量无转化',
+    C: '🔵 C 转化强缺量',
+    D: '🔴 D 双低',
+    U: '⚪️ 未定'
+  };
+  const quadKeys = ['A','B','C','D','U'].filter(k => byQuad[k].length > 0);
+  tabs.innerHTML =
+    '<button onclick="_pinPickQuad(null)" style="padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid '+(_pinActiveQuad==null?'#2563eb':'#cbd5e1')+';background:'+(_pinActiveQuad==null?'#eff6ff':'#fff')+';color:'+(_pinActiveQuad==null?'#1d4ed8':'#475569')+';font-weight:'+(_pinActiveQuad==null?'700':'500')+'">全部 ('+pts.length+')</button>' +
+    quadKeys.map(k =>
+      '<button onclick="_pinPickQuad(\''+k+'\')" style="padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid '+(_pinActiveQuad===k?'#2563eb':'#cbd5e1')+';background:'+(_pinActiveQuad===k?'#eff6ff':'#fff')+';color:'+(_pinActiveQuad===k?'#1d4ed8':'#475569')+';font-weight:'+(_pinActiveQuad===k?'700':'500')+'">'+quadLabels[k]+' ('+byQuad[k].length+')</button>'
+    ).join('');
+
+  // 品牌列表 (按当前象限过滤)
+  const list = _pinActiveQuad ? byQuad[_pinActiveQuad] : pts;
+  if (!_pinActiveBrand || !list.find(p => String(p.b.brandId) === String(_pinActiveBrand))){
+    _pinActiveBrand = list.length ? list[0].b.brandId : null;
+  }
+
+  // 品牌切换横向 tab 栏 + 卡片
+  const cur = list.find(p => String(p.b.brandId) === String(_pinActiveBrand));
+  if (!cur){
+    body.innerHTML = '<div style="padding:40px;text-align:center;color:#94a3b8;font-size:12px">暂无品牌</div>';
+    return;
+  }
+
+  body.innerHTML =
+    '<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;border-bottom:1px solid #e2e8f0;margin-bottom:12px;scrollbar-width:thin">' +
+    list.map(p => {
+      const active = String(p.b.brandId) === String(_pinActiveBrand);
+      return '<button onclick="_pinPickBrand(\''+p.b.brandId+'\')" style="white-space:nowrap;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid '+(active?'#b45852':'#cbd5e1')+';background:'+(active?'#fef2f2':'#fff')+';color:'+(active?'#b45852':'#475569')+';font-weight:'+(active?'700':'500')+'">'+p.b.name+'</button>';
+    }).join('') +
+    '</div>' +
+    _pinBuildCard(cur.b);
+}
+
+function _pinPickQuad(k){
+  _pinActiveQuad = k;
+  _pinActiveBrand = null;
+  rpinc();
+}
+function _pinPickBrand(bid){
+  _pinActiveBrand = bid;
+  rpinc();
+}
+
+// 单个品牌卡（仿 KA 摇优惠）
+function _pinBuildCard(b){
+  const survChip = b.isAlive === true ?
+    '<span style="background:#d1fae5;color:#065f46;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">✅ 存活</span>' :
+    (b.isAlive === false ? '<span style="background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">⚠️ 未存活</span>' : '<span style="background:#e2e8f0;color:#475569;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">—</span>');
+  const head = '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap"><div style="font-size:18px;font-weight:800;color:#1e293b">'+b.name+'</div>'+survChip+'<span style="font-size:11px;color:#64748b">'+(b.assistant||'—')+' · '+(b.cat4||'—')+' · '+b.spMapped+'</span></div>';
+
+  // ① 结果指标 3 卡（无目标达成条）
+  const daily_exp_w = ((b.biz_expW||0)+(b.f2f_expW||0)+(b.fix_expW||0)+(b.nb_expW||0)+(b.zfyl_expW||0));
+  const daily_use = ((b.biz_useD||0)+(b.f2f_useD||0)+(b.fix_useD||0)+(b.nb_useD||0)+(b.zfyl_useD||0));
+  const eur = daily_exp_w > 0 ? (daily_use/(daily_exp_w*10000)*100) : null;
+  const resultCard = function(title, val, color){
+    return '<div style="background:#f8fafc;border-radius:8px;padding:14px"><div style="font-size:11px;color:#64748b;font-weight:600;margin-bottom:6px">'+title+'</div><div style="font-size:24px;font-weight:800;color:'+color+'">'+val+'</div></div>';
+  };
+  const resultSec = '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">📊 结果指标</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">'+
+    resultCard('日均曝光',   daily_exp_w > 0 ? daily_exp_w.toFixed(1)+'w' : '—', '#2563eb') +
+    resultCard('日均核销',   daily_use > 0 ? (daily_use>=10000 ? (daily_use/10000).toFixed(1)+'w' : daily_use.toLocaleString()) : '—', '#059669') +
+    resultCard('曝光核销率', eur != null ? eur.toFixed(2)+'%' : '—', '#d97706') +
+  '</div></div>';
+
+  // ② 四要素检查 4 卡
+  const fCard = function(title, val, ok){
+    const bg = ok===true?'#f0fdf4':(ok===false?'#fef2f2':'#f8fafc');
+    const bd = ok===true?'#86efac':(ok===false?'#fecaca':'#e2e8f0');
+    const icon = ok===true?'✓':(ok===false?'✗':'—');
+    const color = ok===true?'#059669':(ok===false?'#dc2626':'#64748b');
+    return '<div style="background:'+bg+';border:1px solid '+bd+';border-radius:8px;padding:12px"><div style="font-size:11px;color:#475569;font-weight:600;margin-bottom:4px">'+title+' <span style="color:'+color+';font-weight:800">'+icon+'</span></div><div style="font-size:13px;font-weight:700;color:#1e293b">'+val+'</div></div>';
+  };
+  const fourSec = '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">🔲 上线前四要素检查</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">'+
+    fCard('经营模式', b.miniApp != null ? '小程序 '+b.miniApp.toFixed(1)+'%' : '—', b.bizOk) +
+    fCard('价格力',   b.priceForce != null ? (b.priceForce>0?'+':'')+b.priceForce.toFixed(2)+'%' : '—', b.priceOk) +
+    fCard('基建-商户号', b.txPerStore != null ? '1店几笔 '+b.txPerStore.toFixed(1) : '—', b.infraOk) +
+    fCard('基建-门店', b.storeComplete != null ? '完整度 '+b.storeComplete.toFixed(1)+'%' : '—', b.trafficOk) +
+  '</div></div>';
+
+  // ③ 上线后流量 · 分渠道
+  const chn = [
+    {key:'e21', name:'二选一', expW: (b.biz_expW||0)+(b.f2f_expW||0)+(b.fix_expW||0), useD: (b.biz_useD||0)+(b.f2f_useD||0)+(b.fix_useD||0)},
+    {key:'zfyl', name:'支付有礼', expW: b.zfyl_expW||0, useD: b.zfyl_useD||0},
+    {key:'nb',  name:'周边', expW: b.nb_expW||0, useD: b.nb_useD||0}
+  ];
+  const totalExpW = chn.reduce((s,c)=>s+c.expW, 0);
+  const totalUseD = chn.reduce((s,c)=>s+c.useD, 0);
+  const chnRows = chn.map(c => {
+    const expPct = totalExpW > 0 ? (c.expW/totalExpW*100) : 0;
+    const ur = c.expW > 0 ? (c.useD/(c.expW*10000)*100) : null;
+    return '<tr>'+
+      '<td style="padding:4px 8px;font-weight:600">'+c.name+'</td>'+
+      '<td style="padding:4px 8px" class="nc">'+(c.expW>0?c.expW.toFixed(1)+'w':'—')+'</td>'+
+      '<td style="padding:4px 8px" class="nc"><div style="display:flex;align-items:center;gap:6px"><div style="flex:1;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;min-width:50px"><div style="height:100%;width:'+expPct.toFixed(1)+'%;background:#2563eb"></div></div><span style="font-size:10px;color:#475569">'+expPct.toFixed(1)+'%</span></div></td>'+
+      '<td style="padding:4px 8px" class="nc">'+(c.useD>0?c.useD.toLocaleString():'—')+'</td>'+
+      '<td style="padding:4px 8px" class="nc">'+(ur!=null?ur.toFixed(2)+'%':'—')+'</td>'+
+    '</tr>';
+  }).join('');
+  const chnSec = '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">📈 上线后流量分析 · 分渠道对比</div><div style="overflow-x:auto"><table style="width:100%;font-size:11px;border-collapse:collapse"><thead><tr style="background:#f1f5f9;color:#475569"><th style="padding:5px 8px;text-align:left">渠道</th><th style="padding:5px 8px" class="nc">曝光量</th><th style="padding:5px 8px" class="nc" style="min-width:140px">曝光占比</th><th style="padding:5px 8px" class="nc">核销量</th><th style="padding:5px 8px" class="nc">核销率</th></tr></thead><tbody>'+chnRows+'</tbody></table></div></div>';
+
+  // ④ 老客尽曝情况（简化: 单块 高频/低频）
+  const hiExp = b.hiExpUV_all, loExp = b.loExpUV_all;
+  const hiApp = b.hiAppUV_all, loApp = b.loAppUV_all;
+  const hiRate = (hiApp != null && hiApp > 0 && hiExp != null) ? (hiExp/hiApp*100) : null;
+  const loRate = (loApp != null && loApp > 0 && loExp != null) ? (loExp/loApp*100) : null;
+  const custSec = '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">🧍 老客尽曝情况</div><div style="background:#f8fafc;border-radius:8px;padding:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px">'+
+    '<div><div style="font-size:11px;color:#64748b">高频应曝尽曝率</div><div style="font-size:18px;font-weight:700;color:'+(hiRate!=null?'#1e293b':'#94a3b8')+'">'+(hiRate!=null?hiRate.toFixed(1)+'%':'—')+'</div></div>'+
+    '<div><div style="font-size:11px;color:#64748b">低频应曝尽曝率</div><div style="font-size:18px;font-weight:700;color:'+(loRate!=null?'#1e293b':'#94a3b8')+'">'+(loRate!=null?loRate.toFixed(1)+'%':'—')+'</div></div>'+
+    '<div><div style="font-size:11px;color:#64748b">二选一曝光占比</div><div style="font-size:18px;font-weight:700;color:'+(b.e21Ratio!=null?'#1e293b':'#94a3b8')+'">'+(b.e21Ratio!=null?b.e21Ratio.toFixed(1)+'%':'—')+'</div></div>'+
+  '</div>'+
+  (hiExp==null&&loExp==null ? '<div style="font-size:10px;color:#d97706;margin-top:6px">⚠️ 0420 起老客 UV 字段缺失，以上为 null</div>' : '') +
+  '</div>';
+
+  // ⑤ 到店核销 4 卡
+  const visitSec = '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">🎯 到店核销</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">'+
+    '<div style="background:#fef2f2;border-radius:8px;padding:12px;border:1px solid #fecaca"><div style="font-size:11px;color:#64748b;margin-bottom:4px">到店核销率</div><div style="font-size:20px;font-weight:800;color:#dc2626">'+(b.visitUseRate!=null?b.visitUseRate.toFixed(2)+'%':'—')+'</div></div>'+
+    '<div style="background:#f8fafc;border-radius:8px;padding:12px"><div style="font-size:11px;color:#64748b;margin-bottom:4px">日均交易 (万笔)</div><div style="font-size:20px;font-weight:800;color:#1e293b">'+(b.dailyTx!=null?b.dailyTx.toFixed(2):'—')+'</div></div>'+
+    '<div style="background:#f8fafc;border-radius:8px;padding:12px"><div style="font-size:11px;color:#64748b;margin-bottom:4px">存活率</div><div style="font-size:20px;font-weight:800;color:#1e293b">'+(b.survivalRate!=null?b.survivalRate.toFixed(2)+'%':'—')+'</div></div>'+
+    '<div style="background:#f8fafc;border-radius:8px;padding:12px"><div style="font-size:11px;color:#64748b;margin-bottom:4px">日均核销</div><div style="font-size:20px;font-weight:800;color:#1e293b">'+(daily_use>0?(daily_use>=10000?(daily_use/10000).toFixed(1)+'w':daily_use.toLocaleString()):'—')+'</div></div>'+
+  '</div></div>';
+
+  // ⑥ 活动明细
+  const acts = (window.actByBrand && window.actByBrand[b.name]) || actByBrand[b.name] || [];
+  let actsSec = '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">🎫 活动明细 ('+acts.length+'个)</div>';
+  if (!acts.length){
+    actsSec += '<div style="padding:20px;text-align:center;color:#94a3b8;font-size:11px;background:#f8fafc;border-radius:6px">该品牌暂无在线活动</div>';
+  } else {
+    const sorted = [...acts].sort((a,b) => (b.expPV||0) - (a.expPV||0));
+    actsSec += '<div style="overflow-x:auto"><table style="width:100%;font-size:11px;border-collapse:collapse"><thead><tr style="background:#f1f5f9;color:#475569"><th style="padding:5px 8px;text-align:left">活动名称</th><th style="padding:5px 8px;text-align:left">券名称</th><th style="padding:5px 8px" class="nc">价格力</th><th style="padding:5px 8px" class="nc">日均曝光</th><th style="padding:5px 8px" class="nc">曝光核销率</th></tr></thead><tbody>';
+    sorted.forEach(a => {
+      actsSec += '<tr>'+
+        '<td style="padding:4px 8px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(a.activityName||'')+'">'+(a.activityName||'—')+'</td>'+
+        '<td style="padding:4px 8px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(a.couponName||'')+'">'+(a.couponName||'—')+'</td>'+
+        '<td style="padding:4px 8px" class="nc">'+(a.priceForce!=null?(a.priceForce>0?'+':'')+a.priceForce.toFixed(2)+'%':'—')+'</td>'+
+        '<td style="padding:4px 8px" class="nc">'+(a.dailyExpPV!=null?(a.dailyExpPV>=10000?(a.dailyExpPV/10000).toFixed(1)+'w':a.dailyExpPV.toLocaleString()):'—')+'</td>'+
+        '<td style="padding:4px 8px" class="nc">'+(a.expUseRate!=null?a.expUseRate.toFixed(2)+'%':'—')+'</td>'+
+      '</tr>';
+    });
+    actsSec += '</tbody></table></div>';
+  }
+  actsSec += '</div>';
+
+  // ⑦ 备注反馈框
+  const remark = _fbCache[b.brandId+'_pin_remark'] || '';
+  const fbSec = '<div><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">✏️ 补充反馈</div><textarea placeholder="添加反馈..." style="width:100%;min-height:48px;padding:8px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;resize:vertical" onblur="saveFeedback(\''+b.brandId+'\',\''+(b.name||'').replace(/\'/g,\"\\\\\'\")+'\',\'pin_remark\',this.value)">'+remark+'</textarea></div>';
+
+  return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:16px">' +
+    head + resultSec + fourSec + chnSec + custSec + visitSec + actsSec + fbSec +
+  '</div>';
+}
+
 let curS=null,sortD=1;function srt(f){if(curS===f)sortD*=-1;else{curS=f;sortD=1};rbt()}
 function rbt(){const fSP=document.getElementById('fSP').value,fOwner=document.getElementById('fOwner').value,fAsst=document.getElementById('fAsst').value,fCat=document.getElementById('fCat').value,fTier=document.getElementById('fTier').value,fSt=document.getElementById('fSt').value,fOnline=document.getElementById('fOnline').value,fScr=document.getElementById('fScr').value,fQ=document.getElementById('fQ').value.toLowerCase(),fM=document.getElementById('fMetric').value,fOp=document.getElementById('fOp').value,fVr=document.getElementById('fVal').value,fVn=fVr!==''?parseFloat(fVr):null;
 let fl=BS.filter(b=>{if(b.displayLevel==='ka_self')return false;if(fSP&&b.spMapped!==fSP)return false;if(fOwner&&b.owner!==fOwner)return false;if(fAsst&&b.assistant!==fAsst)return false;if(fCat&&b.cat4!==fCat)return false;if(fTier&&b.tierManual!==fTier)return false;if(fSt==='alive'&&b.isAlive!==true)return false;if(fSt==='dead'&&b.isAlive!==false)return false;if(fOnline==='online'&&b.onlineStatus!=='在线')return false;if(fOnline==='pending'&&b.onlineStatus!=='在线待确认')return false;if(fOnline==='nodata'&&b.onlineStatus!=='未更新')return false;if(fOnline==='lost'&&b.statusManual!=='流失')return false;if(fScr==='biz_f'&&b.bizOk!==false)return false;if(fScr==='price_f'&&b.priceOk!==false)return false;if(fScr==='infra_f'&&b.infraOk!==false)return false;if(fScr==='traffic_f'&&b.trafficOk!==false)return false;if(fScr==='all_p'&&!(b.bizOk===true&&b.priceOk===true&&b.infraOk===true&&b.trafficOk===true))return false;if(fScr==='no_data'&&b.hasDailyData)return false;if(fQ&&!b.name.toLowerCase().includes(fQ))return false;if(fM&&fVn!==null){const v=b[fM];if(v==null)return false;if(fOp==='lt'&&!(v<fVn))return false;if(fOp==='lte'&&!(v<=fVn))return false;if(fOp==='gt'&&!(v>fVn))return false;if(fOp==='gte'&&!(v>=fVn))return false}return true});
@@ -1868,7 +2065,7 @@ async function initDashboard(targetDate) {
     window._D=D;
 W=BS.filter(b=>b.tierManual==='腰部'),KA=BS.filter(b=>b.tierManual==='KA');
     actByBrand={};ACTS.forEach(a=>{const n=a.brandName;if(!actByBrand[n])actByBrand[n]=[];actByBrand[n].push(a)});
-const ss=[...new Set(BS.map(b=>b.spMapped))].sort();['fSP'].forEach(id=>{const s=document.getElementById(id);if(!s)return;ss.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o)})});[...new Set(BS.map(b=>b.owner).filter(Boolean))].sort().forEach(v=>{const s=document.getElementById('fOwner');if(s)s.innerHTML+=`<option value="${v}">${v}</option>`});[...new Set(BS.map(b=>b.assistant).filter(Boolean))].sort().forEach(v=>{const s=document.getElementById('fAsst');if(s)s.innerHTML+=`<option value="${v}">${v}</option>`});const catCnt={};BS.forEach(b=>{const c=b.cat4;if(c){catCnt[c]=(catCnt[c]||0)+1}});const cats=Object.keys(catCnt).filter(c=>catCnt[c]>=3).sort();['fCat'].forEach(id=>{const s=document.getElementById(id);if(!s)return;cats.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v+' ('+catCnt[v]+')';s.appendChild(o)})});rsop();rov();rintro(D);rfc();rpin();rpinq();document.getElementById('loading').style.display='none'
+const ss=[...new Set(BS.map(b=>b.spMapped))].sort();['fSP'].forEach(id=>{const s=document.getElementById(id);if(!s)return;ss.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o)})});[...new Set(BS.map(b=>b.owner).filter(Boolean))].sort().forEach(v=>{const s=document.getElementById('fOwner');if(s)s.innerHTML+=`<option value="${v}">${v}</option>`});[...new Set(BS.map(b=>b.assistant).filter(Boolean))].sort().forEach(v=>{const s=document.getElementById('fAsst');if(s)s.innerHTML+=`<option value="${v}">${v}</option>`});const catCnt={};BS.forEach(b=>{const c=b.cat4;if(c){catCnt[c]=(catCnt[c]||0)+1}});const cats=Object.keys(catCnt).filter(c=>catCnt[c]>=3).sort();['fCat'].forEach(id=>{const s=document.getElementById(id);if(!s)return;cats.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v+' ('+catCnt[v]+')';s.appendChild(o)})});rsop();rov();rintro(D);rfc();rpin();rpinq();rpinc();document.getElementById('loading').style.display='none'
 
     // ── 活动明细数据延迟加载（原 Tab2 → 现附录 Tab4）──
     const tabBtns = document.querySelectorAll('.tab');
