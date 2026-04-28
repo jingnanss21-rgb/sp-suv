@@ -1576,20 +1576,40 @@ function rfc(){
   if (!el) return;
   // 口径：腰部 × 餐饮
   const wc = (BS||[]).filter(b => b.tierManual === '腰部' && INTRO_CATERING.has(b.cat4));
-  // 在线（品牌日报 online_today）
+  // 在线池（品牌日报 online_today）
   const online = wc.filter(b => b.onlineToday === true);
   // 系统全达标：四要素 bizOk/priceOk/infraOk/trafficOk 全为 true
   const allPass = online.filter(b => b.bizOk===true && b.priceOk===true && b.infraOk===true && b.trafficOk===true);
-  // 人工打标：_fbCache 里 brandId_screen_biz/price/infra/store 任一有值
-  const hasMark = function(b){
+
+  // 非全达标品牌按 _mkClassify 的规则打分类（keep / progress / offline / nofb）
+  // 一个品牌可能有多个失分维度（issues），取 worst = offline > nofb > progress > keep
+  const notPass = online.filter(b => !allPass.includes(b));
+  const _bidClass = {}; // brandId -> 最终类别 'keep'|'progress'|'offline'|'nofb'
+  notPass.forEach(b => {
     const bid = b.brandId;
-    if (!bid) return false;
-    return !!(_fbCache[bid+'_screen_biz'] || _fbCache[bid+'_screen_price']
-           || _fbCache[bid+'_screen_infra'] || _fbCache[bid+'_screen_store']);
-  };
-  const manual = online.filter(b => !allPass.includes(b) && hasMark(b));
-  // 整改中：在线 - 系统全达标 - 人工打标
-  const pending = online.filter(b => !allPass.includes(b) && !hasMark(b));
+    const issues = [];
+    if (b.bizOk === false) issues.push('经营模式');
+    if (b.priceOk === false) issues.push('货盘');
+    if (b.infraOk === false) issues.push('基建-商户号');
+    if (b.trafficOk === false) issues.push('基建-门店');
+    if (!issues.length){ _bidClass[bid] = 'nofb'; return; } // 四要素有 null 的归未反馈
+    const classes = issues.map(iss => {
+      const fkey = _mkIssue2Field[iss];
+      const val = (_fbCache[bid+'_'+fkey]||'').trim();
+      return _mkClassify(iss, val); // 'keep'|'progress'|'offline'|'nofb'
+    });
+    // 优先级: offline > nofb > progress > keep
+    if (classes.includes('offline')) _bidClass[bid] = 'offline';
+    else if (classes.includes('nofb')) _bidClass[bid] = 'nofb';
+    else if (classes.includes('progress')) _bidClass[bid] = 'progress';
+    else _bidClass[bid] = 'keep';
+  });
+  const keepN     = notPass.filter(b => _bidClass[b.brandId] === 'keep').length;
+  const pendingN  = notPass.filter(b => _bidClass[b.brandId] === 'progress' || _bidClass[b.brandId] === 'nofb').length;
+  const offlineN  = notPass.filter(b => _bidClass[b.brandId] === 'offline').length;
+
+  // offline 从 online 母数里去掉（独立, 不入母）
+  const onlineCorrected = online.length - offlineN;
 
   const card = function(label, icon, value, unit, sub, color){
     return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px 18px">' +
@@ -1601,10 +1621,11 @@ function rfc(){
   };
 
   let html = '';
-  html += card('在线',       '📡', online.length,  '家', '腰部 × 餐饮 × 日报在线', '#059669');
+  const subOnline = '腰部 × 餐饮 × 日报在线' + (offlineN > 0 ? '<br><span style="color:#94a3b8">（已扣除计划下线 '+offlineN+' 家）</span>' : '');
+  html += card('在线',       '📡', onlineCorrected,  '家', subOnline, '#059669');
   html += card('系统全达标', '✅', allPass.length, '家', '经营模式 / 价格力 / 商户号 / 门店 全 ok', '#16a34a');
-  html += card('人工打标',   '🏷', manual.length,  '家', '四要素不达标 经人工打标合理保留（不含待跟进）', '#d97706');
-  html += card('整改中',     '⚠️', pending.length, '家', '目标清 0（包含待跟进和未反馈）', '#dc2626');
+  html += card('人工打标',   '🏷', keepN,  '家', '四要素不达标 经人工打标合理保留', '#d97706');
+  html += card('整改中',     '⚠️', pendingN, '家', '待跟进 + 未反馈 · 目标清 0', '#dc2626');
   el.innerHTML = html;
 }
 
