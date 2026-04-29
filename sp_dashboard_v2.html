@@ -2159,7 +2159,7 @@ function rpinq(){
   el.innerHTML = '';
   _pinChart = echarts.init(el);
   _pinChart.setOption({
-    grid: {left: 60, right: 30, top: 30, bottom: 50},
+    grid: {left: 60, right: 100, top: 30, bottom: 50},
     tooltip: {
       trigger: 'item',
       formatter: function(p){
@@ -2196,7 +2196,7 @@ function rpinq(){
          data: [
            {xAxis: xMed, label:{show:true, position:'end', formatter:function(){return 'X中位 '+(xMed*100).toFixed(1)+'%'}, fontSize:9, color:'#64748b'}},
            {xAxis: 1.0, label:{show:true, position:'end', formatter:'目标 100%', fontSize:9, color:'#dc2626'}, lineStyle:{color:'#dc2626', type:'solid', width:1}},
-           {yAxis: yMed, label:{show:true, position:'end', formatter:function(){return 'Y中位 '+yMed.toFixed(1)+'%'}, fontSize:9, color:'#64748b'}}
+           {yAxis: yMed, label:{show:true, position:'insideEndTop', formatter:function(){return 'Y中位 '+yMed.toFixed(1)+'%'}, fontSize:9, color:'#64748b', padding:[0,0,0,4]}}
          ]}},
       {name:'B 有量低核销',    type:'scatter', symbolSize: function(v){return v[6]}, itemStyle:{color:color.B, opacity:0.65}, data: groups.B},
       {name:'C 高核销缺量',    type:'scatter', symbolSize: function(v){return v[6]}, itemStyle:{color:color.C, opacity:0.65}, data: groups.C},
