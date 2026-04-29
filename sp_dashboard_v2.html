@@ -359,6 +359,17 @@ async function loadDashboardData(targetDate) {
   }
 
   const sop = sopRows.length > 0 ? sopRows[0].sop_data : {};
+  // 防御：如果 sop_snapshot 当日无数据或字段缺失，补空对象避免前端崩溃
+  if (!sop.alive_stats) sop.alive_stats = {};
+  if (!sop.dead_stats) sop.dead_stats = {};
+  if (!sop.factors_v4) sop.factors_v4 = {};
+  if (!sop.cust_pool) sop.cust_pool = {};
+  if (!sop.quadrant) sop.quadrant = {};
+  if (!sop.screen_brands) sop.screen_brands = [];
+  if (!sop.appendix) sop.appendix = {};
+  if (sop.waist_total == null) sop.waist_total = 0;
+  if (sop.waist_online == null) sop.waist_online = 0;
+  if (sop.waist_lost == null) sop.waist_lost = 0;
 
   const D = {
     final: {dataDate:targetDate, totalTarget:800, spSummary:spSummary, brands:brands},
