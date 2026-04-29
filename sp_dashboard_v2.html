@@ -1964,11 +1964,18 @@ function rpin(){
   const isPass = b => (b.bizOk===true && b.priceOk===true && b.infraOk===true && b.trafficOk===true) || hasMark(b);
 
   // 已置顶（以 topBids 为准, 50 坑位限制）
-  // 已置顶 & 在线 (日报在线)
-  const pinnedOnline = online.filter(b => topBids.has(String(b.brandId)));
-  // 已置顶 & 不在线：topRecords 里有但不在当日 online
-  const onlineBidsSet = new Set(online.map(b => String(b.brandId)));
-  const pinnedOfflineBids = Array.from(topBids).filter(bid => !onlineBidsSet.has(bid));
+  // 已置顶 & 在线：以 brand_snapshot.online_today 为准（不筛 tier/status，置顶名单本身就是最严过滤）
+  const _bsMapAll = {};
+  (BS||[]).forEach(b => { if (b && b.brandId != null) _bsMapAll[String(b.brandId)] = b; });
+  const pinnedOnline = Array.from(topBids).filter(bid => {
+    const b = _bsMapAll[bid];
+    return b && b.onlineToday === true;
+  }).map(bid => _bsMapAll[bid]);
+  // 已置顶 & 不在线：topRecords 里有但 BS 当日 online_today 不是 true
+  const pinnedOfflineBids = Array.from(topBids).filter(bid => {
+    const b = _bsMapAll[bid];
+    return !b || b.onlineToday !== true;
+  });
   const pinnedTotal = topBids.size;
 
   const pinPct = TOP_QUOTA > 0 ? (pinnedTotal / TOP_QUOTA * 100) : 0;
@@ -2531,9 +2538,7 @@ function _rcBuildItems(){
     }
   });
 
-  // #7/#8 置顶相关: 独立遍历 topBids, 不筛跟进表分层/状态 (KA 也算)
-  // 口径和 B-1 大卡对齐: "不在线" = 不在 (腰部×跟进在线×日报在线) 池子里
-  const wcOnlineBidSet = new Set(wc.filter(b => b.onlineToday === true).map(b => String(b.brandId)));
+  // #7/#8 置顶相关: 独立遍历 topBids (置顶名单就是最严过滤, 不再筛跟进表分层/状态)
   // 构造 BS 的 brandId → 品牌 的索引 (用于拿完整字段)
   const _bsById = {};
   (BS||[]).forEach(b => { if (b && b.brandId != null) _bsById[String(b.brandId)] = b; });
@@ -2550,16 +2555,11 @@ function _rcBuildItems(){
       cat4: '', storeCount: null, storeComplete: null, onlineToday: null, dailyTier: '',
     };
 
-    // #7 已置顶但不在线 (公线 P0): 已置顶 ∩ 不在 wcOnline 池子里
-    if (!wcOnlineBidSet.has(tbid)){
-      let reason = '当日不在线';
-      if (b){
-        if (b.tierManual !== '腰部') reason = '跟进表非腰部 (当前 '+(b.tierManual||'—')+')';
-        else if (b.statusManual !== '在线') reason = '跟进表状态='+(b.statusManual||'—');
-        else if (b.onlineToday !== true) reason = '日报不在线 (曝光<100)';
-      } else {
-        reason = '不在当日日报快照中';
-      }
+    // #7 已置顶但不在线 (公线 P0): online_today != true
+    if (!b || b.onlineToday !== true){
+      const reason = b
+        ? '日报不在线 (曝光<100)'
+        : '不在当日日报快照中';
       items.push({ ...baseT, issue: 'top_offline',
         detail: '已占用置顶坑位但' + reason + ', 建议补位或替换'
       });
