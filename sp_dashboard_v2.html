@@ -2409,6 +2409,8 @@ function _pinBuildCard(b){
 
 const RC_CATERING = INTRO_CATERING;
 const RC_ZHENGCAN = new Set(['正餐']);
+// 类目分歧免跟进白名单: 明确的非餐饮服务业态, 业务上跟进表标腰部≠餐饮误标, 无需修正
+const RC_CAT_WAIVED = new Set(['按摩足疗','KTV','棋牌室']);
 
 const RC_ISSUE_META = {
   tier_mismatch:   { label: '分层分歧',       desc: '跟进表=腰部 ∩ 日报=尾部',                owner: '行业', priority: 'P0', color: '#dc2626' },
@@ -2456,12 +2458,17 @@ function _rcBuildItems(){
       items.push({ ...base, issue: 'tier_mismatch',
         detail: '跟进表=腰部 / 日报=尾部' + (b.storeCount != null ? ' (审核通过门店数 '+b.storeCount+')' : ''),
         waived: waived,
+        waivedReason: waived ? '非正餐×10家+' : '',
       });
     }
     // #3 类目分歧: cat4 非餐饮 (且不是空)
+    // 放过条件: cat4 ∈ 明确非餐饮服务业态 (按摩足疗/KTV/棋牌室)
     if (base.cat4 && !RC_CATERING.has(base.cat4)){
+      const catWaived = RC_CAT_WAIVED.has(base.cat4);
       items.push({ ...base, issue: 'cat_mismatch',
-        detail: '跟进表腰部(默认餐饮) / 日报类目=' + base.cat4
+        detail: '跟进表腰部(默认餐饮) / 日报类目=' + base.cat4,
+        waived: catWaived,
+        waivedReason: catWaived ? '非餐饮服务业态' : '',
       });
     }
     // #4 日报分层字段空
@@ -2531,7 +2538,7 @@ function _rcExportCSV(){
       it.bid, it.name, it.sp, it.assistant,
       '腰部', it.dailyTier, it.cat4, it.storeCount != null ? it.storeCount : '',
       it.onlineToday === true ? '在线' : (it.onlineToday === false ? '不在线' : '—'),
-      it.waived ? '是 (非正餐×10家+)' : '',
+      it.waived ? ('是 ('+(it.waivedReason||'放过')+')') : '',
       it.detail,
     ]);
   });
@@ -2637,7 +2644,7 @@ function rrc(){
           h += '<td style="padding:4px 6px;color:#475569">'+(it.cat4||'—')+'</td>';
           h += '<td style="padding:4px 6px">'+(it.sp||'—')+'</td>';
           h += '<td style="padding:4px 6px">'+(it.assistant||'—')+'</td>';
-          const detailHtml = it.detail + (waived ? ' <span style="display:inline-block;margin-left:6px;padding:1px 6px;background:#dcfce7;color:#059669;border-radius:3px;font-size:10px;font-weight:600">🟢 非正餐×10家+ · 无需反馈</span>' : '');
+          const detailHtml = it.detail + (waived ? ' <span style="display:inline-block;margin-left:6px;padding:1px 6px;background:#dcfce7;color:#059669;border-radius:3px;font-size:10px;font-weight:600">🟢 '+(it.waivedReason||'无需反馈')+' · 无需反馈</span>' : '');
           h += '<td style="padding:4px 6px;color:'+(waived?'#94a3b8':'#475569')+'">'+detailHtml+'</td>';
           if (waived){
             h += '<td style="padding:4px 6px;text-align:center"><span style="padding:3px 8px;font-size:10px;color:#94a3b8;background:#f1f5f9;border-radius:4px">— 免跟进</span></td>';
