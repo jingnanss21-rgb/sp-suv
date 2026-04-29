@@ -159,6 +159,7 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
         <select id="pinFiltSP" onchange="_pinFilterChanged()" style="padding:5px 8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px"><option value="">经营服务商</option></select>
         <select id="pinFiltOwner" onchange="_pinFilterChanged()" style="padding:5px 8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px"><option value="">负责人</option></select>
         <select id="pinFiltAlive" onchange="_pinFilterChanged()" style="padding:5px 8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px"><option value="">存活状态</option><option value="alive">存活</option><option value="dead">未存活</option></select>
+        <select id="pinFiltCat" onchange="_pinFilterChanged()" style="padding:5px 8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px"><option value="">类目</option></select>
       </div>
       <div id="pinCardTabs" style="display:flex;gap:6px;flex-wrap:wrap;max-width:100%;overflow-x:auto"></div>
       <div id="pinCardBody" style="min-height:200px;margin-top:10px"></div>
@@ -2127,9 +2128,10 @@ function rpinq(){
   }
   if (emptyEl){ emptyEl.style.display = 'none'; }
 
-  // 中位数
+  // 中位数 — Y轴用腰部在线品牌全量到店核销率中位数（不局限于已置顶）
   const xMed = _median(points.map(p=>p.x));
-  const yMed = _median(points.map(p=>p.y));
+  const _allOnlineVUR = (BS||[]).filter(b => b.tierManual==='腰部' && b.statusManual==='在线' && b.onlineToday===true && b.visitUseRate!=null).map(b=>b.visitUseRate);
+  const yMed = _allOnlineVUR.length ? _median(_allOnlineVUR) : _median(points.map(p=>p.y));
 
   // 四象限分类
   const cls = function(p){
@@ -2193,7 +2195,7 @@ function rpinq(){
        markLine: {silent:true, symbol:'none', lineStyle:{color:'#94a3b8', type:'dashed', width:1},
          data: [
            {xAxis: xMed, label:{show:true, position:'end', formatter:function(){return 'X中位 '+(xMed*100).toFixed(1)+'%'}, fontSize:9, color:'#64748b'}},
-           {xAxis: 1.0, label:{show:true, position:'end', formatter:'100%', fontSize:9, color:'#dc2626'}, lineStyle:{color:'#dc2626', type:'solid', width:1}},
+           {xAxis: 1.0, label:{show:true, position:'end', formatter:'目标 100%', fontSize:9, color:'#dc2626'}, lineStyle:{color:'#dc2626', type:'solid', width:1}},
            {yAxis: yMed, label:{show:true, position:'end', formatter:function(){return 'Y中位 '+yMed.toFixed(1)+'%'}, fontSize:9, color:'#64748b'}}
          ]}},
       {name:'B 有量低核销',    type:'scatter', symbolSize: function(v){return v[6]}, itemStyle:{color:color.B, opacity:0.65}, data: groups.B},
@@ -2259,6 +2261,7 @@ function rpinc(){
   });
   const byQuad = {A:0,B:0,C:0,D:0,U:0};
   pinnedOnline.forEach(b => byQuad[quadOf[b.brandId]]++);
+  window._pinQuadOfCache = quadOf; // 供 _pinBuildCard 读取
 
   // 填 服务商/负责人 下拉
   const spSel = document.getElementById('pinFiltSP');
@@ -2271,12 +2274,18 @@ function rpinc(){
     const owners = Array.from(new Set(pinnedOnline.map(b => b.owner).filter(Boolean))).sort();
     owners.forEach(v => { const o=document.createElement('option'); o.value=v; o.textContent=v; ownerSel.appendChild(o) });
   }
+  const catSel = document.getElementById('pinFiltCat');
+  if (catSel && catSel.options.length <= 1){
+    const cats = Array.from(new Set(pinnedOnline.map(b => b.cat4).filter(Boolean))).sort();
+    cats.forEach(v => { const o=document.createElement('option'); o.value=v; o.textContent=v; catSel.appendChild(o) });
+  }
 
   // 读筛选器
   const fQ = ((document.getElementById('pinSearch')||{}).value || '').toLowerCase().trim();
   const fSP = (document.getElementById('pinFiltSP')||{}).value || '';
   const fOwner = (document.getElementById('pinFiltOwner')||{}).value || '';
   const fAlive = (document.getElementById('pinFiltAlive')||{}).value || '';
+  const fCat = (document.getElementById('pinFiltCat')||{}).value || '';
 
   let list = pinnedOnline.filter(b => {
     // 象限过滤
@@ -2285,6 +2294,7 @@ function rpinc(){
     if (fOwner && b.owner !== fOwner) return false;
     if (fAlive === 'alive' && b.isAlive !== true) return false;
     if (fAlive === 'dead' && b.isAlive !== false) return false;
+    if (fCat && b.cat4 !== fCat) return false;
     if (fQ){
       const nm = (b.name||'').toLowerCase();
       const bid = String(b.brandId||'');
@@ -2317,10 +2327,7 @@ function rpinc(){
     '<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;border-bottom:1px solid #e2e8f0;margin-bottom:12px;scrollbar-width:thin">' +
     list.map(b => {
       const active = String(b.brandId) === String(_pinActiveBrand);
-      const q = quadOf[b.brandId]||'U';
-      const qColor = {A:'#059669',B:'#d97706',C:'#2563eb',D:'#dc2626',U:'#94a3b8'}[q];
-      const qName = {A:'健康',B:'有量低核销',C:'高核销缺量',D:'双低',U:'—'}[q];
-      return '<button onclick="_pinPickBrand(\''+b.brandId+'\')" style="white-space:nowrap;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid '+(active?'#b45852':'#cbd5e1')+';background:'+(active?'#fef2f2':'#fff')+';color:'+(active?'#b45852':'#475569')+';font-weight:'+(active?'700':'500')+'">'+b.name+' <span style="font-size:9px;color:'+qColor+';font-weight:700">'+qName+'</span></button>';
+      return '<button onclick="_pinPickBrand(\''+b.brandId+'\')" style="white-space:nowrap;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid '+(active?'#b45852':'#cbd5e1')+';background:'+(active?'#fef2f2':'#fff')+';color:'+(active?'#b45852':'#475569')+';font-weight:'+(active?'700':'500')+'">'+b.name+'</button>';
     }).join('') +
     '</div>' +
     _pinBuildCard(cur);
@@ -2341,7 +2348,14 @@ function _pinBuildCard(b){
   const survChip = b.isAlive === true ?
     '<span style="background:#d1fae5;color:#065f46;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">✅ 存活</span>' :
     (b.isAlive === false ? '<span style="background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">⚠️ 未存活</span>' : '<span style="background:#e2e8f0;color:#475569;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">—</span>');
-  const head = '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap"><div style="font-size:18px;font-weight:800;color:#1e293b">'+b.name+'</div>'+survChip+'</div>';
+  // 象限分类标签
+  const _q = window._pinQuadOfCache && window._pinQuadOfCache[b.brandId] || 'U';
+  const _qColor = {A:'#059669',B:'#d97706',C:'#2563eb',D:'#dc2626',U:'#94a3b8'}[_q];
+  const _qName = {A:'健康',B:'有量低核销',C:'高核销缺量',D:'双低',U:'未定'}[_q];
+  const quadChip = '<span style="background:'+_qColor+'18;color:'+_qColor+';padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">'+_qName+'</span>';
+  // 类目标签
+  const catChip = b.cat4 ? '<span style="background:#f1f5f9;color:#475569;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500">'+b.cat4+'</span>' : '';
+  const head = '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap"><div style="font-size:18px;font-weight:800;color:#1e293b">'+b.name+'</div>'+survChip+quadChip+catChip+'</div>';
 
   // ① 结果指标 3 卡（无目标达成条）
   const daily_exp_w = ((b.biz_expW||0)+(b.f2f_expW||0)+(b.fix_expW||0)+(b.nb_expW||0)+(b.zfyl_expW||0));
@@ -2725,15 +2739,18 @@ function rrc(){
     h += '<div style="font-size:13px;font-weight:700;color:'+ownerColor.fg+'">'+ownerColor.icon+' '+owner+'跟进 <span style="font-size:11px;font-weight:400;margin-left:6px">'+list.length+' 条'+(priStr?' ('+priStr+')':'')+'</span></div>';
     h += '<span style="font-size:11px;color:#94a3b8">▾ 展开/收起</span></summary>';
     h += '<div style="margin-top:10px">';
-    if (list.length === 0){
+    if (list.length === 0 && !Object.keys(RC_ISSUE_META).some(k => RC_ISSUE_META[k].owner === owner)){
       h += '<div style="padding:20px;text-align:center;color:#94a3b8;font-size:12px">✅ 该分组下无未处理项</div>';
     } else {
-      Object.keys(byIss).sort((a,b) => {
+      // 确保该 owner 下所有定义的场景都展示（含 0 家）
+      const ownerIssues = Object.keys(RC_ISSUE_META).filter(k => RC_ISSUE_META[k].owner === owner);
+      ownerIssues.sort((a,b) => {
         const pa = RC_ISSUE_META[a].priority, pb = RC_ISSUE_META[b].priority;
         return pa < pb ? -1 : pa > pb ? 1 : 0;
-      }).forEach(iss => {
+      });
+      ownerIssues.forEach(iss => {
         const meta = RC_ISSUE_META[iss];
-        const sub = byIss[iss];
+        const sub = byIss[iss] || [];
         h += '<details style="background:#fff;border:1px solid '+meta.color+'40;border-radius:6px;padding:8px 12px;margin-bottom:8px">';
         h += '<summary style="cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center">';
         h += '<div><span style="display:inline-block;padding:2px 6px;background:'+meta.color+'20;color:'+meta.color+';border-radius:4px;font-size:10px;font-weight:700;margin-right:6px">'+meta.priority+'</span>';
