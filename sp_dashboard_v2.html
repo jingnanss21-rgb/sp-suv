@@ -166,7 +166,7 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
 
   <!-- ========== 板块 C · 数据对账 ========== -->
   <div class="S">
-    <div class="ST">🔧 数据对账 <span id="rcTotalBadge" style="margin-left:8px;padding:2px 8px;background:#fef3c7;color:#92400e;border-radius:10px;font-size:11px;font-weight:600">—</span></div>
+    <div class="ST">🔧 待跟进 <span id="rcTotalBadge" style="margin-left:8px;padding:2px 8px;background:#fef3c7;color:#92400e;border-radius:10px;font-size:11px;font-weight:600">—</span></div>
     <!-- 筛选器 -->
     <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:12px;margin-top:8px">
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
@@ -2413,7 +2413,9 @@ const RC_ZHENGCAN = new Set(['正餐']);
 const RC_CAT_WAIVED = new Set(['按摩足疗','KTV','棋牌室']);
 
 const RC_ISSUE_META = {
+  top_fail_four:   { label: '已置顶四要素不达标', desc: '已置顶 ∩ 日报在线 ∩ 未全达标 ∩ 无人工保留标',  owner: '行业', priority: 'P0', color: '#dc2626' },
   tier_mismatch:   { label: '分层分歧',       desc: '跟进表=腰部 ∩ 日报=尾部',                owner: '行业', priority: 'P0', color: '#dc2626' },
+  top_offline:     { label: '已置顶但不在线', desc: '已置顶 ∩ 日报不在线 (曝光<100)',         owner: '公线', priority: 'P0', color: '#dc2626' },
   cat_mismatch:    { label: '类目分歧',       desc: '跟进表腰部(默认餐饮) ∩ 日报类目非餐饮', owner: '公线', priority: 'P0', color: '#dc2626' },
   tier_empty:      { label: '日报分层字段空', desc: '日报「品牌分层」= "/" 或空',            owner: '公线', priority: 'P0', color: '#dc2626' },
   factor_missing:  { label: '四要素数据缺失', desc: 'factor_biz/price/infra/store 任一为 null', owner: '公线', priority: 'P0', color: '#dc2626' },
@@ -2442,6 +2444,18 @@ function _rcToggleAck(bid, issueType){
 function _rcBuildItems(){
   const items = []; // { bid, name, sp, assistant, issue, detail, sortKey }
   const wc = (BS||[]).filter(b => b.tierManual === '腰部' && b.statusManual === '在线');
+  // 已置顶品牌 id 集合 (for 场景 top_offline / top_fail_four)
+  const TR = (window._D && window._D.topRecords) || [];
+  const topBids = new Set(TR.map(r => String(r.brand_id)));
+
+  // 人工打标判定: 品牌在任一维度有 screen_* 反馈
+  const _hasKeepMark = function(bid){
+    if (!bid) return false;
+    return !!(_fbCache[bid+'_screen_biz'] ||
+              _fbCache[bid+'_screen_price'] ||
+              _fbCache[bid+'_screen_infra'] ||
+              _fbCache[bid+'_screen_store']);
+  };
 
   wc.forEach(b => {
     const base = {
@@ -2514,6 +2528,34 @@ function _rcBuildItems(){
       items.push({ ...base, issue: 'low_exp',
         detail: '跟进表=在线 / 日报当日曝光<100 被判不在线' + (b.storeCount != null ? ' (门店 '+b.storeCount+')' : '')
       });
+    }
+    // #7 已置顶但不在线 (公线 P0): 已置顶 ∩ 日报不在线
+    // 不去重: 即使已在 low_exp 里也独立列出, 因为置顶坑位需立即补位/替换
+    const isTopped = topBids.has(String(b.brandId));
+    if (isTopped && b.onlineToday !== true){
+      items.push({ ...base, issue: 'top_offline',
+        detail: '已占用置顶坑位但当日不在线, 建议补位或替换' + (b.storeCount != null ? ' (门店 '+b.storeCount+')' : '')
+      });
+    }
+    // #8 已置顶但四要素不达标 (行业 P0): 已置顶 ∩ 日报在线 ∩ 未全达标 ∩ 无人工保留标
+    if (isTopped && b.onlineToday === true){
+      const allPass = b.bizOk===true && b.priceOk===true && b.infraOk===true && b.trafficOk===true;
+      const hasMark = _hasKeepMark(b.brandId);
+      if (!allPass && !hasMark){
+        const failDims = [];
+        if (b.bizOk === false) failDims.push('经营❌');
+        if (b.priceOk === false) failDims.push('货盘❌');
+        if (b.infraOk === false) failDims.push('基建-商户号❌');
+        if (b.trafficOk === false) failDims.push('基建-门店❌');
+        // 同时考虑 null (数据缺失) 维度
+        if (b.bizOk == null) failDims.push('经营·缺');
+        if (b.priceOk == null) failDims.push('货盘·缺');
+        if (b.infraOk == null) failDims.push('基建-商户号·缺');
+        if (b.trafficOk == null) failDims.push('基建-门店·缺');
+        items.push({ ...base, issue: 'top_fail_four',
+          detail: '失分维度: ' + (failDims.join(' · ') || '(未识别)')
+        });
+      }
     }
   });
   return items;
