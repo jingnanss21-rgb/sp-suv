@@ -2609,13 +2609,14 @@ function rrc(){
         h += '<span style="font-size:11px;color:#94a3b8">▸</span></summary>';
         h += '<div style="margin-top:8px;border-top:1px dashed #e2e8f0;padding-top:8px">';
         h += '<table style="width:100%;font-size:11px;border-collapse:collapse">';
-        h += '<thead><tr style="color:#64748b;font-weight:600"><th style="text-align:left;padding:4px 6px">品牌</th><th style="text-align:left;padding:4px 6px">ID</th><th style="text-align:left;padding:4px 6px">经营服务商</th><th style="text-align:left;padding:4px 6px">对接助理</th><th style="text-align:left;padding:4px 6px">详情</th><th style="text-align:center;padding:4px 6px;width:90px">操作</th></tr></thead><tbody>';
+        h += '<thead><tr style="color:#64748b;font-weight:600"><th style="text-align:left;padding:4px 6px">品牌</th><th style="text-align:left;padding:4px 6px">ID</th><th style="text-align:left;padding:4px 6px">类目</th><th style="text-align:left;padding:4px 6px">经营服务商</th><th style="text-align:left;padding:4px 6px">对接助理</th><th style="text-align:left;padding:4px 6px">详情</th><th style="text-align:center;padding:4px 6px;width:90px">操作</th></tr></thead><tbody>';
         sub.sort((a,b) => a.name.localeCompare(b.name));
         sub.forEach(it => {
           const acked = _rcIsAcked(it.bid, it.issue);
           h += '<tr style="border-top:1px solid #f1f5f9'+(acked?';opacity:.5':'')+'">';
           h += '<td style="padding:4px 6px"><b>'+it.name+'</b></td>';
           h += '<td style="padding:4px 6px;color:#64748b">'+it.bid+'</td>';
+          h += '<td style="padding:4px 6px;color:#475569">'+(it.cat4||'—')+'</td>';
           h += '<td style="padding:4px 6px">'+(it.sp||'—')+'</td>';
           h += '<td style="padding:4px 6px">'+(it.assistant||'—')+'</td>';
           h += '<td style="padding:4px 6px;color:#475569">'+it.detail+'</td>';
