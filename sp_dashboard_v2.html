@@ -2449,9 +2449,13 @@ function _rcBuildItems(){
     };
 
     // #2 分层分歧: 跟进表腰部 + 日报分层 = "3-尾部"
+    // 放过条件: 非正餐 且 门店数>=10 (业务规则: 非正餐≥10家算腰部合理范畴, 无需跟进)
     if (base.dailyTier === '3-尾部'){
+      const isZhengcan = RC_ZHENGCAN.has(base.cat4);
+      const waived = !isZhengcan && base.cat4 && b.storeCount != null && b.storeCount >= 10;
       items.push({ ...base, issue: 'tier_mismatch',
-        detail: '跟进表=腰部 / 日报=尾部' + (b.storeCount != null ? ' (审核通过门店数 '+b.storeCount+')' : '')
+        detail: '跟进表=腰部 / 日报=尾部' + (b.storeCount != null ? ' (审核通过门店数 '+b.storeCount+')' : ''),
+        waived: waived,
       });
     }
     // #3 类目分歧: cat4 非餐饮 (且不是空)
@@ -2519,7 +2523,7 @@ function _rcFilterChanged(){ rrc(); }
 
 function _rcExportCSV(){
   const items = _rcApplyFilter(_rcBuildItems());
-  const rows = [['优先级','负责人','问题类型','品牌ID','品牌名称','经营服务商','对接助理','跟进表分层','日报分层','日报类目','审核通过门店数','当日在线','说明']];
+  const rows = [['优先级','负责人','问题类型','品牌ID','品牌名称','经营服务商','对接助理','跟进表分层','日报分层','日报类目','审核通过门店数','当日在线','免跟进','说明']];
   items.forEach(it => {
     const m = RC_ISSUE_META[it.issue];
     rows.push([
@@ -2527,6 +2531,7 @@ function _rcExportCSV(){
       it.bid, it.name, it.sp, it.assistant,
       '腰部', it.dailyTier, it.cat4, it.storeCount != null ? it.storeCount : '',
       it.onlineToday === true ? '在线' : (it.onlineToday === false ? '不在线' : '—'),
+      it.waived ? '是 (非正餐×10家+)' : '',
       it.detail,
     ]);
   });
@@ -2560,8 +2565,9 @@ function rrc(){
   // 总数 badge
   const badge = document.getElementById('rcTotalBadge');
   if (badge){
-    const unacked = allItems.filter(it => !_rcIsAcked(it.bid, it.issue)).length;
-    badge.textContent = '共 ' + unacked + ' 条待处理 · 总 ' + allItems.length;
+    const unacked = allItems.filter(it => !_rcIsAcked(it.bid, it.issue) && !it.waived).length;
+    const waivedCnt = allItems.filter(it => it.waived).length;
+    badge.textContent = '共 ' + unacked + ' 条待处理 · 总 ' + allItems.length + (waivedCnt > 0 ? ' (含 '+waivedCnt+' 免跟进)' : '');
   }
 
   // 按 owner 分组
@@ -2582,10 +2588,16 @@ function rrc(){
       if (!byIss[it.issue]) byIss[it.issue] = [];
       byIss[it.issue].push(it);
     });
-    // P 统计
+    // P 统计 (排除免跟进)
     const priCnt = { P0:0, P1:0, P2:0 };
-    list.forEach(it => { priCnt[RC_ISSUE_META[it.issue].priority]++; });
-    const priStr = ['P0','P1','P2'].filter(p => priCnt[p]>0).map(p => p+':'+priCnt[p]).join(' · ');
+    let ownerWaived = 0;
+    list.forEach(it => {
+      if (it.waived) ownerWaived++;
+      else priCnt[RC_ISSUE_META[it.issue].priority]++;
+    });
+    const priParts = ['P0','P1','P2'].filter(p => priCnt[p]>0).map(p => p+':'+priCnt[p]);
+    if (ownerWaived > 0) priParts.push('免跟进:'+ownerWaived);
+    const priStr = priParts.join(' · ');
 
     h += '<details open style="background:'+ownerColor.bg+';border:1px solid '+ownerColor.bd+';border-radius:8px;padding:10px 14px;margin-bottom:10px">';
     h += '<summary style="cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center">';
@@ -2605,7 +2617,9 @@ function rrc(){
         h += '<summary style="cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center">';
         h += '<div><span style="display:inline-block;padding:2px 6px;background:'+meta.color+'20;color:'+meta.color+';border-radius:4px;font-size:10px;font-weight:700;margin-right:6px">'+meta.priority+'</span>';
         h += '<b style="font-size:12px;color:#1e293b">'+meta.label+'</b>';
-        h += ' <span style="font-size:11px;color:#94a3b8;margin-left:4px">· '+meta.desc+' · '+sub.length+' 家</span></div>';
+        const subWaived = sub.filter(x => x.waived).length;
+        const subActive = sub.length - subWaived;
+        h += ' <span style="font-size:11px;color:#94a3b8;margin-left:4px">· '+meta.desc+' · '+sub.length+' 家'+(subWaived>0?' <span style="color:#059669">(含 '+subWaived+' 免跟进)</span>':'')+'</span></div>';
         h += '<span style="font-size:11px;color:#94a3b8">▸</span></summary>';
         h += '<div style="margin-top:8px;border-top:1px dashed #e2e8f0;padding-top:8px">';
         h += '<table style="width:100%;font-size:11px;border-collapse:collapse">';
@@ -2613,14 +2627,23 @@ function rrc(){
         sub.sort((a,b) => a.name.localeCompare(b.name));
         sub.forEach(it => {
           const acked = _rcIsAcked(it.bid, it.issue);
-          h += '<tr style="border-top:1px solid #f1f5f9'+(acked?';opacity:.5':'')+'">';
-          h += '<td style="padding:4px 6px"><b>'+it.name+'</b></td>';
+          const waived = it.waived === true;
+          const rowStyle = waived
+            ? 'border-top:1px solid #f1f5f9;background:#f8fafc;color:#94a3b8;'
+            : 'border-top:1px solid #f1f5f9'+(acked?';opacity:.5':'');
+          h += '<tr style="'+rowStyle+'">';
+          h += '<td style="padding:4px 6px"><b style="'+(waived?'color:#94a3b8;font-weight:500':'')+'">'+it.name+'</b></td>';
           h += '<td style="padding:4px 6px;color:#64748b">'+it.bid+'</td>';
           h += '<td style="padding:4px 6px;color:#475569">'+(it.cat4||'—')+'</td>';
           h += '<td style="padding:4px 6px">'+(it.sp||'—')+'</td>';
           h += '<td style="padding:4px 6px">'+(it.assistant||'—')+'</td>';
-          h += '<td style="padding:4px 6px;color:#475569">'+it.detail+'</td>';
-          h += '<td style="padding:4px 6px;text-align:center"><button onclick="_rcToggleAck(\''+it.bid+'\',\''+it.issue+'\')" style="padding:3px 8px;font-size:10px;border-radius:4px;cursor:pointer;border:1px solid '+(acked?'#cbd5e1':meta.color)+';background:'+(acked?'#f1f5f9':'#fff')+';color:'+(acked?'#64748b':meta.color)+'">'+(acked?'↩ 撤销':'✓ 标记处理')+'</button></td>';
+          const detailHtml = it.detail + (waived ? ' <span style="display:inline-block;margin-left:6px;padding:1px 6px;background:#dcfce7;color:#059669;border-radius:3px;font-size:10px;font-weight:600">🟢 非正餐×10家+ · 无需反馈</span>' : '');
+          h += '<td style="padding:4px 6px;color:'+(waived?'#94a3b8':'#475569')+'">'+detailHtml+'</td>';
+          if (waived){
+            h += '<td style="padding:4px 6px;text-align:center"><span style="padding:3px 8px;font-size:10px;color:#94a3b8;background:#f1f5f9;border-radius:4px">— 免跟进</span></td>';
+          } else {
+            h += '<td style="padding:4px 6px;text-align:center"><button onclick="_rcToggleAck(\''+it.bid+'\',\''+it.issue+'\')" style="padding:3px 8px;font-size:10px;border-radius:4px;cursor:pointer;border:1px solid '+(acked?'#cbd5e1':meta.color)+';background:'+(acked?'#f1f5f9':'#fff')+';color:'+(acked?'#64748b':meta.color)+'">'+(acked?'↩ 撤销':'✓ 标记处理')+'</button></td>';
+          }
           h += '</tr>';
         });
         h += '</tbody></table>';
