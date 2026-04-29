@@ -141,7 +141,7 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
     <!-- B-2 象限图 + 数据源 tab -->
     <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:12px">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px">
-        <div style="font-size:13px;font-weight:700;color:#1e293b">📊 置顶流量象限 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:4px">X=老客曝光占比（日均老客尽曝PV/日均交易） · Y=到店核销率</span></div>
+        <div style="font-size:13px;font-weight:700;color:#1e293b">📊 置顶流量象限 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:4px"><span style="cursor:help" title="= (近7日_高频尽曝UV + 低频尽曝UV) / 7 / 近7日均_笔数(w) / 10000&#10;&#10;底表: 品牌日报">X=老客曝光占比</span> · Y=到店核销率</span></div>
         <div style="font-size:11px;color:#dc2626;font-weight:500;margin-top:4px">⚠️ 因当前缺失老客日均曝光PV字段，X轴暂用7日累计尽曝UV÷7估算</div>
         <div id="pinDsTabs" style="display:none"></div>
       </div>
@@ -2358,7 +2358,7 @@ function _pinBuildCard(b){
   const head = '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap"><div style="font-size:18px;font-weight:800;color:#1e293b">'+b.name+'</div>'+survChip+quadChip+catChip+'</div>';
 
   // ① 结果指标 3 卡（无目标达成条）
-  const daily_exp_w = ((b.biz_expW||0)+(b.f2f_expW||0)+(b.fix_expW||0)+(b.nb_expW||0)+(b.zfyl_expW||0));
+  const daily_exp_w = b.expPv != null ? b.expPv : ((b.biz_expW||0)+(b.f2f_expW||0)+(b.fix_expW||0)+(b.nb_expW||0)+(b.zfyl_expW||0));
   const daily_use = ((b.biz_useD||0)+(b.f2f_useD||0)+(b.fix_useD||0)+(b.nb_useD||0)+(b.zfyl_useD||0));
   const eur = daily_exp_w > 0 ? (daily_use/(daily_exp_w*10000)*100) : null;
   const resultCard = function(title, val, color){
@@ -2382,7 +2382,7 @@ function _pinBuildCard(b){
     fCard('经营模式', b.miniApp != null ? '小程序 '+b.miniApp.toFixed(1)+'%' : '—', b.bizOk) +
     fCard('价格力',   b.priceForce != null ? (b.priceForce>0?'+':'')+b.priceForce.toFixed(2)+'%' : '—', b.priceOk) +
     fCard('基建-商户号', b.txPerStore != null ? '1店几笔 '+b.txPerStore.toFixed(1) : '—', b.infraOk) +
-    fCard('基建-门店', b.storeComplete != null ? '完整度 '+b.storeComplete.toFixed(1)+'%' : '—', b.trafficOk) +
+    fCard('<span style="cursor:help" title="= 审核通过门店数(品牌日报) / 真实门店数(周报) × 100">基建-门店</span>', b.storeComplete != null ? '完整度 '+b.storeComplete.toFixed(1)+'%' : '—', b.trafficOk) +
   '</div></div>';
 
   // ③ 上线后流量 · 分渠道
@@ -2414,7 +2414,7 @@ function _pinBuildCard(b){
   const custSec = '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">🧍 老客尽曝情况</div><div style="background:#f8fafc;border-radius:8px;padding:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px">'+
     '<div><div style="font-size:11px;color:#64748b">高频应曝尽曝率</div><div style="font-size:18px;font-weight:700;color:'+(hiRate!=null?'#1e293b':'#94a3b8')+'">'+(hiRate!=null?hiRate.toFixed(1)+'%':'—')+'</div></div>'+
     '<div><div style="font-size:11px;color:#64748b">低频应曝尽曝率</div><div style="font-size:18px;font-weight:700;color:'+(loRate!=null?'#1e293b':'#94a3b8')+'">'+(loRate!=null?loRate.toFixed(1)+'%':'—')+'</div></div>'+
-    '<div><div style="font-size:11px;color:#64748b">二选一曝光占比</div><div style="font-size:18px;font-weight:700;color:'+(b.e21Ratio!=null?'#1e293b':'#94a3b8')+'">'+(b.e21Ratio!=null?b.e21Ratio.toFixed(1)+'%':'—')+'</div></div>'+
+    '<div><div style="font-size:11px;color:#64748b;cursor:help" title="= (近7日_高频尽曝UV_二选一 + 低频尽曝UV_二选一) / 7 / 近7日均_曝光PV(w) / 10000&#10;&#10;底表: 品牌日报">二选一老客曝光占比</div><div style="font-size:18px;font-weight:700;color:'+(b.e21Ratio!=null?'#1e293b':'#94a3b8')+'">'+(b.e21Ratio!=null?b.e21Ratio.toFixed(1)+'%':'—')+'</div></div>'+
   '</div>'+
   (hiExp==null&&loExp==null ? '<div style="font-size:10px;color:#d97706;margin-top:6px">⚠️ 0420 起老客 UV 字段缺失，以上为 null</div>' : '') +
   '</div>';
