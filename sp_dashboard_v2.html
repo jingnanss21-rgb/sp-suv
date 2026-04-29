@@ -2419,6 +2419,7 @@ const RC_ISSUE_META = {
   factor_missing:  { label: '四要素数据缺失', desc: 'factor_biz/price/infra/store 任一为 null', owner: '公线', priority: 'P0', color: '#dc2626' },
   wr_miss:         { label: '周报未覆盖',     desc: '跟进表腰部 ∩ 真实门店数缺失',             owner: '公线', priority: 'P1', color: '#d97706' },
   tier_wrong:      { label: '公线分层打标偏差', desc: '日报分层 ≠ 按审核通过门店数阈值推算',   owner: '公线', priority: 'P2', color: '#0891b2' },
+  low_exp:         { label: '曝光少误判',     desc: '跟进表=在线 ∩ 日报不在线 (曝光<100)',     owner: '公线', priority: 'P2', color: '#0891b2' },
 };
 
 function _rcAckKey(bid, issueType){
@@ -2468,7 +2469,7 @@ function _rcBuildItems(){
       items.push({ ...base, issue: 'cat_mismatch',
         detail: '跟进表腰部(默认餐饮) / 日报类目=' + base.cat4,
         waived: catWaived,
-        waivedReason: catWaived ? '非餐饮服务业态' : '',
+        waivedReason: catWaived ? '到综服务业态' : '',
       });
     }
     // #4 日报分层字段空
@@ -2504,6 +2505,15 @@ function _rcBuildItems(){
           detail: '日报标腰部 / 按审核通过门店数 '+b.storeCount+' ('+base.cat4+' 阈值 '+thr+') 应为尾部'
         });
       }
+    }
+    // #1 曝光少误判: 跟进表=在线 ∩ 日报不在线 (曝光<100)
+    // 只算"纯曝光<100"的: 日报分层=腰部 ∩ 类目∈餐饮 (避免和 #2/#3/#4 重复)
+    if (b.onlineToday !== true
+        && base.dailyTier === '2-腰部'
+        && RC_CATERING.has(base.cat4)){
+      items.push({ ...base, issue: 'low_exp',
+        detail: '跟进表=在线 / 日报当日曝光<100 被判不在线' + (b.storeCount != null ? ' (门店 '+b.storeCount+')' : '')
+      });
     }
   });
   return items;
