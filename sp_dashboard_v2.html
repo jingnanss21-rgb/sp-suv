@@ -2134,8 +2134,8 @@ function rpinq(){
   // 四象限分类
   const cls = function(p){
     if (p.x >= xMed && p.y >= yMed) return 'A'; // 健康
-    if (p.x >= xMed && p.y <  yMed) return 'B'; // 有量无转化
-    if (p.x <  xMed && p.y >= yMed) return 'C'; // 转化强缺量
+    if (p.x >= xMed && p.y <  yMed) return 'B'; // 有量低核销
+    if (p.x <  xMed && p.y >= yMed) return 'C'; // 高核销缺量
     return 'D'; // 双低
   };
   const color = {A:'#059669', B:'#d97706', C:'#2563eb', D:'#dc2626'};
@@ -2190,10 +2190,14 @@ function rpinq(){
       {name:'A 健康',          type:'scatter',
        symbolSize: function(v){return v[6]},
        itemStyle:{color:color.A, opacity:0.65}, data: groups.A,
-       markLine: {silent:true, symbol:'none', label:{show:false}, lineStyle:{color:'#94a3b8', type:'dashed', width:1},
-         data: [{xAxis: xMed}, {yAxis: yMed}]}},
-      {name:'B 有量无转化',    type:'scatter', symbolSize: function(v){return v[6]}, itemStyle:{color:color.B, opacity:0.65}, data: groups.B},
-      {name:'C 转化强缺量',    type:'scatter', symbolSize: function(v){return v[6]}, itemStyle:{color:color.C, opacity:0.65}, data: groups.C},
+       markLine: {silent:true, symbol:'none', lineStyle:{color:'#94a3b8', type:'dashed', width:1},
+         data: [
+           {xAxis: xMed, label:{show:true, position:'end', formatter:function(){return 'X中位 '+(xMed*100).toFixed(1)+'%'}, fontSize:9, color:'#64748b'}},
+           {xAxis: 1.0, label:{show:true, position:'end', formatter:'100%', fontSize:9, color:'#dc2626'}, lineStyle:{color:'#dc2626', type:'solid', width:1}},
+           {yAxis: yMed, label:{show:true, position:'end', formatter:function(){return 'Y中位 '+yMed.toFixed(1)+'%'}, fontSize:9, color:'#64748b'}}
+         ]}},
+      {name:'B 有量低核销',    type:'scatter', symbolSize: function(v){return v[6]}, itemStyle:{color:color.B, opacity:0.65}, data: groups.B},
+      {name:'C 高核销缺量',    type:'scatter', symbolSize: function(v){return v[6]}, itemStyle:{color:color.C, opacity:0.65}, data: groups.C},
       {name:'D 双低',          type:'scatter', symbolSize: function(v){return v[6]}, itemStyle:{color:color.D, opacity:0.65}, data: groups.D}
     ],
     legend: {
@@ -2202,8 +2206,8 @@ function rpinq(){
       icon: 'circle', itemWidth: 10, itemHeight: 10,
       data: [
         {name:'A 健康 ('+groups.A.length+')'},
-        {name:'B 有量无转化 ('+groups.B.length+')'},
-        {name:'C 转化强缺量 ('+groups.C.length+')'},
+        {name:'B 有量低核销 ('+groups.B.length+')'},
+        {name:'C 高核销缺量 ('+groups.C.length+')'},
         {name:'D 双低 ('+groups.D.length+')'}
       ]
     }
@@ -2290,7 +2294,7 @@ function rpinc(){
   });
 
   // 象限 tab + 总数
-  const quadLabels = {A:'🟢 A 健康', B:'🟠 B 有量无转化', C:'🔵 C 转化强缺量', D:'🔴 D 双低', U:'⚪️ 未定'};
+  const quadLabels = {A:'🟢 健康', B:'🟠 有量低核销', C:'🔵 高核销缺量', D:'🔴 双低', U:'⚪️ 未定'};
   const quadKeys = ['A','B','C','D','U'].filter(k => byQuad[k] > 0);
   let tabsHtml = '<button onclick="_pinPickQuad(null)" style="padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid '+(_pinActiveQuad==null?'#2563eb':'#cbd5e1')+';background:'+(_pinActiveQuad==null?'#eff6ff':'#fff')+';color:'+(_pinActiveQuad==null?'#1d4ed8':'#475569')+';font-weight:'+(_pinActiveQuad==null?'700':'500')+'">全部 ('+pinnedOnline.length+')</button>';
   tabsHtml += quadKeys.map(k =>
@@ -2313,7 +2317,10 @@ function rpinc(){
     '<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;border-bottom:1px solid #e2e8f0;margin-bottom:12px;scrollbar-width:thin">' +
     list.map(b => {
       const active = String(b.brandId) === String(_pinActiveBrand);
-      return '<button onclick="_pinPickBrand(\''+b.brandId+'\')" style="white-space:nowrap;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid '+(active?'#b45852':'#cbd5e1')+';background:'+(active?'#fef2f2':'#fff')+';color:'+(active?'#b45852':'#475569')+';font-weight:'+(active?'700':'500')+'">'+b.name+'</button>';
+      const q = quadOf[b.brandId]||'U';
+      const qColor = {A:'#059669',B:'#d97706',C:'#2563eb',D:'#dc2626',U:'#94a3b8'}[q];
+      const qName = {A:'健康',B:'有量低核销',C:'高核销缺量',D:'双低',U:'—'}[q];
+      return '<button onclick="_pinPickBrand(\''+b.brandId+'\')" style="white-space:nowrap;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid '+(active?'#b45852':'#cbd5e1')+';background:'+(active?'#fef2f2':'#fff')+';color:'+(active?'#b45852':'#475569')+';font-weight:'+(active?'700':'500')+'">'+b.name+' <span style="font-size:9px;color:'+qColor+';font-weight:700">'+qName+'</span></button>';
     }).join('') +
     '</div>' +
     _pinBuildCard(cur);
@@ -2431,6 +2438,7 @@ const RC_CAT_WAIVED = new Set(['按摩足疗','KTV','棋牌室']);
 const RC_ISSUE_META = {
   top_fail_four:   { label: '已置顶四要素不达标', desc: '已置顶 ∩ 日报在线 ∩ 未全达标 ∩ 无人工保留标',  owner: '行业', priority: 'P0', color: '#dc2626' },
   tier_mismatch:   { label: '分层分歧',       desc: '跟进表=腰部 ∩ 日报=尾部',                owner: '行业', priority: 'P0', color: '#dc2626' },
+  status_mismatch: { label: '状态分歧',       desc: '跟进表=流失/筹备中 ∩ 日报=在线',         owner: '行业', priority: 'P0', color: '#dc2626' },
   top_offline:     { label: '已置顶但不在线', desc: '已置顶 ∩ 日报不在线 (曝光<100)',         owner: '公线', priority: 'P0', color: '#dc2626' },
   cat_mismatch:    { label: '类目分歧',       desc: '跟进表腰部(默认餐饮) ∩ 日报类目非餐饮', owner: '公线', priority: 'P0', color: '#dc2626' },
   tier_empty:      { label: '日报分层字段空', desc: '日报「品牌分层」= "/" 或空',            owner: '公线', priority: 'P0', color: '#dc2626' },
@@ -2593,6 +2601,21 @@ function _rcBuildItems(){
         });
       }
     }
+  });
+
+  // #9 状态分歧 (行业 P0): 跟进表=流失/筹备中 ∩ 日报=在线
+  (BS||[]).forEach(b => {
+    if (b.tierManual !== '腰部') return;
+    if (b.statusManual !== '流失' && b.statusManual !== '筹备中') return;
+    if (b.onlineToday !== true) return;
+    items.push({
+      bid: b.brandId, name: b.name, sp: b.spMapped || '',
+      assistant: b.assistant || '', cat4: b.cat4, storeCount: b.storeCount,
+      storeComplete: b.storeComplete, onlineToday: b.onlineToday,
+      dailyTier: b.dailyTierRaw || '',
+      issue: 'status_mismatch',
+      detail: '跟进表标「' + b.statusManual + '」但日报当日在线 (曝光≥100), 建议确认是否应改为在线'
+    });
   });
 
   return items;
