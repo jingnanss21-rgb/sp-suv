@@ -2529,16 +2529,44 @@ function _rcBuildItems(){
         detail: '跟进表=在线 / 日报当日曝光<100 被判不在线' + (b.storeCount != null ? ' (门店 '+b.storeCount+')' : '')
       });
     }
-    // #7 已置顶但不在线 (公线 P0): 已置顶 ∩ 日报不在线
-    // 不去重: 即使已在 low_exp 里也独立列出, 因为置顶坑位需立即补位/替换
-    const isTopped = topBids.has(String(b.brandId));
-    if (isTopped && b.onlineToday !== true){
-      items.push({ ...base, issue: 'top_offline',
-        detail: '已占用置顶坑位但当日不在线, 建议补位或替换' + (b.storeCount != null ? ' (门店 '+b.storeCount+')' : '')
+  });
+
+  // #7/#8 置顶相关: 独立遍历 topBids, 不筛跟进表分层/状态 (KA 也算)
+  // 口径和 B-1 大卡对齐: "不在线" = 不在 (腰部×跟进在线×日报在线) 池子里
+  const wcOnlineBidSet = new Set(wc.filter(b => b.onlineToday === true).map(b => String(b.brandId)));
+  // 构造 BS 的 brandId → 品牌 的索引 (用于拿完整字段)
+  const _bsById = {};
+  (BS||[]).forEach(b => { if (b && b.brandId != null) _bsById[String(b.brandId)] = b; });
+
+  topBids.forEach(tbid => {
+    const b = _bsById[tbid];
+    const baseT = b ? {
+      bid: b.brandId, name: b.name, sp: b.spMapped || '',
+      assistant: b.assistant || '', cat4: b.cat4, storeCount: b.storeCount,
+      storeComplete: b.storeComplete, onlineToday: b.onlineToday,
+      dailyTier: b.dailyTierRaw || '',
+    } : {
+      bid: tbid, name: '(未在日报中)', sp: '', assistant: '',
+      cat4: '', storeCount: null, storeComplete: null, onlineToday: null, dailyTier: '',
+    };
+
+    // #7 已置顶但不在线 (公线 P0): 已置顶 ∩ 不在 wcOnline 池子里
+    if (!wcOnlineBidSet.has(tbid)){
+      let reason = '当日不在线';
+      if (b){
+        if (b.tierManual !== '腰部') reason = '跟进表非腰部 (当前 '+(b.tierManual||'—')+')';
+        else if (b.statusManual !== '在线') reason = '跟进表状态='+(b.statusManual||'—');
+        else if (b.onlineToday !== true) reason = '日报不在线 (曝光<100)';
+      } else {
+        reason = '不在当日日报快照中';
+      }
+      items.push({ ...baseT, issue: 'top_offline',
+        detail: '已占用置顶坑位但' + reason + ', 建议补位或替换'
       });
     }
+
     // #8 已置顶但四要素不达标 (行业 P0): 已置顶 ∩ 日报在线 ∩ 未全达标 ∩ 无人工保留标
-    if (isTopped && b.onlineToday === true){
+    if (b && b.onlineToday === true){
       const allPass = b.bizOk===true && b.priceOk===true && b.infraOk===true && b.trafficOk===true;
       const hasMark = _hasKeepMark(b.brandId);
       if (!allPass && !hasMark){
@@ -2547,17 +2575,17 @@ function _rcBuildItems(){
         if (b.priceOk === false) failDims.push('货盘❌');
         if (b.infraOk === false) failDims.push('基建-商户号❌');
         if (b.trafficOk === false) failDims.push('基建-门店❌');
-        // 同时考虑 null (数据缺失) 维度
         if (b.bizOk == null) failDims.push('经营·缺');
         if (b.priceOk == null) failDims.push('货盘·缺');
         if (b.infraOk == null) failDims.push('基建-商户号·缺');
         if (b.trafficOk == null) failDims.push('基建-门店·缺');
-        items.push({ ...base, issue: 'top_fail_four',
+        items.push({ ...baseT, issue: 'top_fail_four',
           detail: '失分维度: ' + (failDims.join(' · ') || '(未识别)')
         });
       }
     }
   });
+
   return items;
 }
 
