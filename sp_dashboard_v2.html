@@ -2506,11 +2506,11 @@ function _rcBuildItems(){
         });
       }
     }
-    // #1 曝光少误判: 跟进表=在线 ∩ 日报不在线 (曝光<100)
-    // 只算"纯曝光<100"的: 日报分层=腰部 ∩ 类目∈餐饮 (避免和 #2/#3/#4 重复)
+    // #1 曝光少误判: 跟进表=在线 ∩ 日报不在线 ∩ 日报分层=腰部 ∩ 不在其他场景里
+    // 不筛 cat4: 跟进表腰部本身就是跟进范围的定义, 类目 ≥ 餐饮
+    // 只保留日报分层=腰部 (排除 #2 分层分歧、#4 日报分层空)
     if (b.onlineToday !== true
-        && base.dailyTier === '2-腰部'
-        && RC_CATERING.has(base.cat4)){
+        && base.dailyTier === '2-腰部'){
       items.push({ ...base, issue: 'low_exp',
         detail: '跟进表=在线 / 日报当日曝光<100 被判不在线' + (b.storeCount != null ? ' (门店 '+b.storeCount+')' : '')
       });
