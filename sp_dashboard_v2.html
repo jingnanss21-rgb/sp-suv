@@ -492,7 +492,29 @@ function rsop(){
     </div>`}
 
   // 四要素排查清单渲染
-  const SCR=S.screen_brands||[];
+  // SCR 不再依赖 sop_snapshot.screen_brands，改为从 BS 实时计算
+  const SCR=(function(){
+    const result=[];
+    (BS||[]).forEach(b=>{
+      if(b.tierManual!=='腰部')return;
+      if(b.statusManual!=='在线')return;
+      if(b.onlineToday!==true)return;
+      const issues=[];
+      if(b.bizOk===false) issues.push('经营模式');
+      if(b.priceOk===false) issues.push('货盘');
+      if(b.infraOk===false) issues.push('基建-商户号');
+      if(b.trafficOk===false) issues.push('基建-门店');
+      if(!issues.length)return;
+      result.push({
+        brandId:b.brandId, name:b.name, sp:b.spMapped||'', owner:b.owner||'',
+        assistant:b.assistant||'', cat4:b.cat4||'', isAlive:b.isAlive,
+        storeCount:b.storeCount, dailyTx:b.dailyTx, txPerStore:b.txPerStore,
+        miniApp:b.miniApp, priceForce:b.priceForce, storeComplete:b.storeComplete,
+        issues:issues
+      });
+    });
+    return result;
+  })();
   // 填筛选下拉
   const scrSPs=[...new Set(SCR.map(b=>b.sp))].sort();
   const scrOwners=[...new Set(SCR.map(b=>b.owner).filter(Boolean))].sort();
@@ -1778,7 +1800,29 @@ function _mkBuildMatrix(){
   _mkIssues.forEach(iss => {
     matrix[iss] = {nofb:[], keep:[], progress:[], offline:[], missing:[]};
   });
-  const SCR = (SOP && SOP.screen_brands) || [];
+  // SCR: 从 BS 实时计算（不再依赖 sop_snapshot）
+  const SCR = (function(){
+    const result=[];
+    (BS||[]).forEach(b=>{
+      if(b.tierManual!=='腰部')return;
+      if(b.statusManual!=='在线')return;
+      if(b.onlineToday!==true)return;
+      const issues=[];
+      if(b.bizOk===false) issues.push('经营模式');
+      if(b.priceOk===false) issues.push('货盘');
+      if(b.infraOk===false) issues.push('基建-商户号');
+      if(b.trafficOk===false) issues.push('基建-门店');
+      if(!issues.length)return;
+      result.push({
+        brandId:b.brandId, name:b.name, sp:b.spMapped||'', owner:b.owner||'',
+        assistant:b.assistant||'', cat4:b.cat4||'', isAlive:b.isAlive,
+        storeCount:b.storeCount, dailyTx:b.dailyTx, txPerStore:b.txPerStore,
+        miniApp:b.miniApp, priceForce:b.priceForce, storeComplete:b.storeComplete,
+        issues:issues
+      });
+    });
+    return result;
+  })();
   const _bsMap = {};
   (BS||[]).forEach(x => { if (x && x.brandId != null) _bsMap[String(x.brandId)] = x; });
 
