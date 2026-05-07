@@ -1,5 +1,6 @@
 <!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>餐饮服务商·运营看板</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{--b:#2563eb;--b1:#dbeafe;--b2:#1e40af;--g:#059669;--g1:#d1fae5;--r:#dc2626;--r1:#fee2e2;--o:#d97706;--o1:#fef3c7;--x0:#f8fafc;--x1:#f1f5f9;--x2:#e2e8f0;--x3:#cbd5e1;--x4:#94a3b8;--x5:#64748b;--x6:#475569;--x7:#334155;--rd:8px;--s:0 1px 3px rgba(0,0,0,.07)}
@@ -41,10 +42,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
 .ref th.h0{background:var(--x6);color:#fff}.ref th.h1{background:#4a7ab5;color:#fff}.ref th.h2{background:var(--x4);color:#fff}
 .ref .ra td{background:var(--g1)}.ref .rd td{background:var(--r1)}
 /* table common */
-.tw{background:#fff;border-radius:var(--rd);box-shadow:var(--s);overflow-x:auto}thead tr:nth-child(2) th{top:28px}
+.tw{background:#fff;border-radius:var(--rd);box-shadow:var(--s);overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:11px}th{background:var(--x0);color:var(--x6);font-weight:600;text-align:left;padding:6px 7px;border-bottom:1.5px solid var(--x2);white-space:nowrap;position:sticky;top:0;z-index:2;cursor:pointer;font-size:10px}th:hover{background:var(--x2)}
 td{padding:5px 7px;border-bottom:1px solid var(--x1);vertical-align:middle;white-space:nowrap}tr:hover td{background:var(--x0)}
 .nc{text-align:right;font-variant-numeric:tabular-nums}
+#spTbl th, #spTbl td{text-align:left !important}
 .bd{display:inline-block;font-size:9px;font-weight:600;padding:1px 5px;border-radius:3px}.b-ok{background:var(--g1);color:var(--g)}.b-w{background:var(--o1);color:var(--o)}.b-d{background:var(--r1);color:var(--r)}.b-g{background:var(--x2);color:var(--x6)}
 .wc{color:var(--r);font-weight:600}.oc{color:var(--g)}.up{color:var(--g)}.dn{color:var(--r)}
 .fb{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0;align-items:center}.fb select,.fb input{padding:5px 7px;border:1px solid var(--x3);border-radius:5px;font-size:11px;background:#fff}.fl{font-size:10px;color:var(--x5);font-weight:600}
@@ -72,60 +74,125 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
 @media(max-width:900px){.sop-factors{grid-template-columns:1fr}.kg{grid-template-columns:repeat(2,1fr)}}
 </style></head><body>
 <div id="loading" style="position:fixed;top:0;left:0;right:0;bottom:0;background:#eef2f7;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column"><div style="font-size:16px;color:#475569;font-weight:600">🍜 加载中...</div><div style="font-size:11px;color:#94a3b8;margin-top:6px">正在渲染数据</div></div>
-<div class="hdr" style="position:sticky;top:0;z-index:900;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><h1>🍜 餐饮服务商 · 运营看板</h1><p>数据 2026-04-20 · 周报 0409-0415 · v5.0</p></div><div style="padding:4px 8px"><select id="dateSelector" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px"></select></div></div><div class="W">
-<div class="tabs"><button class="tab on" onclick="stab(0)">📋 运营SOP</button><button class="tab" onclick="stab(1)">📊 要素检查明细</button><button class="tab" onclick="stab(2)">🔄 活动转化明细</button></div>
-
-<div class="P on" id="t0">
-<div class="S"><div class="ST">🎯 整体目标</div><div class="kg" id="sopTgt"></div></div>
-<div class="S"><div class="ST">🔍 运营SOP</div><div class="sop-card" id="sopCard"></div></div>
-<div class="S"><div id="sopFactors"></div></div>
-<div class="S"><div class="ST">👥 老客基数排查 <span id="hdrCustPoolCnt" style="font-size:11px;font-weight:400;color:var(--x4)"></span></div><div id="sopCustPool"></div></div>
-<div class="S"><div class="ST">🎯 达标但未存活品牌分析 <span id="hdrQuadrantCnt" style="font-size:11px;font-weight:400;color:var(--x4)"></span></div><div id="sopQuadrant"></div></div>
-<div class="S"><div class="ST">📈 补充流量提升测算 <span style="font-size:11px;font-weight:400;color:var(--x4)">← 基于象限C/D品牌</span></div><div id="sopBoost"></div></div>
-<div class="S"><div class="ST">📎 附录</div><div id="sopAppendix"></div></div>
+<div class="hdr" style="position:sticky;top:0;z-index:900;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><h1>🍜 餐饮服务商 · 运营看板</h1><p><span id="hdrDataDate"></span></p></div><div style="padding:4px 8px"><select id="dateSelector" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px"></select></div></div><div class="W">
+<div class="tabs">
+  <button class="tab on" onclick="stab(0)">📈 引入进度</button>
+  <button class="tab" onclick="stab(1)">🎯 运营策略</button>
+  <button class="tab" onclick="stab(2)">🎫 活动明细</button>
 </div>
 
-<div class="P" id="t1">
-<div class="S"><div class="ST">🏢 分服务商（腰部）</div><div class="tw"><table id="spTbl"><thead><tr><th>服务商</th><th>类型</th><th>负责人</th><th class="nc">目标</th><th class="nc">投放</th><th class="nc">在线</th><th class="nc">流失</th><th class="nc">存活</th><th class="nc">存活率</th><th>进度</th></tr></thead><tbody></tbody></table></div></div>
-<div class="S"><div class="ST">📋 品牌明细</div>
-<div class="fb"><span class="fl">筛选</span><select id="fSP" onchange="rbt()"><option value="">服务商</option></select><select id="fOwner" onchange="rbt()"><option value="">负责人</option></select><select id="fAsst" onchange="rbt()"><option value="">助理</option></select><select id="fCat" onchange="rbt()"><option value="">类目</option></select><select id="fTier" onchange="rbt()"><option value="">分层</option><option value="KA">KA</option><option value="腰部">腰部</option><option value="尾部">尾部</option></select><select id="fSt" onchange="rbt()"><option value="">存活状态</option><option value="alive">存活</option><option value="dead">未存活</option></select><select id="fOnline" onchange="rbt()"><option value="">在线状态</option><option value="online">在线</option><option value="pending">在线待确认</option><option value="nodata">未更新</option><option value="lost">流失</option></select><select id="fScr" onchange="rbt()"><option value="">筛选维度</option><option value="biz_f">经营模式❌</option><option value="price_f">货盘⚠️</option><option value="infra_f">基建⚠️</option><option value="traffic_f">流量⚠️</option><option value="all_p">全达标✅</option><option value="no_data">无数据</option></select><input id="fQ" type="text" placeholder="搜索品牌/ID" oninput="rbt()" style="width:100px"><button onclick="document.querySelectorAll('#t1 select').forEach(s=>s.value='');document.getElementById('fQ').value='';document.getElementById('fVal').value='';document.getElementById('fMetric').value='';rbt()" style="padding:5px 8px;border:1px solid var(--r);border-radius:5px;background:var(--r1);color:var(--r);font-size:10px;font-weight:600;cursor:pointer">一键清除</button></div>
-<div class="fb"><span class="fl">数值</span><select id="fMetric"><option value="">指标</option><option value="miniApp">小程序渗透</option><option value="priceForce">价格力</option><option value="storeComplete">门店完整度</option><option value="txPerStore">1店几笔</option><option value="e21Ratio">二选一曝光</option><option value="visitUseRate">到店核销率</option></select><select id="fOp"><option value="lt">&lt;</option><option value="lte">≤</option><option value="gt">&gt;</option><option value="gte">≥</option></select><input id="fVal" type="number" placeholder="值" style="width:55px"><button onclick="rbt()" style="padding:5px 8px;border:1px solid var(--b);border-radius:5px;background:var(--b1);color:var(--b);font-size:10px;font-weight:600;cursor:pointer">筛选</button><button onclick="document.getElementById('fMetric').value='';document.getElementById('fVal').value='';rbt()" style="padding:5px 6px;border:1px solid var(--x3);border-radius:5px;background:#fff;color:var(--x6);font-size:10px;cursor:pointer">清除</button></div>
-<div class="tw" style="max-height:calc(100vh - 200px);overflow-y:auto"><table id="bTbl"><thead>
-<tr>
-<th rowspan="2" onclick="srt('name')">品牌⇅</th><th rowspan="2">品牌ID</th><th rowspan="2">类目</th><th rowspan="2">服务商</th><th rowspan="2">负责人</th><th rowspan="2">助理</th><th rowspan="2">分层</th><th rowspan="2">公线</th><th rowspan="2">状态</th>
-<th class="nc" colspan="2" style="background:var(--x6);color:#fff;text-align:center">存活</th>
-<th class="nc" colspan="1" style="background:#4a7ab5;color:#fff;text-align:center">经营模式</th>
-<th class="nc" colspan="1" style="background:#4a7ab5;color:#fff;text-align:center">货盘</th>
-<th class="nc" colspan="4" style="background:#4a7ab5;color:#fff;text-align:center">基建</th>
-<th class="nc" colspan="6" style="background:var(--x5);color:#fff;text-align:center">曝光</th>
-<th rowspan="2">筛选</th><th rowspan="2" style="min-width:90px">备注</th>
-</tr>
-<tr>
-<th class="nc" onclick="srt('isAlive')">存活⇅</th><th class="nc" onclick="srt('survivalRate')">存活率⇅</th>
-<th class="nc" onclick="srt('miniApp')">小程序⇅</th>
-<th class="nc" onclick="srt('priceForce')">价格力⇅</th>
-<th class="nc" onclick="srt('storeCount')">门店数⇅</th><th class="nc" onclick="srt('storeComplete')">门店完整度⇅</th><th class="nc" onclick="srt('dailyTx')">日均交易(w)⇅</th><th class="nc" onclick="srt('txPerStore')">1店几笔⇅</th>
-<th class="nc" onclick="srt('e21ExpRatio')" title="=(商业支付+面对面+固定入口)日均曝光PV/整体日均曝光PV">二选一<br>曝光占比⇅</th><th class="nc" onclick="srt('e21Ratio')" title="=(高频应曝UV_二选一+低频应曝UV_二选一)/整体曝光(含二选一、支付有礼、周边)">老客二选一<br>曝光占比⇅</th><th class="nc" onclick="srt('hiRate_uv')">高频应曝尽曝⇅</th><th class="nc" onclick="srt('loRate_uv')">低频应曝尽曝⇅</th><th class="nc" onclick="srt('custAppRate')">老客应曝尽曝⇅</th><th class="nc" onclick="srt('e21EUR')">老客曝光核销率<span title="公式: 日均二选一核销PV / 日均二选一老客尽曝UV" style="cursor:help;margin-left:2px;font-size:10px;color:var(--x5)">ⓘ</span>⇅</th>
-</tr>
-</thead><tbody></tbody></table></div>
-<div id="bCnt" style="font-size:10px;color:var(--x4);margin-top:3px"></div></div></div>
+<!-- ========== Tab 0: 引入进度（引入概览 + SP 达成度） ========== -->
+<div class="P on" id="t0">
+  <!-- 板块 A: 引入概览 -->
+  <div class="S">
+    <div class="ST">📋 引入概览 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:8px">口径：腰部 × 餐饮 · <span id="introDataDate">—</span></span></div>
+    <div id="introKg" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-size:13px;font-weight:700;color:#1e293b">📈 投放品牌趋势 <span id="introTrendWarn" style="display:none;margin-left:6px;font-size:12px;cursor:help;color:#d97706" title=""></span></div>
+        </div>
+        <div id="introTrendChart" style="width:100%;height:300px"></div>
+      </div>
+      <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+          <div style="font-size:13px;font-weight:700;color:#1e293b">📊 存活率趋势</div>
+        </div>
+        <div id="introAliveChart" style="width:100%;height:300px"></div>
+      </div>
+    </div>
+  </div>
 
+  <!-- 板块 B: 服务商目标达成度（保留原 spTbl）-->
+  <div class="S">
+    <div class="ST">📊 服务商目标达成概览</div>
+    <div class="tw"><table id="spTbl"><thead><tr><th>服务商</th><th>类型</th><th>负责人</th><th class="nc">目标</th><th class="nc">投放</th><th class="nc">在线</th><th class="nc">流失</th><th class="nc">存活</th><th class="nc">存活率</th><th>进度</th></tr></thead><tbody></tbody></table></div>
+  </div>
+</div>
+
+<!-- ========== Tab 1: 运营策略（SOP + 引入前四要素 + 引入后置顶）========== -->
+<div class="P" id="t1">
+  <!-- SOP 时间轴（保留原）-->
+  <div class="S"><div class="ST">🔍 运营 SOP</div><div class="sop-card" id="sopCard"></div></div>
+
+  <!-- ========== 板块 A · 引入前 · 四要素检查 ========== -->
+  <div class="S">
+    <div class="ST">🚀 上线前 · 四要素检查 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:8px">口径：腰部 × 餐饮 × 当日在线</span></div>
+    <!-- A-1 总览 4 卡 -->
+    <div id="fcKg" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:8px"></div>
+    <!-- A-2 人工打标三层折叠 -->
+    <details style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:12px">
+      <summary style="cursor:pointer;list-style:none">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:13px;font-weight:700;color:#1e293b">🏷 人工打标明细 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:4px">· 四要素 × 4 分类 · 点击展开 ▾</span></div>
+        </div>
+      </summary>
+      <div id="fcMarkMatrix" style="margin-top:12px"></div>
+    </details>
+    <!-- A-3 四要素待排查商户清单（保留原 scrTbl）-->
+    <div id="fcScrHost" style="margin-top:12px"></div>
+  </div>
+
+  <!-- ========== 板块 B · 引入后 · 达标商户置顶 ========== -->
+  <div class="S">
+    <div class="ST">🎯 上线后 · 达标商户置顶</div>
+    <!-- B-1 总览 2 卡 -->
+    <div id="pinKg" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px"></div>
+    <!-- B-2 象限图 + 数据源 tab -->
+    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px">
+        <div style="font-size:13px;font-weight:700;color:#1e293b">📊 置顶流量象限 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:4px"><span style="cursor:help" title="= (近7日_高频尽曝UV + 低频尽曝UV) / 7 / 近7日均_笔数(w) / 10000&#10;&#10;底表: 品牌日报">X=老客曝光占比</span> · Y=到店核销率</span></div>
+        <div style="font-size:11px;color:#dc2626;font-weight:500;margin-top:4px">⚠️ 因当前缺失老客日均曝光PV字段，X轴暂用7日累计尽曝UV÷7估算</div>
+        <div id="pinDsTabs" style="display:none"></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <select id="pinQFiltAlive" onchange="rpinq();rpinc()" style="padding:5px 8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px"><option value="">存活状态</option><option value="alive">存活</option><option value="dead">未存活</option></select>
+        <select id="pinQFiltSP" onchange="rpinq();rpinc()" style="padding:5px 8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px"><option value="">经营服务商</option></select>
+      </div>
+      <div id="pinQuadrantAlert" style="display:none"></div>
+      <div id="pinQuadrant" style="width:100%;height:400px"></div>
+      <div id="pinQuadrantEmpty" style="display:none;margin-top:10px;padding:10px 14px;background:#fef2f2;border:1px solid #fca5a5;border-radius:6px;font-size:12px;color:#991b1b;line-height:1.7"></div>
+    </div>
+    <!-- B-3 品牌卡片池 -->
+    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px">
+        <div style="font-size:13px;font-weight:700;color:#1e293b">🧩 置顶品牌诊断</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <input id="pinSearch" type="text" placeholder="🔍 搜索品牌名称 / 品牌ID" oninput="_pinFilterChanged()" style="flex:1;min-width:180px;padding:5px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px">
+        <select id="pinFiltSP" onchange="_pinFilterChanged()" style="padding:5px 8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px"><option value="">经营服务商</option></select>
+        <select id="pinFiltOwner" onchange="_pinFilterChanged()" style="padding:5px 8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px"><option value="">负责人</option></select>
+        <select id="pinFiltAlive" onchange="_pinFilterChanged()" style="padding:5px 8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px"><option value="">存活状态</option><option value="alive">存活</option><option value="dead">未存活</option></select>
+        <select id="pinFiltCat" onchange="_pinFilterChanged()" style="padding:5px 8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px"><option value="">类目</option></select>
+      </div>
+      <div id="pinCardTabs" style="display:flex;gap:6px;flex-wrap:wrap;max-width:100%;overflow-x:auto"></div>
+      <div id="pinCardBody" style="min-height:200px;margin-top:10px"></div>
+    </div>
+  </div>
+
+  <!-- ========== 板块 C · 数据对账 ========== -->
+  <div class="S">
+    <div class="ST">🔧 待跟进 <span id="rcTotalBadge" style="margin-left:8px;padding:2px 8px;background:#fef3c7;color:#92400e;border-radius:10px;font-size:11px;font-weight:600">—</span></div>
+    <!-- 筛选器 -->
+    <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:12px;margin-top:8px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <input id="rcSearch" type="text" placeholder="🔍 搜索品牌名称/ID" oninput="_rcFilterChanged()" style="flex:1;min-width:200px;padding:5px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px">
+        <select id="rcFiltSP" onchange="_rcFilterChanged()" style="padding:5px 8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px"><option value="">全部经营服务商</option></select>
+        <select id="rcFiltAssistant" onchange="_rcFilterChanged()" style="padding:5px 8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px"><option value="">全部对接助理</option></select>
+        <label style="font-size:12px;color:#64748b;display:flex;align-items:center;gap:4px;margin-left:6px"><input id="rcShowAcked" type="checkbox" onchange="_rcFilterChanged()">隐藏已处理</label>
+        <button onclick="_rcExportCSV()" style="padding:5px 12px;background:#1e293b;color:#fff;border:0;border-radius:6px;font-size:12px;cursor:pointer">📥 导出CSV</button>
+      </div>
+    </div>
+    <!-- 分组容器 -->
+    <div id="rcBody" style="margin-top:10px"></div>
+  </div>
+
+  <!-- （原 全量失分品牌底表 已删除, 由 A-3 scrTbl 替代）-->
+</div>
+
+<!-- ========== Tab 2: 活动明细（iframe）========== -->
 <div class="P" id="t2">
-<div style="font-size:10px;color:var(--x5);margin:8px 0">日均数据。曝光(w万) 核销(绝对值)。点击展开活动，占比=活动÷品牌整体。</div>
-<div class="fb"><span class="fl">筛选</span><select id="cSP" onchange="rconv()"><option value="">服务商</option></select><select id="cCat" onchange="rconv()"><option value="">类目</option></select><select id="cTier" onchange="rconv()"><option value="">分层</option><option value="KA">KA</option><option value="腰部">腰部</option><option value="尾部">尾部</option></select><select id="cAlive" onchange="rconv()"><option value="">全部</option><option value="1">存活</option><option value="0">未存活</option></select><input id="cQ" type="text" placeholder="搜索品牌/ID" oninput="clearTimeout(window._cdbT);window._cdbT=setTimeout(rconv,300)" style="width:100px"><button onclick="exportActCSV()" style="margin-left:8px;padding:5px 14px;background:#2563eb;color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:12px;font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.1)">📥 导出活动CSV</button></div>
-<div class="tw" style="max-height:calc(100vh - 200px);overflow-y:auto"><table id="cTbl"><thead>
-<tr><th rowspan="2" style="width:32px"><input type="checkbox" onchange="toggleAllExp(this)" title="全选/取消" style="cursor:pointer;vertical-align:middle"></th><th rowspan="2" onclick="csrt('name')">品牌⇅</th><th rowspan="2">品牌ID</th><th rowspan="2" onclick="csrt('cat4')">类目⇅</th><th rowspan="2" onclick="csrt('sp')">服务商⇅</th><th rowspan="2" onclick="csrt('tier')">分层⇅</th><th rowspan="2">存活</th><th rowspan="2" class="nc" onclick="csrt('dailyTx')">日均交易(w)⇅</th>
-<th class="nc" colspan="5" style="background:var(--x6);color:#fff;text-align:center">整体</th>
-<th class="nc" colspan="5" style="background:#4a7ab5;color:#fff;text-align:center">二选一</th>
-<th class="nc" colspan="5" style="background:var(--x5);color:#fff;text-align:center">周边</th>
-<th class="nc" colspan="5" style="background:var(--x4);color:#fff;text-align:center">支付有礼</th></tr>
-<tr>
-<th class="nc" onclick="csrt('dExpW')">曝光(w)⇅</th><th class="nc" onclick="csrt('dClaimW')">领取(w)⇅</th><th class="nc" onclick="csrt('dUse')">核销⇅</th><th class="nc" onclick="csrt('expUseR')">曝光核销率⇅</th><th class="nc" onclick="csrt('wExp')">曝光环比⇅</th>
-<th class="nc" onclick="csrt('e21ExpW')">曝光⇅</th><th class="nc" onclick="csrt('e21Use')">核销⇅</th><th class="nc">曝光占比</th><th class="nc">核销占比</th><th class="nc" onclick="csrt('e21EUR')">曝光核销率⇅</th>
-<th class="nc" onclick="csrt('nbExpW')">曝光⇅</th><th class="nc" onclick="csrt('nbUse')">核销⇅</th><th class="nc">曝光占比</th><th class="nc">核销占比</th><th class="nc" onclick="csrt('nbEUR')">曝光核销率⇅</th>
-<th class="nc" onclick="csrt('payExpW')">曝光⇅</th><th class="nc" onclick="csrt('payUse')">核销⇅</th><th class="nc">曝光占比</th><th class="nc">核销占比</th><th class="nc" onclick="csrt('payEUR')">曝光核销率⇅</th>
-</tr></thead><tbody></tbody></table></div>
-<div id="cCnt" style="font-size:10px;color:var(--x4);margin-top:3px"></div></div>
+  <iframe src="https://v2-frontend.act-temp.pages.dev?embed=1" style="width:100%;height:calc(100vh - 180px);min-height:680px;border:0;border-radius:6px;background:#fff"></iframe>
 </div>
 
 <script>/**
@@ -201,11 +268,15 @@ async function loadDashboardData(targetDate) {
     targetDate = dates[0].data_date;
   }
 
-  const [snapshots, channels, spInfos, sopRows] = await Promise.all([
+  const trendStart = (function(){const d=new Date(targetDate);d.setDate(d.getDate()-34);return d.toISOString().substring(0,10);})();
+  const [snapshots, channels, spInfos, sopRows, topRecords, trendRows] = await Promise.all([
     fetchJSON('brand_snapshot', 'data_date=eq.' + targetDate + '&select=*'),
     fetchJSON('brand_channel', 'data_date=eq.' + targetDate + '&select=*'),
     fetchJSON('sp_info', 'select=*'),
     fetchJSON('sop_snapshot', 'data_date=eq.' + targetDate + '&select=*'),
+    fetchJSON('brand_top_records', 'select=*').catch(()=>[]),
+    // 近 35 天精简字段（滚动 7 天窗口 + 上期对比）- 用分页避免 1000 上限
+    fetchAllParallel('brand_snapshot', 'select=data_date,brand_id,tier,sub_category,online_today,is_alive,hi_exp_uv_all,lo_exp_uv_all,visit_use_rate,daily_tx&data_date=gte.' + trendStart + '&data_date=lte.' + targetDate + '&order=data_date.asc').catch(()=>[]),
   ]);
 
   const spSummary = {};
@@ -223,11 +294,11 @@ async function loadDashboardData(targetDate) {
     const sc=s.store_count||0, dTx=s.daily_tx, dTxAbs=(dTx||0)*10000, expPv=s.exp_pv;
     return {
       name:s.brand_name, brandId:s.brand_id, sp:s.sp_name||'', spMapped:s.sp_name||'',
-      statusManual:s.status||'', tierManual:s.tier_human||s.tier||'', tierDaily:s.tier||'',
+      statusManual:s.status||'', tierManual:s.tier_human||s.tier||'', tierDaily:s.tier||'', dailyTierRaw:s.daily_tier_raw||'',
       assistant:s.assistant||'', owner:s.owner||'', couponSP:s.coupon_sp||'',
       hasDailyData:s.daily_tx!=null, cat2:s.category||'', cat4:s.sub_category||'',
       displayLevel:s.display_level||'other',
-      survivalRate:s.survival_rate, isAlive:s.is_alive, priceForce:s.price_force,
+      survivalRate:s.survival_rate, isAlive:s.is_alive, onlineToday:s.online_today, priceForce:s.price_force,
       miniApp:s.mini_app, txPerStore:s.tx_per_store, storeComplete:s.store_complete,
       storeCount:s.store_count, visitUseRate:s.visit_use_rate, e21Ratio:s.e21_ratio,
       expPv:s.exp_pv, claimPv:s.claim_pv, usePv:s.use_pv, dailyTx:s.daily_tx,
@@ -242,7 +313,7 @@ async function loadDashboardData(targetDate) {
       hiRate_pv:s.hi_rate_e21!=null?s.hi_rate_e21/100:null,
       loRate_pv:s.lo_rate_e21!=null?s.lo_rate_e21/100:null,
       e21AppUV_7d:e21AppUV7d, allAppUV_7d:hiAppAll+loAppAll, allExpUV_7d:hiExpAll+loExpAll,
-      totalAppUV:e21AppUV7d, totalExpUV:totalExpUV, dailyExpUV:Math.round(dailyExpUV*10)/10,
+      totalAppUV:e21AppUV7d, totalExpUV:totalExpUV, dailyExpUV:dailyExpUV,
       e21_use_daily:e21UseDly, all_use_daily:allUseDly, other_use_daily:otherUseDly,
       custAppRate:e21AppUV7d>0&&dTxAbs>0?Math.round(e21AppUV7d/7/dTxAbs*10000)/10000:0,
       custTxRatio:dTxAbs>0?Math.round((e21AppUV7d/7)/dTxAbs*10000)/100:0,
@@ -294,10 +365,23 @@ async function loadDashboardData(targetDate) {
   }
 
   const sop = sopRows.length > 0 ? sopRows[0].sop_data : {};
+  // 防御：如果 sop_snapshot 当日无数据或字段缺失，补空对象避免前端崩溃
+  if (!sop.alive_stats) sop.alive_stats = {};
+  if (!sop.dead_stats) sop.dead_stats = {};
+  if (!sop.factors_v4) sop.factors_v4 = {};
+  if (!sop.cust_pool) sop.cust_pool = {};
+  if (!sop.quadrant) sop.quadrant = {};
+  if (!sop.screen_brands) sop.screen_brands = [];
+  if (!sop.appendix) sop.appendix = {};
+  if (sop.waist_total == null) sop.waist_total = 0;
+  if (sop.waist_online == null) sop.waist_online = 0;
+  if (sop.waist_lost == null) sop.waist_lost = 0;
 
   const D = {
     final: {dataDate:targetDate, totalTarget:800, spSummary:spSummary, brands:brands},
     sop: sop, bc: bc, acts: [], _actsLoaded: false,
+    topRecords: topRecords || [],
+    trendRows: trendRows || [],
     loadActivities: async function() {
       if (this._actsLoaded) return this.acts;
       const raw = await fetchAllParallel('activity_detail', 'select=*');
@@ -320,11 +404,12 @@ function Pct(n,d){if(!n||!d||d===0)return'—';return(n/d*100).toFixed(1)+'%'}
 function quadDetail(id){const el=document.getElementById(id);if(el)el.style.display=el.style.display==='none'?'block':'none'}
 
 function rsop(){
+  const _setById=(id,html)=>{var el=document.getElementById(id);if(el)el.innerHTML=html;};
   const onl=W.filter(b=>b.statusManual==='在线'),lost=W.filter(b=>b.statusManual==='流失'),alv=onl.filter(b=>b.isAlive===true);
   const sr=onl.length?(alv.length/onl.length*100).toFixed(1):'0';
   const prog=(W.length/F.totalTarget*100).toFixed(1);
   const srProg=Math.min(parseFloat(sr)/50*100,100).toFixed(0);
-  document.getElementById('sopTgt').innerHTML=`
+  (document.getElementById('sopTgt')||{innerHTML:''}).innerHTML=`
     <div class="kc cb"><div class="kl">引入目标</div><div class="kv">${F.totalTarget}</div><div class="ks">腰部商户</div></div>
     <div class="kc cb"><div class="kl">已投放</div><div class="kv">${SOP.waist_total}</div><div class="ks">腰部 · 在线${SOP.waist_online}+流失${SOP.waist_lost}</div><div class="pb"><div class="pf pf-b" style="width:${Math.min(prog,100)}%"></div></div><div class="pt">${prog}%</div></div>
     <div class="kc cb"><div class="kl">在线</div><div class="kv">${onl.length}</div><div class="ks">腰部商户</div></div>
@@ -335,8 +420,8 @@ function rsop(){
   // 动态填充区块标题
   const _fv4=SOP.factors_v4||{}, _cp=SOP.cust_pool||{}, _q=SOP.quadrant||{};
   var _hfc=document.getElementById('hdrFactorsCnt');if(_hfc)_hfc.textContent=(_fv4.total||'—')+'个在线腰部餐饮品牌';
-  document.getElementById('hdrCustPoolCnt').textContent='← 可保留（全达标+人工打标）未存活的'+(_cp.total||'—')+'个品牌';
-  document.getElementById('hdrQuadrantCnt').textContent='← 老客池子充足的'+(_q.total||'—')+'个品牌';
+  var _hcp=document.getElementById('hdrCustPoolCnt');if(_hcp)_hcp.textContent='← 可保留（全达标+人工打标）未存活的'+(_cp.total||'—')+'个品牌';
+  var _hq=document.getElementById('hdrQuadrantCnt');if(_hq)_hq.textContent='← 老客池子充足的'+(_q.total||'—')+'个品牌';
 
   // SOP timeline（不变）
   document.getElementById('sopCard').innerHTML=`<div class="sop-timeline">
@@ -355,15 +440,48 @@ function rsop(){
       <div class="sn-sub">四要素具备的品牌上线后，动态监测以下三项指标，及时排查异常</div>
       <div class="sop-factors">
         <div class="sf-card"><h5>📊 存活率 <span style="font-size:9px;font-weight:400;background:var(--b1);color:var(--b);padding:1px 5px;border-radius:3px;margin-left:4px">公线</span><span style="font-size:9px;font-weight:400;background:var(--g1);color:var(--g);padding:1px 5px;border-radius:3px;margin-left:4px">行业</span></h5><div class="sf-std">日均全渠道核销PV / 日均交易笔数 ≥ <span class="sv">1%</span><br><span style="color:var(--x4);font-size:10px">存活率 ≥ 1% 即为存活</span></div></div>
-        <div class="sf-card"><h5>📡 二选一老客流量 <span style="font-size:9px;font-weight:400;background:var(--b1);color:var(--b);padding:1px 5px;border-radius:3px;margin-left:4px">公线</span></h5><div class="sf-std">日均二选一老客尽曝UV / 日均交易笔数 ≥ <span class="sv">1</span><br><span style="color:var(--x4);font-size:10px">老客流量充分度 = 1:1</span></div></div>
-        <div class="sf-card"><h5>🏪 到店核销率 <span style="font-size:9px;font-weight:400;background:var(--g1);color:var(--g);padding:1px 5px;border-radius:3px;margin-left:4px">行业</span></h5><div class="sf-std">到店核销率 ≥ 餐饮腰部中位数 <span class="sv">${((SOP.wol_stats||{}).visitUseRate||{}).med||'—'}%</span><br><span style="color:var(--x4);font-size:10px">按月review，动态更新；低于中位数需排查核销体验</span></div></div>
+        <div class="sf-card"><h5>📡 老客流量 <span style="font-size:9px;font-weight:400;background:var(--b1);color:var(--b);padding:1px 5px;border-radius:3px;margin-left:4px">公线</span></h5><div class="sf-std">日均(高频+低频)尽曝PV / 日均交易笔数 ≥ <span class="sv">1</span><br><span style="color:var(--x4);font-size:10px">老客流量充分度 = 1:1</span></div></div>
+        <div class="sf-card"><h5>🏪 到店核销率 <span style="font-size:9px;font-weight:400;background:var(--g1);color:var(--g);padding:1px 5px;border-radius:3px;margin-left:4px">行业</span></h5><div class="sf-std">到店核销率 ≥ 腰部中位数 <span class="sv">${((()=>{const a=(BS||[]).filter(b=>b.tierManual==='腰部'&&b.onlineToday===true&&b.visitUseRate!=null).map(b=>b.visitUseRate).sort((x,y)=>x-y);if(!a.length)return '—';const m=Math.floor(a.length/2);return (a.length%2?a[m]:(a[m-1]+a[m])/2).toFixed(1)})())}%</span><br><span style="color:var(--x4);font-size:10px">按日报动态计算（筛腰部在线）</span></div></div>
       </div>
     </div>
   </div>`;
 
-  // === 四要素扫描 ===
+  // === 四要素待排查商户清单（保留原逻辑，仅注入到 #fcScrHost）===
   const S=SOP;
   const fv4=S.factors_v4||{};
+  (document.getElementById('fcScrHost')||{innerHTML:''}).innerHTML=`
+    <details style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px">
+      <summary style="cursor:pointer;list-style:none">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="font-size:13px;font-weight:700;color:#1e293b">📋 商户反馈明细 <span style="font-size:11px;color:#94a3b8;font-weight:400;margin-left:4px">（<span id="scrHdrCnt">—</span> 个 · 口径 腰部×餐饮×日报在线）· 点击展开 ▾</span></div>
+        </div>
+      </summary>
+      <div style="margin-top:12px">
+        <div class="fb"><span class="fl">筛选</span>
+          <select id="scrSP" onchange="renderScreen()"><option value="">服务商</option></select>
+          <select id="scrOwner" onchange="renderScreen()"><option value="">负责人</option></select>
+          <select id="scrAsst" onchange="renderScreen()"><option value="">助理</option></select>
+          <select id="scrIssue" onchange="renderScreen()"><option value="">待排查问题</option><option value="经营模式">经营模式</option><option value="货盘">货盘</option><option value="基建-商户号">基建-商户号</option><option value="基建-门店">基建-门店</option></select>
+          <input id="scrQ" type="text" placeholder="搜索品牌" oninput="renderScreen()" style="width:100px">
+        </div>
+      </div>
+      <div class="tw" style="max-height:600px;overflow:auto;position:relative;margin-top:8px"><table id="scrTbl" class="an-tbl" style="font-size:13px"><thead style="position:sticky;top:0;z-index:2;background:#fff"><tr>
+        <th style="text-align:left;position:sticky;left:0;z-index:3;background:#f8fafc">品牌</th><th>品牌ID</th><th>服务商</th><th>负责人</th><th>助理</th><th>业态</th><th>存活</th>
+        <th class="nc">门店数</th><th class="nc">日均交易</th><th class="nc">1店几笔</th><th class="nc">小程序占比</th><th class="nc">价格力</th><th class="nc">门店完整度</th><th>待排查问题</th>
+        <th style="background:#b45852;color:#fff;min-width:130px">经营模式反馈</th>
+        <th style="background:#b49252;color:#fff;min-width:130px">货盘反馈</th>
+        <th style="background:#5a8aad;color:#fff;min-width:130px">基建-商户号反馈</th>
+        <th style="background:#6366f1;color:#fff;min-width:130px">基建-门店反馈</th>
+        <th style="min-width:140px">0406反馈</th>
+        <th style="min-width:160px;background:#7c3aed;color:#fff">0407-0410反馈</th>
+        <th style="min-width:160px;background:#0d9488;color:#fff">0412-0417反馈</th>
+      </tr></thead><tbody></tbody></table></div>
+      <div id="scrCnt" style="font-size:10px;color:var(--x4);margin-top:3px"></div>
+      <div id="scrMissing" style="font-size:11px;color:#d97706;margin-top:6px;padding:6px 10px;background:#fef3c7;border-radius:6px;display:none"></div>
+    </details>`;
+
+  // 继续原 rsop 以下渲染（SCR 填充 + 监听等）——保留原逻辑
+  // === 四要素扫描 ===
   function fCard(cat,metricDesc,n,total,color,followUp){
     const w=total?(n/total*100).toFixed(0):0;
     return`<div style="background:#fff;border-radius:10px;box-shadow:var(--s);overflow:hidden">
@@ -378,52 +496,38 @@ function rsop(){
       </div>
       <div style="padding:10px 18px 14px;background:var(--x0);border-top:1px solid var(--x2);font-size:11px;color:var(--x6);line-height:1.6">🔧 后续跟进：${followUp}</div>
     </div>`}
-  document.getElementById('sopFactors').innerHTML=`
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-      <div style="font-size:14px;font-weight:700;color:#1e293b">📊 腰部品牌四要素扫描</div>
-      <div style="font-size:11px;background:#dbeafe;color:#1e40af;padding:3px 10px;border-radius:10px">${fv4.total} 个在线品牌</div>
-    </div>
-    <div id="sopMatrix"></div>
-    <div id="scrFunnel" style="margin-top:12px"></div>
-    <div id="scrFbSummary" style="margin-top:12px"></div>
-    <!-- 四要素排查清单 -->
-    <details style="margin-top:12px">
-      <summary style="cursor:pointer;font-size:13px;font-weight:700;color:var(--x7);margin-bottom:8px">📋 四要素待排查商户清单（${(S.screen_brands||[]).length}个）▾</summary>
-      <div style="margin-bottom:10px">
-        <div class="fb"><span class="fl">筛选</span>
-          <select id="scrSP" onchange="renderScreen()"><option value="">服务商</option></select>
-          <select id="scrOwner" onchange="renderScreen()"><option value="">负责人</option></select>
-          <select id="scrAsst" onchange="renderScreen()"><option value="">助理</option></select>
-          <select id="scrIssue" onchange="renderScreen()"><option value="">待排查问题</option><option value="经营模式">经营模式</option><option value="货盘">货盘</option><option value="基建-商户号">基建-商户号</option><option value="基建-门店">基建-门店</option></select>
-          <input id="scrQ" type="text" placeholder="搜索品牌/ID" oninput="renderScreen()" style="width:100px">
-        </div>
-      </div>
-      <div class="tw" style="max-height:600px;overflow:auto;position:relative"><table id="scrTbl" class="an-tbl" style="font-size:13px"><thead style="position:sticky;top:0;z-index:2;background:#fff"><tr>
-        <th style="text-align:left;position:sticky;left:0;z-index:3;background:#f8fafc">品牌</th><th>品牌ID</th><th>服务商</th><th>负责人</th><th>助理</th><th>业态</th><th>存活</th>
-        <th class="nc">门店数</th><th class="nc">日均交易</th><th class="nc">1店几笔</th><th class="nc">小程序占比</th><th class="nc">价格力</th><th class="nc">门店完整度</th><th>待排查问题</th>
-        <th style="background:#b45852;color:#fff;min-width:130px">经营模式反馈</th>
-        <th style="background:#b49252;color:#fff;min-width:130px">货盘反馈</th>
-        <th style="background:#5a8aad;color:#fff;min-width:130px">基建-商户号反馈</th>
-        <th style="background:#6366f1;color:#fff;min-width:130px">基建-门店反馈</th>
-        <th style="min-width:140px">0406反馈</th>
-        <th style="min-width:160px;background:#7c3aed;color:#fff">0407-0410反馈</th>
-        <th style="min-width:160px;background:#0d9488;color:#fff">0412-0417反馈</th>
-      </tr></thead><tbody></tbody></table></div>
-      <div id="scrCnt" style="font-size:10px;color:var(--x4);margin-top:3px"></div>
-    </details>
-    ${(()=>{const dm=S.data_missing_brands||[];if(!dm.length)return'';
-      let rows='';dm.forEach(b=>{rows+='<tr><td style="padding:4px 8px;font-weight:600">'+b.name+'</td><td style="padding:4px 8px">'+(b.brandId||'—')+'</td><td style="padding:4px 8px">'+(b.sp||'—')+'</td><td style="padding:4px 8px">'+(b.owner||'—')+'</td><td style="padding:4px 8px">'+(b.assistant||'—')+'</td><td style="padding:4px 8px">'+(b.cat4||'—')+'</td><td style="padding:4px 8px">'+(b.isAlive===true?'<span class="bd b-ok">存活</span>':(b.isAlive===false?'<span class="bd b-d">未存活</span>':'—'))+'</td><td style="padding:4px 8px" class="nc">'+(b.storeCount!=null?b.storeCount:'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.dailyTx?b.dailyTx.toLocaleString():'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.txPerStore!=null?b.txPerStore:'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.miniApp!=null?_P(b.miniApp):'—')+'</td><td style="padding:4px 8px" class="nc">'+(b.priceForce!=null?(b.priceForce>0?'+':'')+_P(b.priceForce).replace('—',''):'—')+'</td></tr>'});
-      return '<details style="margin-top:12px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--x4);margin-bottom:6px">⚠️ 小程序交易占比无数据品牌（'+dm.length+'个）— 待日报更新 ▾</summary><div class="tw"><table style="width:100%;font-size:11px;border-collapse:collapse"><thead><tr style="background:var(--x0)"><th style="padding:5px 8px;text-align:left">品牌</th><th style="padding:5px 8px">品牌ID</th><th style="padding:5px 8px">服务商</th><th style="padding:5px 8px">负责人</th><th style="padding:5px 8px">助理</th><th style="padding:5px 8px">业态</th><th style="padding:5px 8px">存活</th><th style="padding:5px 8px" class="nc">门店数</th><th style="padding:5px 8px" class="nc">日均交易</th><th style="padding:5px 8px" class="nc">1店几笔</th><th style="padding:5px 8px" class="nc">小程序占比</th><th style="padding:5px 8px" class="nc">价格力</th></tr></thead><tbody>'+rows+'</tbody></table></div></details>'})()}`;
 
   // 四要素排查清单渲染
-  const SCR=S.screen_brands||[];
+  // SCR 不再依赖 sop_snapshot.screen_brands，改为从 BS 实时计算
+  const SCR=(function(){
+    const result=[];
+    (BS||[]).forEach(b=>{
+      if(b.tierManual!=='腰部')return;
+      if(b.statusManual!=='在线')return;
+      if(b.onlineToday!==true)return;
+      const issues=[];
+      if(b.bizOk===false) issues.push('经营模式');
+      if(b.priceOk===false) issues.push('货盘');
+      if(b.infraOk===false) issues.push('基建-商户号');
+      if(b.trafficOk===false) issues.push('基建-门店');
+      if(!issues.length)return;
+      result.push({
+        brandId:b.brandId, name:b.name, sp:b.spMapped||'', owner:b.owner||'',
+        assistant:b.assistant||'', cat4:b.cat4||'', isAlive:b.isAlive,
+        storeCount:b.storeCount, dailyTx:b.dailyTx, txPerStore:b.txPerStore,
+        miniApp:b.miniApp, priceForce:b.priceForce, storeComplete:b.storeComplete,
+        issues:issues
+      });
+    });
+    return result;
+  })();
   // 填筛选下拉
   const scrSPs=[...new Set(SCR.map(b=>b.sp))].sort();
   const scrOwners=[...new Set(SCR.map(b=>b.owner).filter(Boolean))].sort();
   const scrAssts=[...new Set(SCR.map(b=>b.assistant).filter(Boolean))].sort();
-  scrSPs.forEach(v=>{document.getElementById('scrSP').innerHTML+=`<option value="${v}">${v}</option>`});
-  scrOwners.forEach(v=>{document.getElementById('scrOwner').innerHTML+=`<option value="${v}">${v}</option>`});
-  scrAssts.forEach(v=>{document.getElementById('scrAsst').innerHTML+=`<option value="${v}">${v}</option>`});
+  scrSPs.forEach(v=>{var e=document.getElementById('scrSP');if(e)e.innerHTML+=`<option value="${v}">${v}</option>`});
+  scrOwners.forEach(v=>{var e=document.getElementById('scrOwner');if(e)e.innerHTML+=`<option value="${v}">${v}</option>`});
+  scrAssts.forEach(v=>{var e=document.getElementById('scrAsst');if(e)e.innerHTML+=`<option value="${v}">${v}</option>`});
 
   const _scrFbOpts={
     '经营模式':['会员占比超过50%','代金券投放中','准备切代金券投放','不接受代金券，计划下线','沟通确认后希望在线','沟通确认中','已沟通，未回复','已沟通，整改中'],
@@ -475,7 +579,15 @@ function rsop(){
     const fAsst=document.getElementById('scrAsst').value;
     const fIssue=document.getElementById('scrIssue').value;
     const fQ=(document.getElementById('scrQ').value||'').toLowerCase();
+    // 对齐 Tab 0 / A-1 口径: tierManual=腰部 ∩ 餐饮 ∩ 日报 online_today=true
+    // screen_brands 本身 tierManual/online_today 为空, 从 BS 按 brandId 补
+    const _bsMap={};(BS||[]).forEach(function(x){if(x&&x.brandId!=null)_bsMap[String(x.brandId)]=x;});
     let fl=SCR.filter(b=>{
+      // 不再筛 cat4 (和 Tab0 一致, 只信跟进表)
+      const bs=_bsMap[String(b.brandId)];
+      if(!bs)return false;
+      if(bs.tierManual!=='腰部')return false;
+      if(bs.onlineToday!==true)return false;
       if(fSP&&b.sp!==fSP)return false;
       if(fOwner&&b.owner!==fOwner)return false;
       if(fAsst&&b.assistant!==fAsst)return false;
@@ -516,6 +628,39 @@ function rsop(){
       </tr>`;
     });
     document.getElementById('scrCnt').textContent=fl.length+'/'+SCR.length+' 品牌';
+    var _sh=document.getElementById('scrHdrCnt');if(_sh)_sh.textContent=fl.length;
+    // 数据缺失商户备注：口径内(腰部×跟进在线×日报在线) 但四要素任一为 null & 不在 scr_filtered 里的
+    var _missing=(BS||[]).filter(function(b){
+      if(b.tierManual!=='腰部')return false;
+      if(b.onlineToday!==true)return false;
+      var hasNull=(b.bizOk===null||b.priceOk===null||b.infraOk===null||b.trafficOk===null||
+                   b.bizOk===undefined||b.priceOk===undefined||b.infraOk===undefined||b.trafficOk===undefined);
+      if(!hasNull)return false;
+      return true;
+    });
+    // 再加"系统漏判"：有 false 但未进 SCR 的
+    var _scrBids=new Set(fl.map(function(x){return String(x.brandId)}));
+    var _allScrBids=new Set((SCR||[]).map(function(x){return String(x.brandId)}));
+    var _gap=(BS||[]).filter(function(b){
+      if(b.tierManual!=='腰部')return false;
+      if(b.onlineToday!==true)return false;
+      if(b.bizOk===true && b.priceOk===true && b.infraOk===true && b.trafficOk===true)return false; // 达标的不算
+      if(_allScrBids.has(String(b.brandId)))return false; // 已在 SCR 里的不算（无论是否被过滤）
+      if(b.bizOk===null||b.priceOk===null||b.infraOk===null||b.trafficOk===null)return false; // 已纳入 missing
+      return true;
+    });
+    var _total=_missing.length+_gap.length;
+    var _sm=document.getElementById('scrMissing');
+    if(_sm){
+      if(_total>0){
+        _sm.style.display='block';
+        _sm.innerHTML='⚠️ <b>'+_total+' 个数据缺失商户</b> 待底表更新：'+
+          _missing.concat(_gap).slice(0,10).map(function(b){return b.name}).join(' · ')+
+          (_total>10?' 等':'');
+      }else{
+        _sm.style.display='none';
+      }
+    }
     // 反馈汇总
     if(_fbLoaded){
       const bizC={},priceC={},infraC={};
@@ -552,7 +697,7 @@ function rsop(){
         else{otherN++;otherList.push({name:b.name,rm:rm})}
       });
       function fbRows(items){return items.map(([k,v])=>`<tr><td style="padding:3px 8px">${k}</td><td style="padding:3px 8px" class="nc"><b>${v}</b></td></tr>`).join('')}
-      document.getElementById('scrFbSummary').innerHTML=`<details>
+      (document.getElementById('scrFbSummary')||{innerHTML:''}).innerHTML=`<details>
         <summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--x6);margin-bottom:6px">📊 初步反馈汇总 ▾</summary>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:14px">
           <div style="background:#fff;border-radius:8px;box-shadow:var(--s);padding:14px">
@@ -792,7 +937,7 @@ function rsop(){
         const humanPass=keepB.length;const effectivePass=fv4.all_pass+humanPass;
         mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px 10px;font-size:13px;font-weight:600;border-right:2px solid #e2e8f0;min-height:90px;background:#f0fdf4;color:#059669"><span style="font-size:18px">✅</span>可保留<span style="font-size:10px;color:#6ee7b7;font-weight:400">人工打标</span></div>';
         dims.forEach(d=>{const kn=_issueKeepCount(d.name);mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px;min-height:90px;border-bottom:1px solid #a7f3d0;border-right:1px solid #a7f3d0;background:#ecfdf5"><div style="font-size:28px;font-weight:700;color:#059669">'+kn+'</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">可保留</div></div>'});
-        mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px;min-height:90px;background:#ecfdf5;border-left:2px solid #e2e8f0;border-bottom:1px solid #f1f5f9"><div style="font-size:28px;font-weight:700;color:#059669">'+humanPass+'</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">人工可保留</div></div>';
+        mH+='<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 8px;min-height:90px;background:#ecfdf5;border-left:2px solid #e2e8f0;border-bottom:1px solid #f1f5f9"><div style="font-size:28px;font-weight:700;color:#059669">'+effectivePass+'</div><div style="font-size:11px;color:#94a3b8;margin-top:4px">占比 '+(fv4.valid?Math.round(effectivePass/fv4.valid*100):0)+'%</div><div style="font-size:10px;font-weight:600;margin-top:4px;padding:2px 8px;border-radius:10px;background:#dcfce7;color:#16a34a">系统'+fv4.all_pass+' + 人工'+humanPass+'</div></div>';
         mH+='</div>';
         // 可保留折叠（二级原因Tab）
         if(keepB.length){
@@ -841,7 +986,7 @@ function rsop(){
         mH+='</div>';
         mEl.innerHTML=mH;
       }
-      document.getElementById('scrFunnel').innerHTML='';
+      (document.getElementById('scrFunnel')||{innerHTML:''}).innerHTML='';
     }
     setTimeout(autoResizeAll,50);
   }
@@ -868,7 +1013,7 @@ function rsop(){
   const avgEUR=sumExp>0?(sumUse*7/sumExp*100).toFixed(2):'—';
   cpOkRows+=`<tr style="font-weight:700;background:var(--x1)"><td>合计/均值</td><td></td><td></td><td></td><td></td><td class="nc">${sumDtx.toLocaleString()}</td><td></td><td class="nc" style="background:#dbeafe">${sumApp.toLocaleString()}</td><td class="nc" style="background:#dbeafe">${sumExp.toLocaleString()}</td><td class="nc" style="background:#dbeafe">${avgRate}%</td><td class="nc" style="background:#dbeafe">${sumUse.toFixed(0)}</td><td class="nc" style="background:#dbeafe">${avgEUR}%</td></tr>`;
 
-  document.getElementById('sopCustPool').innerHTML=`
+  (document.getElementById('sopCustPool')||{innerHTML:''}).innerHTML=`
     <div style="font-size:12px;color:var(--x6);margin-bottom:12px">可保留（全达标+人工打标）未存活的 <b>${CP.total}个</b> 品牌，排查老客基数是否支撑1:1曝光目标</div>
     <div style="font-size:11px;color:var(--x5);margin-bottom:14px">排查口径：二选一应曝老客UV（近7日高频+低频）/ 日均交易笔数 ≥ 1</div>
     <div style="display:flex;gap:14px;margin-bottom:14px">
@@ -893,21 +1038,21 @@ function rsop(){
     </div>
     <details style="margin-bottom:10px">
       <summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--g);margin-bottom:6px">老客池子充足的 ${CP.ok} 个品牌明细 ▾</summary>
-      <div class="tw" style="max-height:60vh;overflow-y:auto"><table class="an-tbl"><thead><tr>
+      <div class="tw"><table class="an-tbl"><thead><tr>
         <th>品牌</th><th>品牌ID</th><th>服务商</th><th>业态</th><th class="nc">门店数</th><th class="nc">日均交易笔数</th><th class="nc">1店几笔</th>
         <th class="nc" style="background:#2563eb;color:#fff">应曝UV(7日)</th><th class="nc" style="background:#2563eb;color:#fff">尽曝UV(7日)</th><th class="nc" style="background:#2563eb;color:#fff">应曝尽曝率</th><th class="nc" style="background:#2563eb;color:#fff">日均核销PV</th><th class="nc" style="background:#2563eb;color:#fff">曝光核销率</th>
       </tr></thead><tbody>${cpOkRows}</tbody></table></div>
     </details>
     ${CP.fail>0?`<details>
       <summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--o);margin-bottom:6px">老客池子不足的 ${CP.fail} 个品牌明细（待确认罗盘规则）▾</summary>
-      <div class="tw" style="max-height:60vh;overflow-y:auto"><table class="an-tbl"><thead><tr><th>品牌</th><th>品牌ID</th><th>服务商</th><th>业态</th><th class="nc">审核通过门店</th><th class="nc">日均交易笔数</th><th class="nc">1店几笔</th><th class="nc">二选一应曝UV(7日)</th></tr></thead><tbody>${cpFailRows}</tbody></table></div>
+      <div class="tw"><table class="an-tbl"><thead><tr><th>品牌</th><th>品牌ID</th><th>服务商</th><th>业态</th><th class="nc">审核通过门店</th><th class="nc">日均交易笔数</th><th class="nc">1店几笔</th><th class="nc">二选一应曝UV(7日)</th></tr></thead><tbody>${cpFailRows}</tbody></table></div>
     </details>`:''}`;
 
   // === 象限分析 ===
   const Q=S.quadrant||{}, QS=Q.summary||{}, QR=Q.results||[];
   const qA=QS.A||{count:0},qB=QS.B||{count:0},qC=QS.C||{count:0},qD=QS.D||{count:0},qX=QS.X||{count:0};
 
-  document.getElementById('sopQuadrant').innerHTML=`
+  (document.getElementById('sopQuadrant')||{innerHTML:''}).innerHTML=`
     <div style="font-size:12px;color:var(--x5);margin-bottom:16px">可保留（全达标+人工打标）、老客池子充足但未存活的 <b style="color:var(--x7)">${Q.total}个</b> 品牌，按老客曝光充分度和曝光核销率分为四个象限：</div>
     <div style="max-width:860px;margin:0 auto">
       <!-- 上半：曝光充足 → B(左,低核销) + A(右,高核销) -->
@@ -937,14 +1082,14 @@ function rsop(){
           <div style="flex:1;min-width:0;padding:20px 22px;background:#fff7ed;border-radius:0 0 0 10px;border-right:1.5px dashed var(--x3)">
             <div style="font-size:13px;font-weight:700;color:#9a3412;margin-bottom:6px">D · 流量不足、低核销率</div>
             <div style="font-size:40px;font-weight:800;color:#ea580c">${qD.count}</div>
-            <div style="font-size:11px;color:#9a3412;margin-top:8px">其中 <b style="font-size:18px;color:#c2410c">${qD.no_exp}</b> 个老客曝光几乎为0 <span style="font-size:9px;color:#c2410c80">（尽曝UV < 10）</span></div>
+            <div style="font-size:11px;color:#9a3412;margin-top:8px">其中 <b style="font-size:18px;color:#c2410c">${qD.no_exp}</b> 个老客曝光几乎为0 <span style="font-size:9px;color:#c2410c80">（尽曝UV < 5）</span></div>
             <div style="font-size:11px;color:#9a3412;margin-top:4px"><b style="font-size:18px;color:#c2410c">${qD.has_exp}</b> 个有老客曝光但核销率低 ${(()=>{const dExp=QR.filter(r=>r.quad==='D'&&r.eur_reliable);if(!dExp.length)return'';const names=dExp.map(b=>b.name).join('、');const detail=dExp.map(b=>'<b>'+b.name+'</b> 尽曝UV:'+Math.round(b.cur_exp)+' 交易:'+b.daily_tx.toLocaleString()+' 核销率:'+(b.cur_e21_eur!=null?b.cur_e21_eur+'%':'—')).join('<br>');return`<span onclick="quadDetail('qd_detail')" style="cursor:pointer;color:var(--b);font-weight:600">（${names} ▾）</span></div><div id="qd_detail" style="display:none;margin-top:6px;font-size:10px;color:var(--x6);background:#fff5ed;padding:8px 10px;border-radius:5px;line-height:1.7">${detail}`})()}</div>
           </div>
           <div style="flex:1;min-width:0;padding:20px 22px;background:#fef2f2;border-radius:0 0 10px 0">
             <div style="font-size:13px;font-weight:700;color:#991b1b;margin-bottom:6px">C · 流量不足、高核销率</div>
             <div style="font-size:40px;font-weight:800;color:#dc2626">${qC.count}</div>
             <div style="font-size:11px;color:#991b1b;margin-top:8px"><b style="font-size:18px;color:#dc2626">${qC.has_exp}</b> 个核销率可信，补流量可存活</div>
-            <div style="font-size:11px;color:#991b1b;margin-top:4px"><b style="font-size:18px;color:#c2410c">${qC.no_exp}</b> 个老客曝光几乎为0 <span style="font-size:9px;color:#c2410c80">（尽曝UV < 10，核销率不可信）</span></div>
+            <div style="font-size:11px;color:#991b1b;margin-top:4px"><b style="font-size:18px;color:#c2410c">${qC.no_exp}</b> 个老客曝光几乎为0 <span style="font-size:9px;color:#c2410c80">（尽曝UV < 5，核销率不可信）</span></div>
           </div>
         </div>
       </div>
@@ -984,7 +1129,7 @@ function rsop(){
     const cap=r.was_capped?' ✂️':'';
     aliveTable+=`<tr><td>${r.name}</td><td>${r.brandId||'—'}</td><td>${r.cat4}</td><td class="nc">${N(r.daily_tx)}</td><td class="nc">${r.cur_exp.toFixed(0)}</td><td class="nc">${eur}${cap}</td><td class="nc">${r.cur_all.toFixed(0)}</td><td class="nc" style="color:var(--g);font-weight:700">${r.new_all.toFixed(0)}</td><td class="nc" style="color:var(--g);font-weight:700">+${r.all_delta.toFixed(0)}</td></tr>`});
 
-  document.getElementById('sopBoost').innerHTML=`
+  (document.getElementById('sopBoost')||{innerHTML:''}).innerHTML=`
     <div style="font-size:12px;color:var(--x6);margin-bottom:14px;line-height:1.7">假设每个品牌的日均老客曝光补到 : 日均交易笔数 = 1:1，老客二选一曝光核销率保持当前水平（因日均老客尽曝UV少造成曝光核销率异常高的，按20%封顶），其他渠道核销不变。</div>
     <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:22px">
       <div style="flex:1;min-width:240px;background:#fff;border-radius:10px;box-shadow:var(--s);padding:22px;position:relative;overflow:hidden">
@@ -1011,16 +1156,16 @@ function rsop(){
         <div style="position:absolute;top:0;left:0;right:0;height:3px;background:var(--o)"></div>
         <div style="font-size:13px;color:var(--x5);font-weight:600;margin-bottom:14px">待验证品牌 <span style="font-size:9px;font-weight:600;background:#fff7ed;color:#c2410c;padding:2px 6px;border-radius:3px;margin-left:6px">需尽快推动置顶曝光</span></div>
         <div style="font-size:36px;font-weight:800;color:var(--o)">${unreliable}</div>
-        <div style="font-size:12px;color:var(--x6);margin-top:8px;line-height:1.6">日均老客尽曝UV < 10，当前无有效核销数据。<br>需要有老客曝光，才能验证核销率能否达到1%。</div>
+        <div style="font-size:12px;color:var(--x6);margin-top:8px;line-height:1.6">日均老客尽曝UV < 5，当前无有效核销数据。<br>需要有老客曝光，才能验证核销率能否达到1%。</div>
       </div>
     </div>
     <div style="margin-bottom:20px">
       <div style="font-size:13px;font-weight:700;color:var(--x7);margin-bottom:10px">分类目测算对比</div>
-      <div class="tw" style="max-height:60vh;overflow-y:auto"><table class="an-tbl"><thead><tr><th>类目</th><th class="nc">当前存活</th><th class="nc" style="color:var(--g)">补后存活</th><th class="nc">当前核销PV</th><th class="nc" style="color:var(--g)">补后核销PV</th></tr></thead><tbody>${catTableRows}</tbody></table></div>
+      <div class="tw"><table class="an-tbl"><thead><tr><th>类目</th><th class="nc">当前存活</th><th class="nc" style="color:var(--g)">补后存活</th><th class="nc">当前核销PV</th><th class="nc" style="color:var(--g)">补后核销PV</th></tr></thead><tbody>${catTableRows}</tbody></table></div>
     </div>
     <details>
       <summary style="cursor:pointer;font-size:12px;font-weight:700;color:var(--b);margin-bottom:8px">${nAlive}个确定新增存活品牌明细 — 点击展开</summary>
-      <div class="tw" style="max-height:60vh;overflow-y:auto"><table class="an-tbl"><thead><tr><th>品牌</th><th>品牌ID</th><th>类目</th><th class="nc">日均交易</th><th class="nc">日均尽曝UV</th><th class="nc">老客曝光核销率</th><th class="nc">当前核销</th><th class="nc">补后核销</th><th class="nc">增量</th></tr></thead><tbody>${aliveTable}</tbody></table></div>
+      <div class="tw"><table class="an-tbl"><thead><tr><th>品牌</th><th>品牌ID</th><th>类目</th><th class="nc">日均交易</th><th class="nc">日均尽曝UV</th><th class="nc">老客曝光核销率</th><th class="nc">当前核销</th><th class="nc">补后核销</th><th class="nc">增量</th></tr></thead><tbody>${aliveTable}</tbody></table></div>
     </details>
     <div style="font-size:10px;color:var(--x4);margin-top:10px;line-height:1.8">
       <b>测算口径</b><br>
@@ -1055,7 +1200,7 @@ function rsop(){
   function cR(st,k){const s=st[k]||{};if(s.med==null)return'<td style="text-align:center">—</td>';const mv=(s.med*100).toFixed(1);const av=(s.avg*100).toFixed(1);return`<td style="text-align:center">中位<b>${mv}</b>%<br><span style="font-size:9px;color:var(--x4)">均${av}% n=${s.n}</span></td>`}
   const refHtml=`<div class="tw" style="margin-top:8px"><table class="ref"><thead><tr><th class="h0" rowspan="2" style="text-align:center"></th><th class="h1" style="text-align:center">经营模式</th><th class="h1" style="text-align:center">货盘</th><th class="h1" style="text-align:center">基建</th><th class="h2" colspan="5" style="text-align:center">上线后</th></tr><tr><th class="h1" style="text-align:center">小程序渗透</th><th class="h1" style="text-align:center">价格力</th><th class="h1" style="text-align:center">1店几笔</th><th class="h2" style="text-align:center">1店几曝(二选一)</th><th class="h2" style="text-align:center">老客应曝尽曝率</th><th class="h2" style="text-align:center">老客二选一曝光占比</th><th class="h2" style="text-align:center">二选一曝光核销率</th><th class="h2" style="text-align:center">到店核销率</th></tr></thead><tbody><tr class="ra"><td style="text-align:center;font-weight:700;background:#fff!important">✅ 存活</td>${c(S.alive_stats,'miniApp','%')}${c(S.alive_stats,'priceForce','%')}${c(S.alive_stats,'txPerStore','')}${c(S.alive_stats,'expPerStore','')}${cR(S.alive_stats,'custAppRate')}${c(S.alive_stats,'e21Ratio','%')}${c(S.alive_stats,'e21EUR','%')}${c(S.alive_stats,'visitUseRate','%')}</tr><tr class="rd"><td style="text-align:center;font-weight:700;background:#fff!important">❌ 未存活</td>${c(S.dead_stats,'miniApp','%')}${c(S.dead_stats,'priceForce','%')}${c(S.dead_stats,'txPerStore','')}${c(S.dead_stats,'expPerStore','')}${cR(S.dead_stats,'custAppRate')}${c(S.dead_stats,'e21Ratio','%')}${c(S.dead_stats,'e21EUR','%')}${c(S.dead_stats,'visitUseRate','%')}</tr></tbody></table></div>`;
 
-  document.getElementById('sopAppendix').innerHTML=`
+  (document.getElementById('sopAppendix')||{innerHTML:''}).innerHTML=`
     <div class="qa" style="margin-bottom:14px">
       <div class="qa-q">📋 腰部品牌指标水位（中位数 & 均值）</div>
       ${refHtml}
@@ -1071,19 +1216,19 @@ function rsop(){
       </tbody></table></div>
       ${ndBrands.length?`<details style="margin-top:8px">
         <summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--x6);margin-bottom:6px">📋 日报无数据（${ndBrands.length}个）</summary>
-        <div class="tw" style="max-height:60vh;overflow-y:auto"><table class="an-tbl"><thead><tr><th>品牌</th><th>品牌ID</th><th>服务商</th><th>业态</th><th class="nc">门店数</th></tr></thead><tbody>${ndRows}</tbody></table></div>
+        <div class="tw"><table class="an-tbl"><thead><tr><th>品牌</th><th>品牌ID</th><th>服务商</th><th>业态</th><th class="nc">门店数</th></tr></thead><tbody>${ndRows}</tbody></table></div>
       </details>`:''}
       ${ncBrands.length?`<details style="margin-top:8px">
         <summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--x6);margin-bottom:6px">📋 公线类目≠餐饮（${ncBrands.length}个）</summary>
-        <div class="tw" style="max-height:60vh;overflow-y:auto"><table class="an-tbl"><thead><tr><th>品牌</th><th>品牌ID</th><th>服务商</th><th>业态</th><th>公线类目</th><th class="nc">门店数</th></tr></thead><tbody>${ncRows}</tbody></table></div>
+        <div class="tw"><table class="an-tbl"><thead><tr><th>品牌</th><th>品牌ID</th><th>服务商</th><th>业态</th><th>公线类目</th><th class="nc">门店数</th></tr></thead><tbody>${ncRows}</tbody></table></div>
       </details>`:''}
       <details style="margin-top:8px">
         <summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--b);margin-bottom:6px">📋 公线分层≠腰部（${tailBrands.length}个）— 待确认上传门店数，校验分层</summary>
-        <div class="tw" style="max-height:60vh;overflow-y:auto"><table class="an-tbl"><thead><tr><th>品牌</th><th>品牌ID</th><th>服务商</th><th>业态</th><th>公线分层</th><th class="nc">审核通过门店数</th></tr></thead><tbody>${tailRows}</tbody></table></div>
+        <div class="tw"><table class="an-tbl"><thead><tr><th>品牌</th><th>品牌ID</th><th>服务商</th><th>业态</th><th>公线分层</th><th class="nc">审核通过门店数</th></tr></thead><tbody>${tailRows}</tbody></table></div>
       </details>
       ${offBrands.length?`<details style="margin-top:8px">
         <summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--o);margin-bottom:6px">📋 当日未在线（${offBrands.length}个）— 待确认在线状态</summary>
-        <div class="tw" style="max-height:60vh;overflow-y:auto"><table class="an-tbl"><thead><tr><th>品牌</th><th>品牌ID</th><th>服务商</th><th>业态</th><th>当日在线状态</th><th class="nc">门店数</th></tr></thead><tbody>${offRows}</tbody></table></div>
+        <div class="tw"><table class="an-tbl"><thead><tr><th>品牌</th><th>品牌ID</th><th>服务商</th><th>业态</th><th>当日在线状态</th><th class="nc">门店数</th></tr></thead><tbody>${offRows}</tbody></table></div>
       </details>`:''}
     </div>
     <div class="qa" style="margin-top:14px">
@@ -1137,25 +1282,1551 @@ function rsop(){
           <div style="display:flex;flex-direction:column;gap:0">
             <div style="${cs};min-height:120px;border:2px solid #c2410c">
               ${topBar('#c2410c')}
-              <div style="font-size:12px;color:var(--x5);margin-bottom:6px">老客尽曝UV < 10</div>
+              <div style="font-size:12px;color:var(--x5);margin-bottom:6px">老客尽曝UV < 5</div>
               <div style="font-size:32px;font-weight:800;color:#c2410c">${ZU.uv_lt5}</div>
               <div style="margin-top:6px"><span style="font-size:9px;font-weight:600;background:#fff7ed;color:#c2410c;padding:2px 6px;border-radius:3px">${ZU.uv_lt5_pct||0}%在待验证${Q.unreliable_count||0}个中，需尽快置顶曝光</span></div>
             </div>
           </div>
         </div>`
-        +(ZU.fail_brands&&ZU.fail_brands.length?'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:#b45852;margin-bottom:6px">↓ 四要素不达标（'+ZU.fail_count+'个）→ 待排查四要素 ▾</summary><div class="tw" style="max-height:60vh;overflow-y:auto">'+tbl+thBase+'<tbody>'+ZU.fail_brands.map(baseRow).join('')+'</tbody></table></div></details>':'')
-        +(ZU.pool_fail_brands&&ZU.pool_fail_brands.length?'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--o);margin-bottom:6px">↓ 老客基数不够（'+ZU.pool_fail+'个）→ 待确认罗盘规则 ▾</summary><div class="tw" style="max-height:60vh;overflow-y:auto">'+tbl+thFlow+'<tbody>'+ZU.pool_fail_brands.map(flowRow).join('')+'</tbody></table></div></details>':'')
-        +(ZU.pool_ok_brands&&ZU.pool_ok_brands.length?'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:#c2410c;margin-bottom:6px">→ 尽曝UV < 10（'+(ZU.pool_ok||0)+'个）→ 需公线尽快置顶 ▾</summary><div class="tw" style="max-height:60vh;overflow-y:auto">'+tbl+thFlow+'<tbody>'+ZU.pool_ok_brands.map(flowRow).join('')+'</tbody></table></div></details>':'');
+        +(ZU.fail_brands&&ZU.fail_brands.length?'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:#b45852;margin-bottom:6px">↓ 四要素不达标（'+ZU.fail_count+'个）→ 待排查四要素 ▾</summary><div class="tw">'+tbl+thBase+'<tbody>'+ZU.fail_brands.map(baseRow).join('')+'</tbody></table></div></details>':'')
+        +(ZU.pool_fail_brands&&ZU.pool_fail_brands.length?'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:var(--o);margin-bottom:6px">↓ 老客基数不够（'+ZU.pool_fail+'个）→ 待确认罗盘规则 ▾</summary><div class="tw">'+tbl+thFlow+'<tbody>'+ZU.pool_fail_brands.map(flowRow).join('')+'</tbody></table></div></details>':'')
+        +(ZU.pool_ok_brands&&ZU.pool_ok_brands.length?'<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;font-weight:600;color:#c2410c;margin-bottom:6px">→ 尽曝UV < 5（'+(ZU.pool_ok||0)+'个）→ 需公线尽快置顶 ▾</summary><div class="tw">'+tbl+thFlow+'<tbody>'+ZU.pool_ok_brands.map(flowRow).join('')+'</tbody></table></div></details>':'');
       })()}
     </div>`;
 
 }
 
-function rov(){const tb=document.querySelector('#spTbl tbody');tb.innerHTML='';Object.keys(SPS).filter(k=>SPS[k].brands.length>0).sort((a,b)=>{const ta=SPS[a].type||'',tb2=SPS[b].type||'';return(ta.indexOf('SaaS')>=0?0:1)-(tb2.indexOf('SaaS')>=0?0:1)||SPS[b].brands.length-SPS[a].brands.length}).forEach(k=>{const s=SPS[k],bs2=W.filter(b=>b.spMapped===k);if(!bs2.length)return;const o2=bs2.filter(b=>b.statusManual==='在线'),l2=bs2.filter(b=>b.statusManual==='流失'),a2=o2.filter(b=>b.isAlive===true);const sr2=o2.length?(a2.length/o2.length*100).toFixed(1):'—';const p2=s.target?(bs2.length/s.target*100).toFixed(1):'—';const pc=parseFloat(p2)>=100?'pf-g':parseFloat(p2)>=60?'pf-b':'pf-o';tb.innerHTML+=`<tr><td><b>${s.name}</b></td><td>${s.type||'—'}</td><td>${s.owner||'—'}</td><td class="nc">${s.target||'—'}</td><td class="nc"><b>${bs2.length}</b></td><td class="nc">${o2.length}</td><td class="nc">${l2.length}</td><td class="nc">${a2.length}</td><td class="nc ${parseFloat(sr2)>=50?'oc':'wc'}">${sr2}%</td><td style="min-width:80px"><div class="pb"><div class="pf ${pc}" style="width:${Math.min(parseFloat(p2)||0,100)}%"></div></div><div class="pt">${p2}%</div></td></tr>`})}
+function rov(){const tb=document.querySelector('#spTbl tbody');tb.innerHTML='';Object.keys(SPS).filter(k=>SPS[k].brands.length>0 && (SPS[k].target||0)>0).sort((a,b)=>{const ta=SPS[a].type||'',tb2=SPS[b].type||'';return(ta.indexOf('SaaS')>=0?0:1)-(tb2.indexOf('SaaS')>=0?0:1)||SPS[b].brands.length-SPS[a].brands.length}).forEach(k=>{const s=SPS[k],bs2=W.filter(b=>b.spMapped===k);if(!bs2.length)return;const o2=bs2.filter(b=>b.statusManual==='在线'),l2=bs2.filter(b=>b.statusManual==='流失'),a2=o2.filter(b=>b.isAlive===true);const sr2=o2.length?(a2.length/o2.length*100).toFixed(1):'—';const p2=s.target?(bs2.length/s.target*100).toFixed(1):'—';const pc=parseFloat(p2)>=100?'pf-g':parseFloat(p2)>=60?'pf-b':'pf-o';tb.innerHTML+=`<tr><td><b>${s.name}</b></td><td>${s.type||'—'}</td><td>${s.owner||'—'}</td><td class="nc">${s.target||'—'}</td><td class="nc"><b>${bs2.length}</b></td><td class="nc">${o2.length}</td><td class="nc">${l2.length}</td><td class="nc">${a2.length}</td><td class="nc ${parseFloat(sr2)>=50?'oc':'wc'}">${sr2}%</td><td style="min-width:80px"><div class="pb"><div class="pf ${pc}" style="width:${Math.min(parseFloat(p2)||0,100)}%"></div></div><div class="pt">${p2}%</div></td></tr>`})}
+
+// ========== 引入进度：概览 4 大卡 + 每日折线图（绿线=当日在线 / 蓝线=累计已投放）==========
+const INTRO_CATERING = new Set(['正餐','茶饮咖啡','中式快餐','甜品烘焙','西式快餐','小吃','其他餐饮']);
+var _introChart = null;
+var _aliveChart = null;
+
+function _introAddDays(isoDate, delta){
+  const d = new Date(isoDate + 'T00:00:00');
+  d.setDate(d.getDate() + delta);
+  return d.toISOString().substring(0,10);
+}
+
+// 绿线口径：每天 tier=腰部 ∩ 餐饮 ∩ online_today=true 的 brand_id 集合
+function _introGreenMap(trendRows){
+  const m = {};
+  (trendRows||[]).forEach(function(r){
+    if (!r) return;
+    if (r.tier !== '腰部') return;
+    if (r.online_today !== true) return;
+    const d = r.data_date;
+    if (!m[d]) m[d] = new Set();
+    m[d].add(r.brand_id);
+  });
+  return m;
+}
+
+// 蓝线口径：截至每日，跟进表(腰部×在线+流失)的 brand_id 中，first_seen_in_daily <= 当日 的去重数
+// first_seen 不按 tier/餐饮筛选，取任何 trendRows 里的第一次出现
+function _introBlueArr(trendRows, dates, followBids){
+  const firstSeen = {};
+  (trendRows||[]).forEach(function(r){
+    if (!r || r.brand_id == null) return;
+    const bid = r.brand_id, d = r.data_date;
+    if (firstSeen[bid] == null || d < firstSeen[bid]) firstSeen[bid] = d;
+  });
+  const events = [];
+  Object.keys(firstSeen).forEach(function(bid){
+    const b = Number(bid);
+    if (followBids.has(b)) events.push([firstSeen[bid], b]);
+  });
+  events.sort(function(a,b){ return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0; });
+  const cum = new Set();
+  const out = [];
+  let idx = 0;
+  dates.forEach(function(d){
+    while (idx < events.length && events[idx][0] <= d){
+      cum.add(events[idx][1]); idx++;
+    }
+    out.push(cum.size);
+  });
+  return out;
+}
+
+// 近 N 天均值（含当天，不足 N 天取现有天数）
+function _introAvgNDays(dailyMap, endDate, n){
+  let total = 0, cnt = 0;
+  for (let i = 0; i < n; i++){
+    const d = _introAddDays(endDate, -i);
+    if (dailyMap[d]) { total += dailyMap[d].size; cnt++; }
+  }
+  return cnt > 0 ? total / cnt : null;
+}
+
+// 上周同期（endDate 往前 7 天那天的值）
+function _introSameDayLastWeek(dailyMap, endDate){
+  const d = _introAddDays(endDate, -7);
+  return dailyMap[d] ? dailyMap[d].size : null;
+}
+
+function rintro(D){
+  const targetDate = (F && F.dataDate) || '';
+  const dd = document.getElementById('introDataDate');
+  if (dd) dd.textContent = targetDate;
+
+  // ========== 1. 概览 4 大卡 ==========
+  // 口径：以跟进表为锚（腰部×(在线+流失)），不再用日报 cat4 过滤
+  // 理由：跟进表里腰部商户默认都是餐饮，日报类目/分层可能有打标误差；跟进表是引入进展的真实源
+  const wc = (BS||[]).filter(b => b.tierManual === '腰部');
+  // 已投放 = 跟进表腰部×(在线+流失)
+  const deployed = wc.filter(b => b.statusManual === '在线' || b.statusManual === '流失').length;
+  // 流失 = 已投放 - 当日日报在线（跟进表池里今日日报不在线的）
+  const lost = deployed - wc.filter(b => b.onlineToday === true).length;
+  // 跟进表在线 = 跟进表腰部×status=在线（用于 0426+ 骤降提示：y=跟进表在线，x=y-日报在线）
+  const followOnlineCnt = wc.filter(b => b.statusManual === '在线').length;
+  const totalTarget = (F && F.totalTarget) || 800;
+  const deployedPct = totalTarget > 0 ? (deployed/totalTarget*100) : 0;
+
+  // 在线 / 存活 = 跟进表池 ∩ 日报 online_today=true（保留日报口径）
+  const onlineBS = wc.filter(b => b.onlineToday === true);
+  const aliveBS = onlineBS.filter(b => b.isAlive === true);
+  const todayOnline = onlineBS.length;
+  const todayAlive = aliveBS.length;
+  const todayRate = todayOnline > 0 ? todayAlive/todayOnline : null;
+
+  // 0426 后在线骤降提示：若 targetDate >= 2026-04-26 且 跟进表在线 > 日报在线，挂⚠️悬浮
+  // 方案B: 仅把"真腰部×餐饮×离线"算入"实际在线"(曝光<100 被误伤)，
+  //         日报分层/类目/字段异常的另外归一类（待校正），不并入在线数
+  try {
+    const warnEl = document.getElementById('introTrendWarn');
+    if (warnEl){
+      if (targetDate >= '2026-04-26' && followOnlineCnt > todayOnline){
+        // 从 wc (跟进表腰部) 里拆: 非在线 且 属于餐饮 且 按审核通过门店数判仍为腰部 → 误伤
+        const CAT = INTRO_CATERING;
+        const ZHENGCAN = new Set(['正餐']);
+        const _offline = wc.filter(b => b.onlineToday !== true && b.statusManual === '在线');
+        let realWaistOffline = 0, needFix = 0;
+        _offline.forEach(b => {
+          const cat = b.cat4;
+          const sc = b.storeCount;
+          if (!CAT.has(cat)){ needFix++; return; }           // 非餐饮类目
+          if (sc == null){ needFix++; return; }              // 门店数缺失
+          const thr = ZHENGCAN.has(cat) ? 5 : 20;
+          if (sc >= thr) realWaistOffline++;                 // 符合腰部阈值 → 真误伤
+          else needFix++;                                     // 不达阈值 → 待校正
+        });
+        const realTotal = todayOnline + realWaistOffline;
+        warnEl.style.display = 'inline';
+        warnEl.textContent = '⚠️';
+        warnEl.title =
+          '实际在线 '+todayOnline+'+'+realWaistOffline+' = '+realTotal+' 家\n'+
+          '看板在线 '+todayOnline+' 家；'+(followOnlineCnt-todayOnline)+' 家未被统计到：\n'+
+          '1）'+realWaistOffline+' 家因曝光<100 被误伤（周末线上全量上线周边挤占线下流量）\n'+
+          '2）'+needFix+' 家因日报分层/类目/字段异常，需运营在跟进表或公线校正后纳入';
+      } else {
+        warnEl.style.display = 'none';
+      }
+    }
+  } catch(e){}
+
+  // 上周同期（仅绿线口径可算）
+  const greenMap = _introGreenMap((D && D.trendRows) || []);
+  const lastWeekOnline = _introSameDayLastWeek(greenMap, targetDate);
+
+  const card = function(label, icon, bigValue, bigUnit, subHtml, color){
+    return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px 18px">' +
+      '<div style="font-size:12px;color:#64748b;font-weight:600">'+icon+' '+label+'</div>' +
+      '<div style="font-size:32px;font-weight:800;color:'+(color||'#1e293b')+';margin-top:6px;line-height:1.1">' +
+        bigValue + (bigUnit ? '<span style="font-size:14px;color:#94a3b8;font-weight:500;margin-left:4px">'+bigUnit+'</span>' : '') +
+      '</div>' + (subHtml||'') +
+    '</div>';
+  };
+
+  // 已投放卡 - 带进度条
+  const depBarHtml = '<div style="margin-top:8px"><div style="height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden"><div style="height:100%;width:'+Math.min(deployedPct,100).toFixed(1)+'%;background:linear-gradient(90deg,#3b82f6,#2563eb);transition:width .4s"></div></div><div style="font-size:11px;color:#64748b;margin-top:4px">完成度 <b style="color:#2563eb">'+deployedPct.toFixed(1)+'%</b> · 目标 '+totalTarget+'</div></div>';
+
+  // 在线卡 - 今日 vs 上周同期
+  let onlineSub = '';
+  if (lastWeekOnline != null){
+    const delta = todayOnline - lastWeekOnline;
+    const color = delta > 0 ? '#059669' : delta < 0 ? '#dc2626' : '#64748b';
+    const arrow = delta > 0 ? '↑' : delta < 0 ? '↓' : '→';
+    const pct = lastWeekOnline > 0 ? (delta/lastWeekOnline*100) : 0;
+    const sign = delta > 0 ? '+' : '';
+    onlineSub = '<div style="font-size:11px;color:#94a3b8;margin-top:6px">上周同期 <b style="color:#475569">'+lastWeekOnline+'</b></div>' +
+                '<div style="font-size:11px;margin-top:2px;color:'+color+';font-weight:600">'+arrow+' '+sign+delta+' ('+sign+pct.toFixed(1)+'%)</div>';
+  }
+
+  let html = '';
+  html += card('已投放', '📦', deployed + '<span style="font-size:14px;color:#94a3b8;font-weight:500;margin-left:4px">（含流失 '+lost+'）</span>', '/ ' + totalTarget, depBarHtml, '#2563eb');
+  html += card('在线',   '📡', todayOnline, '家', onlineSub, '#059669');
+  html += card('存活',   '✅', todayAlive,  '家', '<div style="font-size:11px;color:#94a3b8;margin-top:6px">当日截面 · 近7日存活率 ≥ 1%</div>', '#059669');
+  const rateStr = todayRate != null ? (todayRate*100).toFixed(1)+'%' : '—';
+  html += card('存活率', '📊', rateStr, '', '<div style="font-size:11px;color:#94a3b8;margin-top:6px">存活 / 在线</div>', '#0369a1');
+
+  const kg = document.getElementById('introKg');
+  if (kg) kg.innerHTML = html;
+
+  // ========== 2. 每日折线图：绿线=当日在线 / 蓝线=累计已投放 ==========
+  // 蓝线口径对齐概览卡：跟进表腰部×(在线+流失)，不再筛日报 cat4
+  const followBids = new Set();
+  (BS||[]).forEach(function(b){
+    if (b && b.tierManual === '腰部'
+        && (b.statusManual === '在线' || b.statusManual === '流失')
+        && b.brandId != null){
+      followBids.add(Number(b.brandId));
+    }
+  });
+
+  const allDates = Array.from(new Set((D.trendRows||[]).map(r => r.data_date))).sort();
+  const xDates = allDates.filter(d => d <= targetDate && d >= '2026-04-01');
+  if (xDates.length === 0){
+    document.getElementById('introTrendChart').innerHTML = '<div style="padding:40px;text-align:center;color:#94a3b8;font-size:12px">暂无数据</div>';
+    return;
+  }
+  const greenSeries = xDates.map(d => greenMap[d] ? greenMap[d].size : 0);
+  const blueSeries  = _introBlueArr(D.trendRows||[], xDates, followBids);
+
+  const el = document.getElementById('introTrendChart');
+  if (typeof echarts === 'undefined'){
+    el.innerHTML = '<div style="padding:40px;text-align:center;color:#dc2626;font-size:12px">ECharts 未加载</div>';
+    return;
+  }
+  if (_introChart){ _introChart.dispose(); _introChart = null; }
+  _introChart = echarts.init(el);
+  // X 轴稀疏：首日 + 每 7 天 + 末日
+  const xLabelFmt = function(val, idx){
+    const isFirst = idx === 0;
+    const isLast = idx === xDates.length - 1;
+    if (isFirst || isLast || idx % 7 === 0){
+      return val.substring(5);
+    }
+    return '';
+  };
+  _introChart.setOption({
+    grid: {left: 52, right: 56, top: 50, bottom: 36},
+    tooltip: {
+      trigger: 'axis',
+      formatter: function(params){
+        let s = '<b>'+params[0].axisValue+'</b>';
+        params.forEach(function(p){
+          s += '<br>'+p.marker+p.seriesName+': <b>'+p.value+'</b> 家';
+        });
+        // gap: 蓝 - 绿
+        const green = params.find(p => p.seriesName.indexOf('在线') >= 0);
+        const blue  = params.find(p => p.seriesName.indexOf('已投放') >= 0);
+        if (green && blue){
+          const gap = blue.value - green.value;
+          s += '<br><span style="color:#94a3b8">池中当日未在线: <b>'+gap+'</b></span>';
+        }
+        return s;
+      }
+    },
+    xAxis: {
+      type: 'category',
+      data: xDates,
+      boundaryGap: false,
+      axisLabel: {fontSize: 10, color: '#64748b', formatter: xLabelFmt, interval: 0},
+      axisLine: {lineStyle: {color: '#cbd5e1'}},
+      axisTick: {show: false}
+    },
+    yAxis: [
+      {
+        type: 'value',
+        name: '在线',
+        position: 'left',
+        nameTextStyle: {fontSize: 11, color: '#059669', fontWeight: 600, align: 'right'},
+        nameGap: 22,
+        axisLabel: {fontSize: 10, color: '#059669'},
+        splitLine: {lineStyle: {color: '#e2e8f0', type: 'dashed'}},
+        scale: true
+      },
+      {
+        type: 'value',
+        name: '已投放',
+        position: 'right',
+        nameTextStyle: {fontSize: 11, color: '#2563eb', fontWeight: 600, align: 'left'},
+        nameGap: 22,
+        axisLabel: {fontSize: 10, color: '#2563eb'},
+        splitLine: {show: false},
+        scale: true
+      }
+    ],
+    series: [
+      {
+        name: '当日在线（腰部×餐饮）',
+        type: 'line',
+        yAxisIndex: 0,
+        smooth: false,
+        symbol: 'circle',
+        symbolSize: function(v, p){ return p.dataIndex === xDates.length-1 ? 8 : 4 },
+        lineStyle: {width: 2, color: '#059669'},
+        itemStyle: {color: '#059669'},
+        areaStyle: {color: {type: 'linear', x:0,y:0,x2:0,y2:1, colorStops: [
+          {offset: 0, color: 'rgba(5,150,105,0.14)'},
+          {offset: 1, color: 'rgba(5,150,105,0.01)'}
+        ]}},
+        data: greenSeries
+      },
+      {
+        name: '累计已投放（跟进表·腰部×在线+流失）',
+        type: 'line',
+        yAxisIndex: 1,
+        smooth: false,
+        symbol: 'circle',
+        symbolSize: function(v, p){ return p.dataIndex === xDates.length-1 ? 8 : 4 },
+        lineStyle: {width: 2, color: '#2563eb', type: 'solid'},
+        itemStyle: {color: '#2563eb'},
+        data: blueSeries
+      }
+    ]
+  });
+  if (!window._introResizeBound){
+    window._introResizeBound = true;
+    window.addEventListener('resize', function(){
+      if (_introChart) _introChart.resize();
+      if (_aliveChart) _aliveChart.resize();
+    });
+  }
+
+  // ========== 3. 存活率趋势图（右半）==========
+  // 每日存活率 = (tier=腰部∩餐饮∩online_today=1∩is_alive=true) / (tier=腰部∩餐饮∩online_today=1)
+  const aliveDaily = {};
+  (D.trendRows||[]).forEach(function(r){
+    if (!r) return;
+    if (r.tier !== '腰部') return;
+    if (r.online_today !== true) return;
+    const d = r.data_date;
+    if (!aliveDaily[d]) aliveDaily[d] = {online:0, alive:0};
+    aliveDaily[d].online++;
+    if (r.is_alive === true) aliveDaily[d].alive++;
+  });
+  const aliveSeries = xDates.map(function(d){
+    const v = aliveDaily[d];
+    if (!v || v.online === 0) return null;
+    return +(v.alive/v.online*100).toFixed(1);
+  });
+  const aliveCntSeries = xDates.map(function(d){
+    const v = aliveDaily[d];
+    return v ? v.alive : 0;
+  });
+  const aliveEl = document.getElementById('introAliveChart');
+  if (!aliveEl) return;
+  if (_aliveChart){ _aliveChart.dispose(); _aliveChart = null; }
+  _aliveChart = echarts.init(aliveEl);
+  _aliveChart.setOption({
+    grid: {left: 56, right: 56, top: 36, bottom: 36},
+    legend: {show: false},
+    tooltip: {
+      trigger: 'axis',
+      formatter: function(params){
+        const d = params[0].axisValue;
+        const v = aliveDaily[d] || {online:0,alive:0};
+        let s = '<b>'+d+'</b>';
+        params.forEach(function(p){
+          const unit = p.seriesName === '存活率' ? '%' : '家';
+          s += '<br>'+p.marker+p.seriesName+': <b>'+p.value+unit+'</b>';
+        });
+        s += '<br><span style="color:#94a3b8">存活 '+v.alive+' / 在线 '+v.online+'</span>';
+        return s;
+      }
+    },
+    xAxis: {
+      type: 'category',
+      data: xDates,
+      boundaryGap: false,
+      axisLabel: {fontSize: 10, color: '#64748b', formatter: xLabelFmt, interval: 0},
+      axisLine: {lineStyle: {color: '#cbd5e1'}},
+      axisTick: {show: false}
+    },
+    yAxis: [
+      {
+        type: 'value',
+        name: '存活',
+        position: 'left',
+        nameTextStyle: {fontSize: 11, color: '#10b981', fontWeight: 600, align: 'right'},
+        nameGap: 22,
+        axisLabel: {fontSize: 10, color: '#10b981'},
+        splitLine: {lineStyle: {color: '#e2e8f0', type: 'dashed'}},
+        scale: true,
+        min: 0
+      },
+      {
+        type: 'value',
+        name: '存活率',
+        position: 'right',
+        nameTextStyle: {fontSize: 11, color: '#0369a1', fontWeight: 600, align: 'left'},
+        nameGap: 22,
+        axisLabel: {fontSize: 10, color: '#0369a1', formatter: '{value}%'},
+        splitLine: {show: false},
+        scale: true,
+        min: 0
+      }
+    ],
+    series: [{
+      name: '存活品牌数',
+      type: 'line',
+      yAxisIndex: 0,
+      smooth: false,
+      symbol: 'circle',
+      symbolSize: function(v, p){ return p.dataIndex === xDates.length-1 ? 8 : 4 },
+      lineStyle: {width: 2, color: '#10b981'},
+      itemStyle: {color: '#10b981'},
+      data: aliveCntSeries
+    },{
+      name: '存活率',
+      type: 'line',
+      yAxisIndex: 1,
+      smooth: false,
+      symbol: 'circle',
+      symbolSize: function(v, p){ return p.dataIndex === xDates.length-1 ? 8 : 4 },
+      lineStyle: {width: 2, color: '#0369a1'},
+      itemStyle: {color: '#0369a1'},
+      areaStyle: {color: {type: 'linear', x:0,y:0,x2:0,y2:1, colorStops: [
+        {offset: 0, color: 'rgba(3,105,161,0.14)'},
+        {offset: 1, color: 'rgba(3,105,161,0.01)'}
+      ]}},
+      data: aliveSeries
+    }]
+  });
+}
+
+// ========== Tab 1 · A-1 · 四要素检查总览 4 卡 ==========
+function rfc(){
+  const el = document.getElementById('fcKg');
+  if (!el) return;
+  // 口径：腰部 × 餐饮 × 跟进表 status='在线'（过滤流失和筹备中）× 日报 online_today
+  const wc = (BS||[]).filter(b =>
+    b.tierManual === '腰部' &&
+    b.statusManual === '在线'
+  );
+  const online = wc.filter(b => b.onlineToday === true);
+  // 系统全达标
+  const allPass = online.filter(b => b.bizOk===true && b.priceOk===true && b.infraOk===true && b.trafficOk===true);
+
+  // 非全达标: 按维度分类
+  // 数据缺失 (missing) = 四要素任一为 null/undefined
+  // keep / progress / offline / nofb 来自反馈规则
+  const notPass = online.filter(b => !allPass.includes(b));
+  const _bidClass = {};
+  notPass.forEach(b => {
+    const bid = b.brandId;
+    // 先判是否有数据缺失（任一要素 null）
+    const hasNull = (b.bizOk == null || b.priceOk == null || b.infraOk == null || b.trafficOk == null);
+    if (hasNull){ _bidClass[bid] = 'missing'; return; }
+    // 只取 false 的维度做分类
+    const issues = [];
+    if (b.bizOk === false) issues.push('经营模式');
+    if (b.priceOk === false) issues.push('货盘');
+    if (b.infraOk === false) issues.push('基建-商户号');
+    if (b.trafficOk === false) issues.push('基建-门店');
+    if (!issues.length){ _bidClass[bid] = 'nofb'; return; }
+    const classes = issues.map(iss => {
+      const fkey = _mkIssue2Field[iss];
+      const val = (_fbCache[bid+'_'+fkey]||'').trim();
+      return _mkClassify(iss, val);
+    });
+    if (classes.includes('offline')) _bidClass[bid] = 'offline';
+    else if (classes.includes('nofb')) _bidClass[bid] = 'nofb';
+    else if (classes.includes('progress')) _bidClass[bid] = 'progress';
+    else _bidClass[bid] = 'keep';
+  });
+  const keepN    = notPass.filter(b => _bidClass[b.brandId] === 'keep').length;
+  const pendingN = notPass.filter(b => _bidClass[b.brandId] === 'progress' || _bidClass[b.brandId] === 'nofb').length;
+  const offlineN = notPass.filter(b => _bidClass[b.brandId] === 'offline').length;
+  const missingN = notPass.filter(b => _bidClass[b.brandId] === 'missing').length;
+
+  // offline 从 online 母数里去掉
+  const onlineCorrected = online.length - offlineN;
+
+  const card = function(label, icon, value, unit, sub, color){
+    return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px 18px">' +
+      '<div style="font-size:12px;color:#64748b;font-weight:600">'+icon+' '+label+'</div>' +
+      '<div style="font-size:32px;font-weight:800;color:'+(color||'#1e293b')+';margin-top:6px;line-height:1.1">' +
+        value + (unit ? '<span style="font-size:14px;color:#94a3b8;font-weight:500;margin-left:4px">'+unit+'</span>' : '') +
+      '</div>' + (sub ? '<div style="font-size:11px;color:#94a3b8;margin-top:6px">'+sub+'</div>' : '') +
+    '</div>';
+  };
+
+  let html = '';
+  let subOnline = '腰部×餐饮×跟进在线×日报在线';
+  if (offlineN > 0) subOnline += '<br><span style="color:#94a3b8">（已扣除计划下线 '+offlineN+' 家）</span>';
+  html += card('在线',       '📡', onlineCorrected, '家', subOnline, '#059669');
+  html += card('系统全达标', '✅', allPass.length, '家', '经营 / 价格力 / 商户号 / 门店 全 ok', '#16a34a');
+  html += card('人工打标',   '🏷', keepN,  '家', '四要素失分 经人工打标合理保留', '#0d9488');
+  html += card('整改中',     '⚠️', pendingN, '家', '待跟进 + 未反馈 · 目标清 0'+(missingN>0?'<br><span style="color:#94a3b8">（数据缺失 '+missingN+' 家未计入）</span>':''), '#dc2626');
+  el.innerHTML = html;
+}
+
+// ========== Tab 1 · A-2 · 人工打标三层折叠矩阵 ==========
+// 展开状态缓存
+var _markExpanded = { activeClass: 'keep', activeIssue: null, activeSp: {} }; // 一级: 分类, 二级: 四要素维度, 三级: {reason: sp}
+
+// 四要素 × 分类 的规则 (复制自 rsop 内部, 保持一致)
+const _mkIssue2Field = {'经营模式':'screen_biz','货盘':'screen_price','基建-商户号':'screen_infra','基建-门店':'screen_store'};
+const _mkKeepRules = {
+  '经营模式': ['会员占比超过50%','沟通确认后希望在线','准备切代金券投放','代金券投放中'],
+  '货盘': ['全场券','已更新更优货盘，价格力更新延迟'],
+  '基建-商户号': ['经营规模小，1店<10笔合理'],
+  '基建-门店': ['公线真实门店不准需修正','服务商仅覆盖部分门店，已全部上传','已整改，待内部确认']
+};
+const _mkOffRules = {
+  '经营模式': ['不接受代金券，计划下线'],
+  '货盘': ['商家无法提供，计划下线'],
+  '基建-商户号': ['商家无法获取，计划下线'],
+  '基建-门店': ['商家无法上传，计划下线']
+};
+const _mkProgRules = {
+  '经营模式': ['沟通确认中','已沟通，整改中'],
+  '货盘': ['沟通确认中','已沟通，整改中'],
+  '基建-商户号': ['沟通确认中','基建沟通中','已沟通，整改中','总部拿不到商户号，待沟通pos商或门店给420单号方案'],
+  '基建-门店': ['沟通确认中','已沟通，整改中']
+};
+
+function _mkClassify(issue, val){
+  if (!val) return 'nofb';
+  if (val === '已沟通，未回复') return 'nofb'; // 无实质反馈 → 归入未反馈
+  if ((_mkOffRules[issue]||[]).includes(val)) return 'offline';
+  if ((_mkKeepRules[issue]||[]).includes(val)) return 'keep';
+  if ((_mkProgRules[issue]||[]).includes(val)) return 'progress';
+  return 'progress'; // 默认走待跟进
+}
+
+const _mkClsColor = {
+  'nofb':    {bg:'#f8fafc', bd:'#e2e8f0', fg:'#64748b', label:'未反馈'},
+  'keep':    {bg:'#ecfdf5', bd:'#a7f3d0', fg:'#059669', label:'可保留'},
+  'progress':{bg:'#fffbeb', bd:'#fde68a', fg:'#d97706', label:'待跟进'},
+  'offline': {bg:'#fef2f2', bd:'#fecaca', fg:'#dc2626', label:'计划下线'},
+  'missing': {bg:'#eff6ff', bd:'#bfdbfe', fg:'#2563eb', label:'数据缺失'}
+};
+const _mkIssueColor = {'经营模式':'#c07064','货盘':'#c09e64','基建-商户号':'#6a9ab8','基建-门店':'#7c7ef0'};
+const _mkIssues = ['经营模式','货盘','基建-商户号','基建-门店'];
+const _mkClasses = ['nofb','keep','progress','offline','missing'];
+
+// 聚合: {issue: {cls: [{bid, name, sp, reason, metric}, ...]}}
+function _mkBuildMatrix(){
+  const matrix = {};
+  _mkIssues.forEach(iss => {
+    matrix[iss] = {nofb:[], keep:[], progress:[], offline:[], missing:[]};
+  });
+  // SCR: 从 BS 实时计算（不再依赖 sop_snapshot）
+  const SCR = (function(){
+    const result=[];
+    (BS||[]).forEach(b=>{
+      if(b.tierManual!=='腰部')return;
+      if(b.statusManual!=='在线')return;
+      if(b.onlineToday!==true)return;
+      const issues=[];
+      if(b.bizOk===false) issues.push('经营模式');
+      if(b.priceOk===false) issues.push('货盘');
+      if(b.infraOk===false) issues.push('基建-商户号');
+      if(b.trafficOk===false) issues.push('基建-门店');
+      if(!issues.length)return;
+      result.push({
+        brandId:b.brandId, name:b.name, sp:b.spMapped||'', owner:b.owner||'',
+        assistant:b.assistant||'', cat4:b.cat4||'', isAlive:b.isAlive,
+        storeCount:b.storeCount, dailyTx:b.dailyTx, txPerStore:b.txPerStore,
+        miniApp:b.miniApp, priceForce:b.priceForce, storeComplete:b.storeComplete,
+        issues:issues
+      });
+    });
+    return result;
+  })();
+  const _bsMap = {};
+  (BS||[]).forEach(x => { if (x && x.brandId != null) _bsMap[String(x.brandId)] = x; });
+
+  // 已在 SCR 中的品牌（按原逻辑分类: keep/progress/nofb/offline）
+  const seenBids = new Set();
+  SCR.forEach(b => {
+    // 过滤: 腰部×跟进在线×日报在线 (不再筛 cat4, 和 Tab0 对齐)
+    const bs = _bsMap[String(b.brandId)];
+    if (!bs) return;
+    if (bs.tierManual !== '腰部') return;
+    if (bs.statusManual !== '在线') return;
+    if (bs.onlineToday !== true) return;
+
+    seenBids.add(String(b.brandId));
+    (b.issues||[]).forEach(iss => {
+      if (!_mkIssues.includes(iss)) return;
+      const fkey = _mkIssue2Field[iss];
+      const val = (_fbCache[b.brandId+'_'+fkey]||'').trim();
+      const cls = _mkClassify(iss, val);
+      let metric = '';
+      if (iss === '经营模式') metric = b.miniApp != null ? '小程序 '+b.miniApp.toFixed(1)+'%' : '—';
+      else if (iss === '货盘') metric = b.priceForce != null ? '价格力 '+(b.priceForce>0?'+':'')+b.priceForce.toFixed(2)+'%' : '—';
+      else if (iss === '基建-商户号') metric = b.txPerStore != null ? '1店几笔 '+b.txPerStore.toFixed(1) : '—';
+      else if (iss === '基建-门店') metric = b.storeComplete != null ? '完整度 '+b.storeComplete.toFixed(1)+'%' : '—';
+      matrix[iss][cls].push({bid:b.brandId, name:b.name, sp:b.sp, reason:val, metric:metric});
+    });
+  });
+
+  // 数据缺失: 从 BS 里扫 符合口径 但四要素任一为 null 的品牌
+  (BS||[]).forEach(b => {
+    if (b.tierManual !== '腰部') return;
+    if (b.statusManual !== '在线') return;
+    if (b.onlineToday !== true) return;
+    if (seenBids.has(String(b.brandId))) return; // 已被 SCR 归类的跳过
+
+    // 检查每个维度是否 null，只把 null 的维度归 missing
+    const dimsNull = [];
+    if (b.bizOk == null) dimsNull.push(['经营模式', (b.miniApp != null && !Number.isNaN(b.miniApp)) ? '小程序 '+b.miniApp.toFixed(1)+'%' : '数据缺失']);
+    if (b.priceOk == null) dimsNull.push(['货盘', (b.priceForce != null && !Number.isNaN(b.priceForce)) ? '价格力 '+(b.priceForce>0?'+':'')+b.priceForce.toFixed(2)+'%' : '数据缺失']);
+    if (b.infraOk == null) dimsNull.push(['基建-商户号', (b.txPerStore != null && !Number.isNaN(b.txPerStore)) ? '1店几笔 '+b.txPerStore.toFixed(1) : '数据缺失']);
+    if (b.trafficOk == null) dimsNull.push(['基建-门店', (b.storeComplete != null && !Number.isNaN(b.storeComplete)) ? '完整度 '+b.storeComplete.toFixed(1)+'%' : '数据缺失']);
+    if (!dimsNull.length) return;
+    dimsNull.forEach(pair => {
+      const iss = pair[0], metric = pair[1];
+      matrix[iss].missing.push({bid:b.brandId, name:b.name, sp:b.spMapped, reason:'(数据缺失)', metric:metric});
+    });
+  });
+
+  return matrix;
+}
+
+function rfcmark(){
+  const el = document.getElementById('fcMarkMatrix');
+  if (!el) return;
+  const M = _mkBuildMatrix();
+
+  // 各分类总数 (不论维度)
+  const clsCount = {keep:0, nofb:0, offline:0, progress:0};
+  _mkIssues.forEach(iss => _mkClasses.forEach(cls => { clsCount[cls] += M[iss][cls].length; }));
+
+  // 一级 tab 顺序: 可保留 / 未反馈 / 计划下线 / 整改中 (按你要求)
+  const tier1 = ['keep','nofb','missing','progress','offline'];
+
+  // 新出现 highlight: keep 之外任一 > 0
+  const hasAbnormal = (clsCount.nofb + clsCount.offline + clsCount.progress) > 0;
+
+  let h = '';
+  // ===== 一级 tab: 固定 4 分类 =====
+  h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap">';
+  tier1.forEach(cls => {
+    const cc = _mkClsColor[cls];
+    const active = _markExpanded.activeClass === cls;
+    const isHl = cls !== 'keep' && cls !== 'missing' && clsCount[cls] > 0;
+    h += '<button onclick="_mkPickCls(\''+cls+'\')" style="padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer;border:'+(isHl?'2px':'1px')+' solid '+(active?cc.fg:(isHl?cc.fg:cc.bd))+';background:'+(active?cc.bg:(isHl?cc.bg:'#fff'))+';color:'+(active?cc.fg:(isHl?cc.fg:'#475569'))+';font-weight:'+(active||isHl?'700':'500')+';position:relative">'+cc.label+' <b>'+clsCount[cls]+'</b>'+(isHl?'<span style="position:absolute;top:-4px;right:-4px;width:8px;height:8px;background:'+cc.fg+';border-radius:50%;border:2px solid #fff"></span>':'')+'</button>';
+  });
+  if (hasAbnormal){
+    h += '<span style="margin-left:6px;padding:4px 10px;background:#fef3c7;border-radius:12px;font-size:11px;color:#92400e;font-weight:600">⚠️ 非"可保留"分类有数据，需跟进</span>';
+  }
+  h += '</div>';
+
+  const curCls = _markExpanded.activeClass || 'keep';
+  const cc = _mkClsColor[curCls];
+
+  // ===== 二级 tab: 四要素维度 (当前分类下有数据的) =====
+  const issuesWithData = _mkIssues.filter(iss => M[iss][curCls].length > 0);
+  if (!issuesWithData.length){
+    h += '<div style="padding:30px;text-align:center;color:#94a3b8;font-size:12px;background:#f8fafc;border-radius:8px">当前分类「'+cc.label+'」下无数据</div>';
+    el.innerHTML = h;
+    return;
+  }
+  // 默认激活第一个有数据的维度（如果当前维度在此分类下没数据就切回）
+  if (!_markExpanded.activeIssue || M[_markExpanded.activeIssue][curCls].length === 0){
+    _markExpanded.activeIssue = issuesWithData[0];
+  }
+  h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;flex-wrap:wrap;padding-left:4px">';
+  h += '<span style="font-size:11px;color:#64748b;margin-right:4px">维度：</span>';
+  issuesWithData.forEach(iss => {
+    const n = M[iss][curCls].length;
+    const active = _markExpanded.activeIssue === iss;
+    const ic = _mkIssueColor[iss];
+    h += '<button onclick="_mkPickIssue(\''+iss+'\')" style="padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid '+(active?ic:'#cbd5e1')+';background:'+(active?ic+'15':'#fff')+';color:'+(active?ic:'#475569')+';font-weight:'+(active?'700':'500')+'">'+iss+' <b>'+n+'</b></button>';
+  });
+  h += '</div>';
+
+  // ===== 三级内容: 按反馈原因分组 → 按服务商聚合品牌 =====
+  const curIss = _markExpanded.activeIssue;
+  const items = M[curIss][curCls];
+  const byReason = {};
+  items.forEach(it => {
+    const r = it.reason || '(未填)';
+    if (!byReason[r]) byReason[r] = [];
+    byReason[r].push(it);
+  });
+  const reasons = Object.keys(byReason).sort((a,b) => byReason[b].length - byReason[a].length);
+
+  h += '<div style="display:flex;flex-direction:column;gap:10px">';
+  reasons.forEach(reason => {
+    const brands = byReason[reason];
+    // 按服务商分组
+    const bySp = {};
+    brands.forEach(b => {
+      const sp = b.sp || '(未知服务商)';
+      if (!bySp[sp]) bySp[sp] = [];
+      bySp[sp].push(b);
+    });
+    const spList = Object.keys(bySp).sort((a,b) => bySp[b].length - bySp[a].length);
+
+    // 默认激活第一个服务商
+    const reasonKey = curCls + '|' + curIss + '|' + reason;
+    let curSp = _markExpanded.activeSp[reasonKey];
+    if (!curSp || !bySp[curSp]) curSp = spList[0];
+
+    h += '<div style="border:1px solid '+cc.bd+';border-radius:8px;overflow:hidden">';
+    // 原因标题
+    h += '<div style="padding:8px 12px;background:'+cc.bg+';display:flex;align-items:center;justify-content:space-between">' +
+         '<div style="font-size:12px;font-weight:700;color:'+cc.fg+'">'+reason+'</div>' +
+         '<div style="font-size:11px;color:'+cc.fg+';font-weight:600">'+brands.length+' 家</div>' +
+         '</div>';
+    // 服务商 tab 行
+    const spKeyEsc = reasonKey.replace(/'/g, "\\'");
+    h += '<div style="background:#fff;padding:10px 12px">';
+    h += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">';
+    spList.forEach(sp => {
+      const active = sp === curSp;
+      const n = bySp[sp].length;
+      h += '<button onclick="_mkPickSp(\''+spKeyEsc+'\',\''+sp.replace(/'/g,"\\\'")+'\')" style="padding:4px 10px;border-radius:5px;font-size:11px;cursor:pointer;border:1px solid '+(active?cc.fg:'#e2e8f0')+';background:'+(active?cc.bg:'#f8fafc')+';color:'+(active?cc.fg:'#475569')+';font-weight:'+(active?'700':'500')+'">'+sp+' <b>'+n+'</b></button>';
+    });
+    h += '</div>';
+    // 当前服务商下的品牌列表
+    h += '<div style="font-size:12px;color:#475569;line-height:1.8;padding-left:2px">' +
+      bySp[curSp].map(b => '<span style="white-space:nowrap;color:#1e293b">'+b.name+'<span style="color:#94a3b8">（'+b.bid+'）</span></span>').join('<span style="color:#cbd5e1;margin:0 6px">·</span>') +
+    '</div>';
+    h += '</div>';
+    h += '</div>';
+  });
+  h += '</div>';
+
+  el.innerHTML = h;
+}
+
+function _mkPickCls(c){
+  _markExpanded.activeClass = c;
+  _markExpanded.activeIssue = null; // 切分类时重置维度
+  rfcmark();
+}
+function _mkPickIssue(iss){
+  _markExpanded.activeIssue = iss;
+  rfcmark();
+}
+function _mkPickSp(reasonKey, sp){
+  _markExpanded.activeSp[reasonKey] = sp;
+  rfcmark();
+}
+
+// ========== Tab 1 · B-1 · 达标商户置顶总览 4 卡 ==========
+function rpin(){
+  const el = document.getElementById('pinKg');
+  if (!el) return;
+  const TR = (window._D && window._D.topRecords) || [];
+  const topBids = new Set(TR.map(r => String(r.brand_id)));
+  const TOP_QUOTA = 50;
+
+  // 口径与 A-1 对齐：腰部 × 跟进在线 × 日报在线 (不筛 cat4)
+  const online = (BS||[]).filter(b =>
+    b.tierManual === '腰部' && b.statusManual === '在线' && b.onlineToday === true
+  );
+  // 达标 = 系统全达标 OR 人工打标
+  const hasMark = function(b){
+    const bid = b.brandId;
+    if (!bid) return false;
+    return !!(_fbCache[bid+'_screen_biz'] || _fbCache[bid+'_screen_price']
+           || _fbCache[bid+'_screen_infra'] || _fbCache[bid+'_screen_store']);
+  };
+  const isPass = b => (b.bizOk===true && b.priceOk===true && b.infraOk===true && b.trafficOk===true) || hasMark(b);
+
+  // 已置顶（以 topBids 为准, 50 坑位限制）
+  // 已置顶 & 在线：以 brand_snapshot.online_today 为准（不筛 tier/status，置顶名单本身就是最严过滤）
+  const _bsMapAll = {};
+  (BS||[]).forEach(b => { if (b && b.brandId != null) _bsMapAll[String(b.brandId)] = b; });
+  const pinnedOnline = Array.from(topBids).filter(bid => {
+    const b = _bsMapAll[bid];
+    return b && b.onlineToday === true;
+  }).map(bid => _bsMapAll[bid]);
+  // 已置顶 & 不在线：topRecords 里有但 BS 当日 online_today 不是 true
+  const pinnedOfflineBids = Array.from(topBids).filter(bid => {
+    const b = _bsMapAll[bid];
+    return !b || b.onlineToday !== true;
+  });
+  const pinnedTotal = topBids.size;
+
+  const pinPct = TOP_QUOTA > 0 ? (pinnedTotal / TOP_QUOTA * 100) : 0;
+  const pinBarHtml = '<div style="margin-top:10px"><div style="height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden"><div style="height:100%;width:'+Math.min(pinPct,100).toFixed(1)+'%;background:linear-gradient(90deg,#10b981,#059669);transition:width .4s"></div></div><div style="font-size:11px;color:#64748b;margin-top:4px">占用 <b style="color:#059669">'+pinnedTotal+' / '+TOP_QUOTA+'</b> · 在线 <b style="color:#059669">'+pinnedOnline.length+'</b> · 不在线 <b style="color:#dc2626">'+pinnedOfflineBids.length+'</b> <span style="color:#94a3b8">（曝光&lt;100）</span></div></div>';
+
+  // 未置顶 = 候补补位池：达标 & 未置顶
+  const passUnpinned = online.filter(b => isPass(b) && !topBids.has(String(b.brandId)));
+
+  const card = function(label, icon, value, unit, sub, color){
+    return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:16px 18px">' +
+      '<div style="font-size:12px;color:#64748b;font-weight:600">'+icon+' '+label+'</div>' +
+      '<div style="font-size:32px;font-weight:800;color:'+(color||'#1e293b')+';margin-top:6px;line-height:1.1">' +
+        value + (unit ? '<span style="font-size:14px;color:#94a3b8;font-weight:500;margin-left:4px">'+unit+'</span>' : '') +
+      '</div>' + (sub||'') +
+    '</div>';
+  };
+
+  // 顶部 2 大卡（均匀分布）
+  let html = '';
+  html += card('已置顶', '🎯', pinnedTotal,   '家', pinBarHtml, '#059669');
+  html += card('未置顶', '⏳', passUnpinned.length, '家', '<div style="font-size:11px;color:#94a3b8;margin-top:6px">候补补位池 · 50 名额限制</div>', '#0891b2');
+  el.innerHTML = html;
+}
+
+// ========== Tab 1 · B-2 · 置顶流量象限图 ==========
+var _pinChart = null;
+var _pinDataSource = 'realtime';
+function _pinRenderDsTabs(){} // no-op, mock tab removed
+function _pinSwitchDs(k){}
+
+// 计算日均老客尽曝 (X 轴数值) - 根据数据源
+function _pinCalcX(b, dataSource, trendRows){
+  // 公式: (7日高频尽曝UV + 7日低频尽曝UV) / 7 / 日均交易笔数
+  const hi = (typeof b.hiExpUV_all === 'number' ? b.hiExpUV_all : null);
+  const lo = (typeof b.loExpUV_all === 'number' ? b.loExpUV_all : null);
+  if ((hi == null || hi === 0) && (lo == null || lo === 0)) return null;
+  const avg7 = ((hi||0) + (lo||0)) / 7;
+  const tx = b.dailyTx;
+  if (tx == null || tx <= 0) return null;
+  return avg7 / (tx * 10000);  // dailyTx 单位是"万笔"
+}
+
+function _median(arr){
+  if (!arr.length) return 0;
+  const s = [...arr].sort((a,b)=>a-b);
+  const m = Math.floor(s.length/2);
+  return s.length % 2 ? s[m] : (s[m-1]+s[m])/2;
+}
+
+function rpinq(){
+  const el = document.getElementById('pinQuadrant');
+  if (!el) return;
+  _pinRenderDsTabs();
+
+  const TR = (window._D && window._D.topRecords) || [];
+  const trendRows = (window._D && window._D.trendRows) || [];
+  const topBids = new Set(TR.map(r => String(r.brand_id)));
+
+  // 象限图筛选器
+  const qFiltAlive = (document.getElementById('pinQFiltAlive')||{}).value || '';
+  const qFiltSP = (document.getElementById('pinQFiltSP')||{}).value || '';
+
+  // 填充服务商下拉（只填一次）
+  const qSpSel = document.getElementById('pinQFiltSP');
+  if (qSpSel && qSpSel.options.length <= 1){
+    const sps = Array.from(new Set((BS||[]).filter(b => topBids.has(String(b.brandId))).map(b => b.spMapped).filter(Boolean))).sort();
+    sps.forEach(v => { const o=document.createElement('option'); o.value=v; o.textContent=v; qSpSel.appendChild(o) });
+  }
+
+  // 口径：腰部 × 跟进在线 × 日报在线 × 已置顶 (不筛 cat4, 和 Tab0/A-1 一致)
+  const online = (BS||[]).filter(b =>
+    b.tierManual === '腰部' && b.statusManual === '在线' && b.onlineToday === true
+  );
+  let pinnedOnline = online.filter(b => topBids.has(String(b.brandId)));
+
+  // 应用象限图筛选
+  if (qFiltAlive === 'alive') pinnedOnline = pinnedOnline.filter(b => b.isAlive === true);
+  if (qFiltAlive === 'dead') pinnedOnline = pinnedOnline.filter(b => b.isAlive === false);
+  if (qFiltSP) pinnedOnline = pinnedOnline.filter(b => b.spMapped === qFiltSP);
+
+  // 计算每个品牌 (x, y)
+  const points = [];
+  pinnedOnline.forEach(b => {
+    const x = _pinCalcX(b, _pinDataSource, trendRows);
+    const y = b.visitUseRate;
+    if (x == null || y == null) return;
+    // 气泡大小 = 日均核销 PV (use_pv 或 actByBrand 合计)
+    const usePv = b.usePv || ((b.biz_useD||0)+(b.f2f_useD||0)+(b.fix_useD||0)+(b.nb_useD||0)+(b.zfyl_useD||0));
+    points.push({name: b.name, bid: b.brandId, sp: b.spMapped, x: x, y: y, b: b, size: usePv});
+  });
+
+  // 去掉顶部 alert（移入空态显示）
+  const alert = document.getElementById('pinQuadrantAlert');
+  if (alert){ alert.style.display = 'none'; alert.innerHTML = ''; }
+
+  const emptyEl = document.getElementById('pinQuadrantEmpty');
+
+  if (points.length === 0){
+    if (typeof echarts !== 'undefined' && _pinChart){ _pinChart.dispose(); _pinChart = null; }
+    if (emptyEl){ emptyEl.style.display = 'none'; }
+    el.innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:center;height:100%;padding:20px">' +
+        '<div style="max-width:640px;background:#fef2f2;border:2px solid #fca5a5;border-radius:10px;padding:22px 26px;color:#991b1b;line-height:1.8;box-shadow:0 4px 12px rgba(239,68,68,0.12)">' +
+          '<div style="font-size:15px;font-weight:800;margin-bottom:10px">❗️ 暂无可用数据点（已置顶品牌 '+pinnedOnline.length+' 家，当前无老客尽曝UV数据）</div>' +
+          '<div style="font-size:12.5px"><b>说明：</b>X轴使用7日累计尽曝UV÷7估算，若该字段也为空则无法绘制。</div>' +
+        '</div>' +
+      '</div>';
+    return;
+  }
+  if (emptyEl){ emptyEl.style.display = 'none'; }
+
+  // 中位数 — Y轴用腰部在线品牌全量到店核销率中位数（不局限于已置顶）
+  const xMed = _median(points.map(p=>p.x));
+  const _allOnlineVUR = (BS||[]).filter(b => b.tierManual==='腰部' && b.statusManual==='在线' && b.onlineToday===true && b.visitUseRate!=null).map(b=>b.visitUseRate);
+  const yMed = _allOnlineVUR.length ? _median(_allOnlineVUR) : _median(points.map(p=>p.y));
+
+  // 四象限分类
+  const cls = function(p){
+    if (p.x >= xMed && p.y >= yMed) return 'A'; // 健康
+    if (p.x >= xMed && p.y <  yMed) return 'B'; // 有量低核销
+    if (p.x <  xMed && p.y >= yMed) return 'C'; // 高核销缺量
+    return 'D'; // 双低
+  };
+  const color = {A:'#059669', B:'#d97706', C:'#2563eb', D:'#dc2626'};
+  const groups = {A:[], B:[], C:[], D:[]};
+  // 气泡大小归一化: 按 size 的百分位缩放到 8-30
+  const sizes = points.map(p => p.size||0).filter(s => s > 0);
+  const maxSize = sizes.length ? Math.max.apply(null, sizes) : 1;
+  points.forEach(p => {
+    // 带 size 字段给 ECharts symbolSize 用
+    const sizePx = p.size > 0 ? (8 + Math.sqrt(p.size/maxSize) * 22) : 8;
+    groups[cls(p)].push([p.x, p.y, p.name, p.sp, p.bid, p.size||0, sizePx]);
+  });
+
+  if (typeof echarts === 'undefined'){
+    el.innerHTML = '<div style="color:#dc2626;padding:20px">ECharts 未加载</div>';
+    return;
+  }
+  if (_pinChart){ _pinChart.dispose(); }
+  el.innerHTML = '';
+  _pinChart = echarts.init(el);
+  _pinChart.setOption({
+    grid: {left: 60, right: 100, top: 30, bottom: 50},
+    tooltip: {
+      trigger: 'item',
+      formatter: function(p){
+        const d = p.data;
+        return '<b>'+d[2]+'</b><br>服务商: '+d[3]+
+               '<br>老客曝光占比: <b>'+(d[0]*100).toFixed(2)+'%</b>'+
+               '<br>到店核销率: <b>'+d[1].toFixed(2)+'%</b>'+
+               '<br>日均核销: <b>'+(d[5]>=10000?(d[5]/10000).toFixed(1)+'w':Math.round(d[5]))+'</b>';
+      }
+    },
+    xAxis: {
+      type: 'value',
+      name: '老客曝光占比（日均老客尽曝PV/日均交易）',
+      nameLocation: 'middle',
+      nameGap: 28,
+      nameTextStyle: {fontSize: 11, color: '#64748b'},
+      axisLabel: {fontSize: 10, color: '#64748b', formatter: function(v){return (v*100).toFixed(1)+'%'}},
+      splitLine: {lineStyle: {color: '#e2e8f0', type: 'dashed'}}
+    },
+    yAxis: {
+      type: 'value',
+      name: '到店核销率 %',
+      nameLocation: 'middle',
+      nameGap: 42,
+      nameTextStyle: {fontSize: 11, color: '#64748b'},
+      axisLabel: {fontSize: 10, color: '#64748b', formatter: '{value}%'},
+      splitLine: {lineStyle: {color: '#e2e8f0', type: 'dashed'}}
+    },
+    series: [
+      {name:'A 健康',          type:'scatter',
+       symbolSize: function(v){return v[6]},
+       itemStyle:{color:color.A, opacity:0.65}, data: groups.A,
+       markLine: {silent:true, symbol:'none', lineStyle:{color:'#94a3b8', type:'dashed', width:1},
+         data: [
+           {xAxis: xMed, label:{show:true, position:'end', formatter:function(){return 'X中位 '+(xMed*100).toFixed(1)+'%'}, fontSize:9, color:'#64748b'}},
+           {xAxis: 1.0, label:{show:true, position:'end', formatter:'目标 100%', fontSize:9, color:'#dc2626'}, lineStyle:{color:'#dc2626', type:'solid', width:1}},
+           {yAxis: yMed, label:{show:true, position:'insideEndTop', formatter:function(){return 'Y中位 '+yMed.toFixed(1)+'%'}, fontSize:9, color:'#64748b', padding:[0,0,0,4]}}
+         ]}},
+      {name:'B 有量低核销',    type:'scatter', symbolSize: function(v){return v[6]}, itemStyle:{color:color.B, opacity:0.65}, data: groups.B},
+      {name:'C 高核销缺量',    type:'scatter', symbolSize: function(v){return v[6]}, itemStyle:{color:color.C, opacity:0.65}, data: groups.C},
+      {name:'D 双低',          type:'scatter', symbolSize: function(v){return v[6]}, itemStyle:{color:color.D, opacity:0.65}, data: groups.D}
+    ],
+    legend: {
+      top: 2, right: 10,
+      textStyle: {fontSize: 11, color: '#475569'},
+      icon: 'circle', itemWidth: 10, itemHeight: 10,
+      data: [
+        {name:'A 健康 ('+groups.A.length+')'},
+        {name:'B 有量低核销 ('+groups.B.length+')'},
+        {name:'C 高核销缺量 ('+groups.C.length+')'},
+        {name:'D 双低 ('+groups.D.length+')'}
+      ]
+    }
+  });
+  // 同步绑 resize
+  if (!window._pinResizeBound){
+    window._pinResizeBound = true;
+    window.addEventListener('resize', function(){ if (_pinChart) _pinChart.resize() });
+  }
+}
+
+// ========== Tab 1 · B-3 · 置顶品牌诊断卡片池（KA 摇优惠同构）==========
+var _pinActiveBrand = null; // 当前选中的 brand_id
+var _pinActiveQuad = null;  // 当前象限筛选 'A'|'B'|'C'|'D'|'U'|null
+function _pinFilterChanged(){ _pinActiveBrand = null; rpinc(); }
+function _pinQuadCls(x, y, xMed, yMed){
+  if (x >= xMed && y >= yMed) return 'A';
+  if (x >= xMed && y <  yMed) return 'B';
+  if (x <  xMed && y >= yMed) return 'C';
+  return 'D';
+}
+function rpinc(){
+  const body = document.getElementById('pinCardBody');
+  const tabs = document.getElementById('pinCardTabs');
+  if (!body || !tabs) return;
+
+  const TR = (window._D && window._D.topRecords) || [];
+  const trendRows = (window._D && window._D.trendRows) || [];
+  const topBids = new Set(TR.map(r => String(r.brand_id)));
+
+  // 读取象限图同款筛选器（共享）
+  const qFiltAlive = (document.getElementById('pinQFiltAlive')||{}).value || '';
+  const qFiltSP = (document.getElementById('pinQFiltSP')||{}).value || '';
+
+  const online = (BS||[]).filter(b =>
+    b.tierManual === '腰部' && b.statusManual === '在线' && b.onlineToday === true
+  );
+  let pinnedOnline = online.filter(b => topBids.has(String(b.brandId)));
+
+  // 应用象限图筛选（与象限图联动）
+  if (qFiltAlive === 'alive') pinnedOnline = pinnedOnline.filter(b => b.isAlive === true);
+  if (qFiltAlive === 'dead') pinnedOnline = pinnedOnline.filter(b => b.isAlive === false);
+  if (qFiltSP) pinnedOnline = pinnedOnline.filter(b => b.spMapped === qFiltSP);
+
+  // 先算象限 (跟 rpinq 一致)
+  const pts = pinnedOnline.map(b => {
+    const x = _pinCalcX(b, _pinDataSource, trendRows);
+    const y = b.visitUseRate;
+    return {b: b, x: x, y: y};
+  });
+  const valid = pts.filter(p => p.x != null && p.y != null);
+  const xMed = _median(valid.map(p => p.x));
+  const yMed = _median(valid.map(p => p.y));
+  const quadOf = {};
+  pts.forEach(p => {
+    if (p.x == null || p.y == null) quadOf[p.b.brandId] = 'U';
+    else quadOf[p.b.brandId] = _pinQuadCls(p.x, p.y, xMed, yMed);
+  });
+  const byQuad = {A:0,B:0,C:0,D:0,U:0};
+  pinnedOnline.forEach(b => byQuad[quadOf[b.brandId]]++);
+  window._pinQuadOfCache = quadOf; // 供 _pinBuildCard 读取
+
+  // 填 服务商/负责人 下拉
+  const spSel = document.getElementById('pinFiltSP');
+  const ownerSel = document.getElementById('pinFiltOwner');
+  if (spSel && spSel.options.length <= 1){
+    const sps = Array.from(new Set(pinnedOnline.map(b => b.spMapped).filter(Boolean))).sort();
+    sps.forEach(v => { const o=document.createElement('option'); o.value=v; o.textContent=v; spSel.appendChild(o) });
+  }
+  if (ownerSel && ownerSel.options.length <= 1){
+    const owners = Array.from(new Set(pinnedOnline.map(b => b.owner).filter(Boolean))).sort();
+    owners.forEach(v => { const o=document.createElement('option'); o.value=v; o.textContent=v; ownerSel.appendChild(o) });
+  }
+  const catSel = document.getElementById('pinFiltCat');
+  if (catSel && catSel.options.length <= 1){
+    const cats = Array.from(new Set(pinnedOnline.map(b => b.cat4).filter(Boolean))).sort();
+    cats.forEach(v => { const o=document.createElement('option'); o.value=v; o.textContent=v; catSel.appendChild(o) });
+  }
+
+  // 读筛选器
+  const fQ = ((document.getElementById('pinSearch')||{}).value || '').toLowerCase().trim();
+  const fSP = (document.getElementById('pinFiltSP')||{}).value || '';
+  const fOwner = (document.getElementById('pinFiltOwner')||{}).value || '';
+  const fAlive = (document.getElementById('pinFiltAlive')||{}).value || '';
+  const fCat = (document.getElementById('pinFiltCat')||{}).value || '';
+
+  let list = pinnedOnline.filter(b => {
+    // 象限过滤
+    if (_pinActiveQuad && quadOf[b.brandId] !== _pinActiveQuad) return false;
+    if (fSP && b.spMapped !== fSP) return false;
+    if (fOwner && b.owner !== fOwner) return false;
+    if (fAlive === 'alive' && b.isAlive !== true) return false;
+    if (fAlive === 'dead' && b.isAlive !== false) return false;
+    if (fCat && b.cat4 !== fCat) return false;
+    if (fQ){
+      const nm = (b.name||'').toLowerCase();
+      const bid = String(b.brandId||'');
+      if (!nm.includes(fQ) && !bid.includes(fQ)) return false;
+    }
+    return true;
+  });
+
+  // 象限 tab + 总数
+  const quadLabels = {A:'🟢 健康', B:'🟠 有量低核销', C:'🔵 高核销缺量', D:'🔴 双低', U:'⚪️ 未定'};
+  const quadKeys = ['A','B','C','D','U'].filter(k => byQuad[k] > 0);
+  let tabsHtml = '<button onclick="_pinPickQuad(null)" style="padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid '+(_pinActiveQuad==null?'#2563eb':'#cbd5e1')+';background:'+(_pinActiveQuad==null?'#eff6ff':'#fff')+';color:'+(_pinActiveQuad==null?'#1d4ed8':'#475569')+';font-weight:'+(_pinActiveQuad==null?'700':'500')+'">全部 ('+pinnedOnline.length+')</button>';
+  tabsHtml += quadKeys.map(k =>
+    '<button onclick="_pinPickQuad(\''+k+'\')" style="padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid '+(_pinActiveQuad===k?'#2563eb':'#cbd5e1')+';background:'+(_pinActiveQuad===k?'#eff6ff':'#fff')+';color:'+(_pinActiveQuad===k?'#1d4ed8':'#475569')+';font-weight:'+(_pinActiveQuad===k?'700':'500')+'">'+quadLabels[k]+' ('+byQuad[k]+')</button>'
+  ).join('');
+  tabsHtml += '<span style="font-size:11px;color:#64748b;padding:4px 8px;align-self:center">· 当前筛选 <b style="color:#1e293b">'+list.length+'</b> / '+pinnedOnline.length+'</span>';
+  tabs.innerHTML = tabsHtml;
+
+  if (!_pinActiveBrand || !list.find(b => String(b.brandId) === String(_pinActiveBrand))){
+    _pinActiveBrand = list.length ? list[0].brandId : null;
+  }
+
+  const cur = list.find(b => String(b.brandId) === String(_pinActiveBrand));
+  if (!cur){
+    body.innerHTML = '<div style="padding:40px;text-align:center;color:#94a3b8;font-size:12px">无匹配品牌</div>';
+    return;
+  }
+
+  body.innerHTML =
+    '<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;border-bottom:1px solid #e2e8f0;margin-bottom:12px;scrollbar-width:thin">' +
+    list.map(b => {
+      const active = String(b.brandId) === String(_pinActiveBrand);
+      return '<button onclick="_pinPickBrand(\''+b.brandId+'\')" style="white-space:nowrap;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid '+(active?'#b45852':'#cbd5e1')+';background:'+(active?'#fef2f2':'#fff')+';color:'+(active?'#b45852':'#475569')+';font-weight:'+(active?'700':'500')+'">'+b.name+'</button>';
+    }).join('') +
+    '</div>' +
+    _pinBuildCard(cur);
+}
+
+function _pinPickQuad(k){
+  _pinActiveQuad = k;
+  _pinActiveBrand = null;
+  rpinc();
+}
+function _pinPickBrand(bid){
+  _pinActiveBrand = bid;
+  rpinc();
+}
+
+// 单个品牌卡（仿 KA 摇优惠）
+function _pinBuildCard(b){
+  const survChip = b.isAlive === true ?
+    '<span style="background:#d1fae5;color:#065f46;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">✅ 存活</span>' :
+    (b.isAlive === false ? '<span style="background:#fee2e2;color:#991b1b;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">⚠️ 未存活</span>' : '<span style="background:#e2e8f0;color:#475569;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">—</span>');
+  // 象限分类标签
+  const _q = window._pinQuadOfCache && window._pinQuadOfCache[b.brandId] || 'U';
+  const _qColor = {A:'#059669',B:'#d97706',C:'#2563eb',D:'#dc2626',U:'#94a3b8'}[_q];
+  const _qName = {A:'健康',B:'有量低核销',C:'高核销缺量',D:'双低',U:'未定'}[_q];
+  const quadChip = '<span style="background:'+_qColor+'18;color:'+_qColor+';padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">'+_qName+'</span>';
+  // 类目标签
+  const catChip = b.cat4 ? '<span style="background:#f1f5f9;color:#475569;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500">'+b.cat4+'</span>' : '';
+  const head = '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap"><div style="font-size:18px;font-weight:800;color:#1e293b">'+b.name+'</div>'+survChip+quadChip+catChip+'</div>';
+
+  // ① 结果指标 3 卡（无目标达成条）
+  const daily_exp_w = b.expPv != null ? b.expPv : ((b.biz_expW||0)+(b.f2f_expW||0)+(b.fix_expW||0)+(b.nb_expW||0)+(b.zfyl_expW||0));
+  const daily_use = ((b.biz_useD||0)+(b.f2f_useD||0)+(b.fix_useD||0)+(b.nb_useD||0)+(b.zfyl_useD||0));
+  const eur = daily_exp_w > 0 ? (daily_use/(daily_exp_w*10000)*100) : null;
+  const resultCard = function(title, val, color){
+    return '<div style="background:#f8fafc;border-radius:8px;padding:14px"><div style="font-size:11px;color:#64748b;font-weight:600;margin-bottom:6px">'+title+'</div><div style="font-size:24px;font-weight:800;color:'+color+'">'+val+'</div></div>';
+  };
+  const resultSec = '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">📊 结果指标</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">'+
+    resultCard('日均曝光',   daily_exp_w > 0 ? daily_exp_w.toFixed(1)+'w' : '—', '#2563eb') +
+    resultCard('日均核销',   daily_use > 0 ? (daily_use>=10000 ? (daily_use/10000).toFixed(1)+'w' : daily_use.toLocaleString()) : '—', '#059669') +
+    resultCard('曝光核销率', eur != null ? eur.toFixed(2)+'%' : '—', eur != null && eur < 0.4 ? '#dc2626' : '#d97706') +
+    resultCard('存活率',     b.survivalRate != null ? b.survivalRate.toFixed(2)+'%' : '—', b.survivalRate != null && b.survivalRate < 1.0 ? '#dc2626' : '#059669') +
+  '</div></div>';
+
+  // ② 四要素检查 4 卡
+  const fCard = function(title, val, ok){
+    const bg = ok===true?'#f0fdf4':(ok===false?'#fef2f2':'#f8fafc');
+    const bd = ok===true?'#86efac':(ok===false?'#fecaca':'#e2e8f0');
+    const icon = ok===true?'✓':(ok===false?'✗':'—');
+    const color = ok===true?'#059669':(ok===false?'#dc2626':'#64748b');
+    return '<div style="background:'+bg+';border:1px solid '+bd+';border-radius:8px;padding:12px"><div style="font-size:11px;color:#475569;font-weight:600;margin-bottom:4px">'+title+' <span style="color:'+color+';font-weight:800">'+icon+'</span></div><div style="font-size:13px;font-weight:700;color:#1e293b">'+val+'</div></div>';
+  };
+  const fourSec = '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">🔲 上线前四要素检查</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">'+
+    fCard('经营模式', b.miniApp != null ? '小程序 '+b.miniApp.toFixed(1)+'%' : '—', b.bizOk) +
+    fCard('价格力',   b.priceForce != null ? (b.priceForce>0?'+':'')+b.priceForce.toFixed(2)+'%' : '—', b.priceOk) +
+    fCard('基建-商户号', b.txPerStore != null ? '1店几笔 '+b.txPerStore.toFixed(1) : '—', b.infraOk) +
+    fCard('<span style="cursor:help" title="= 审核通过门店数(品牌日报) / 真实门店数(周报) × 100">基建-门店</span>', b.storeComplete != null ? '完整度 '+b.storeComplete.toFixed(1)+'%' : '—', b.trafficOk) +
+  '</div></div>';
+
+  // ③ 上线后流量 · 分渠道
+  const chn = [
+    {key:'e21', name:'二选一', expW: (b.biz_expW||0)+(b.f2f_expW||0)+(b.fix_expW||0), useD: (b.biz_useD||0)+(b.f2f_useD||0)+(b.fix_useD||0)},
+    {key:'zfyl', name:'支付有礼', expW: b.zfyl_expW||0, useD: b.zfyl_useD||0},
+    {key:'nb',  name:'周边', expW: b.nb_expW||0, useD: b.nb_useD||0}
+  ];
+  const totalExpW = chn.reduce((s,c)=>s+c.expW, 0);
+  const totalUseD = chn.reduce((s,c)=>s+c.useD, 0);
+  const chnRows = chn.map(c => {
+    const expPct = totalExpW > 0 ? (c.expW/totalExpW*100) : 0;
+    const ur = c.expW > 0 ? (c.useD/(c.expW*10000)*100) : null;
+    return '<tr>'+
+      '<td style="padding:4px 8px;font-weight:600">'+c.name+'</td>'+
+      '<td style="padding:4px 8px" class="nc">'+(c.expW>0?c.expW.toFixed(1)+'w':'—')+'</td>'+
+      '<td style="padding:4px 8px" class="nc"><div style="display:flex;align-items:center;gap:6px"><div style="flex:1;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;min-width:50px"><div style="height:100%;width:'+expPct.toFixed(1)+'%;background:#2563eb"></div></div><span style="font-size:10px;color:#475569">'+expPct.toFixed(1)+'%</span></div></td>'+
+      '<td style="padding:4px 8px" class="nc">'+(c.useD>0?c.useD.toLocaleString():'—')+'</td>'+
+      '<td style="padding:4px 8px" class="nc">'+(ur!=null?ur.toFixed(2)+'%':'—')+'</td>'+
+    '</tr>';
+  }).join('');
+  const chnSec = '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">📈 上线后流量分析 · 分渠道对比</div><div style="overflow-x:auto"><table style="width:100%;font-size:11px;border-collapse:collapse"><thead><tr style="background:#f1f5f9;color:#475569"><th style="padding:5px 8px;text-align:left">渠道</th><th style="padding:5px 8px" class="nc">曝光量</th><th style="padding:5px 8px" class="nc" style="min-width:140px">曝光占比</th><th style="padding:5px 8px" class="nc">核销量</th><th style="padding:5px 8px" class="nc">核销率</th></tr></thead><tbody>'+chnRows+'</tbody></table></div></div>';
+
+  // ④ 老客尽曝情况（简化: 单块 高频/低频）
+  const hiExp = b.hiExpUV_all, loExp = b.loExpUV_all;
+  const hiApp = b.hiAppUV_all, loApp = b.loAppUV_all;
+  const hiRate = (hiApp != null && hiApp > 0 && hiExp != null) ? (hiExp/hiApp*100) : null;
+  const loRate = (loApp != null && loApp > 0 && loExp != null) ? (loExp/loApp*100) : null;
+  const custSec = '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">🧍 老客尽曝情况</div><div style="background:#f8fafc;border-radius:8px;padding:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px">'+
+    '<div><div style="font-size:11px;color:#64748b">高频应曝尽曝率</div><div style="font-size:18px;font-weight:700;color:'+(hiRate!=null?'#1e293b':'#94a3b8')+'">'+(hiRate!=null?hiRate.toFixed(1)+'%':'—')+'</div></div>'+
+    '<div><div style="font-size:11px;color:#64748b">低频应曝尽曝率</div><div style="font-size:18px;font-weight:700;color:'+(loRate!=null?'#1e293b':'#94a3b8')+'">'+(loRate!=null?loRate.toFixed(1)+'%':'—')+'</div></div>'+
+    '<div><div style="font-size:11px;color:#64748b;cursor:help" title="= (近7日_高频尽曝UV_二选一 + 低频尽曝UV_二选一) / 7 / 近7日均_曝光PV(w) / 10000&#10;&#10;底表: 品牌日报">二选一老客曝光占比</div><div style="font-size:18px;font-weight:700;color:'+(b.e21Ratio!=null?'#1e293b':'#94a3b8')+'">'+(b.e21Ratio!=null?b.e21Ratio.toFixed(1)+'%':'—')+'</div></div>'+
+  '</div>'+
+  (hiExp==null&&loExp==null ? '<div style="font-size:10px;color:#d97706;margin-top:6px">⚠️ 0420 起老客 UV 字段缺失，以上为 null</div>' : '') +
+  '</div>';
+
+  // ⑤ 到店核销 4 卡
+  const visitSec = '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">🎯 到店核销</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">'+
+    '<div style="background:#fef2f2;border-radius:8px;padding:12px;border:1px solid #fecaca"><div style="font-size:11px;color:#64748b;margin-bottom:4px">到店核销率</div><div style="font-size:20px;font-weight:800;color:#dc2626">'+(b.visitUseRate!=null?b.visitUseRate.toFixed(2)+'%':'—')+'</div></div>'+
+    '<div style="background:#f8fafc;border-radius:8px;padding:12px"><div style="font-size:11px;color:#64748b;margin-bottom:4px">日均交易 (万笔)</div><div style="font-size:20px;font-weight:800;color:#1e293b">'+(b.dailyTx!=null?b.dailyTx.toFixed(2):'—')+'</div></div>'+
+    '<div style="background:#f8fafc;border-radius:8px;padding:12px"><div style="font-size:11px;color:#64748b;margin-bottom:4px">存活率</div><div style="font-size:20px;font-weight:800;color:#1e293b">'+(b.survivalRate!=null?b.survivalRate.toFixed(2)+'%':'—')+'</div></div>'+
+    '<div style="background:#f8fafc;border-radius:8px;padding:12px"><div style="font-size:11px;color:#64748b;margin-bottom:4px">日均核销</div><div style="font-size:20px;font-weight:800;color:#1e293b">'+(daily_use>0?(daily_use>=10000?(daily_use/10000).toFixed(1)+'w':daily_use.toLocaleString()):'—')+'</div></div>'+
+  '</div></div>';
+
+  // ⑥ 活动明细模块已移除（见 Tab 2 活动明细完整看板）
+
+  // ⑦ 备注反馈框
+  const remark = _fbCache[b.brandId+'_pin_remark'] || '';
+  const safeName = (b.name||'').replace(/'/g, "\\'");
+  const fbSec = '<div><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">✏️ 补充反馈</div><textarea placeholder="添加反馈..." style="width:100%;min-height:48px;padding:8px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;resize:vertical" onblur="saveFeedback(\''+b.brandId+'\',\''+safeName+'\',\'pin_remark\',this.value)">'+remark+'</textarea></div>';
+
+  return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:16px">' +
+    head + resultSec + fourSec + chnSec + custSec + visitSec + fbSec +
+  '</div>';
+}
+
+// ========== Tab 1 · C · 数据对账 ==========
+// 6 个场景: #2 分层分歧 #3 类目分歧 #4 日报分层空 #7 周报未覆盖 #8 四要素数据缺失 #5 公线打标偏差
+// 负责人: 行业={#2}, 公线={#3,#4,#7,#8,#5}
+// 存已处理标记用 localStorage: key = 'rc_ack_' + data_date + '_' + brand_id + '_' + issue_type
+
+const RC_CATERING = INTRO_CATERING;
+const RC_ZHENGCAN = new Set(['正餐']);
+// 类目分歧免跟进白名单: 明确的非餐饮服务业态, 业务上跟进表标腰部≠餐饮误标, 无需修正
+const RC_CAT_WAIVED = new Set(['按摩足疗','KTV','棋牌室']);
+
+const RC_ISSUE_META = {
+  top_fail_four:   { label: '已置顶四要素不达标', desc: '已置顶 ∩ 日报在线 ∩ 未全达标 ∩ 无人工保留标',  owner: '行业', priority: 'P0', color: '#dc2626' },
+  tier_mismatch:   { label: '分层分歧',       desc: '跟进表=腰部 ∩ 日报=尾部',                owner: '行业', priority: 'P0', color: '#dc2626' },
+  status_mismatch: { label: '状态分歧',       desc: '跟进表=流失/筹备中 ∩ 日报=在线',         owner: '行业', priority: 'P0', color: '#dc2626' },
+  top_offline:     { label: '已置顶但不在线', desc: '已置顶 ∩ 日报不在线 (曝光<100)',         owner: '公线', priority: 'P0', color: '#dc2626' },
+  cat_mismatch:    { label: '类目分歧',       desc: '跟进表腰部(默认餐饮) ∩ 日报类目非餐饮', owner: '公线', priority: 'P0', color: '#dc2626' },
+  tier_empty:      { label: '日报分层字段空', desc: '日报「品牌分层」= "/" 或空',            owner: '公线', priority: 'P0', color: '#dc2626' },
+  factor_missing:  { label: '四要素数据缺失', desc: 'factor_biz/price/infra/store 任一为 null', owner: '公线', priority: 'P0', color: '#dc2626' },
+  wr_miss:         { label: '周报未覆盖',     desc: '跟进表腰部 ∩ 真实门店数缺失',             owner: '公线', priority: 'P1', color: '#d97706' },
+  tier_wrong:      { label: '公线分层打标偏差', desc: '日报分层 ≠ 按审核通过门店数阈值推算',   owner: '公线', priority: 'P2', color: '#0891b2' },
+  low_exp:         { label: '曝光少误判',     desc: '跟进表=在线 ∩ 日报不在线 (曝光<100)',     owner: '公线', priority: 'P2', color: '#0891b2' },
+};
+
+function _rcAckKey(bid, issueType){
+  const dd = (F && F.dataDate) || '';
+  return 'rc_ack_' + dd + '_' + bid + '_' + issueType;
+}
+function _rcIsAcked(bid, issueType){
+  try { return localStorage.getItem(_rcAckKey(bid, issueType)) === '1'; } catch(e){ return false; }
+}
+function _rcToggleAck(bid, issueType){
+  try {
+    const k = _rcAckKey(bid, issueType);
+    if (localStorage.getItem(k) === '1') localStorage.removeItem(k);
+    else localStorage.setItem(k, '1');
+  } catch(e){}
+  rrc();
+}
+
+// 扫描 BS 生成对账项数组
+function _rcBuildItems(){
+  const items = []; // { bid, name, sp, assistant, issue, detail, sortKey }
+  const wc = (BS||[]).filter(b => b.tierManual === '腰部' && b.statusManual === '在线');
+  // 已置顶品牌 id 集合 (for 场景 top_offline / top_fail_four)
+  const TR = (window._D && window._D.topRecords) || [];
+  const topBids = new Set(TR.map(r => String(r.brand_id)));
+
+  // 人工打标判定: 品牌在任一维度有 screen_* 反馈
+  const _hasKeepMark = function(bid){
+    if (!bid) return false;
+    return !!(_fbCache[bid+'_screen_biz'] ||
+              _fbCache[bid+'_screen_price'] ||
+              _fbCache[bid+'_screen_infra'] ||
+              _fbCache[bid+'_screen_store']);
+  };
+
+  wc.forEach(b => {
+    const base = {
+      bid: b.brandId, name: b.name, sp: b.spMapped || '',
+      assistant: b.assistant || '', cat4: b.cat4, storeCount: b.storeCount,
+      storeComplete: b.storeComplete, onlineToday: b.onlineToday,
+      dailyTier: b.dailyTierRaw || '',
+    };
+
+    // #2 分层分歧: 跟进表腰部 + 日报分层 = "3-尾部"
+    // 放过条件: 非正餐 且 门店数>=10 (业务规则: 非正餐≥10家算腰部合理范畴, 无需跟进)
+    if (base.dailyTier === '3-尾部'){
+      const isZhengcan = RC_ZHENGCAN.has(base.cat4);
+      const waived = !isZhengcan && base.cat4 && b.storeCount != null && b.storeCount >= 10;
+      items.push({ ...base, issue: 'tier_mismatch',
+        detail: '跟进表=腰部 / 日报=尾部' + (b.storeCount != null ? ' (审核通过门店数 '+b.storeCount+')' : ''),
+        waived: waived,
+        waivedReason: waived ? '非正餐×10家+' : '',
+      });
+    }
+    // #3 类目分歧: cat4 非餐饮 (且不是空)
+    // 放过条件: cat4 ∈ 明确非餐饮服务业态 (按摩足疗/KTV/棋牌室)
+    if (base.cat4 && !RC_CATERING.has(base.cat4)){
+      const catWaived = RC_CAT_WAIVED.has(base.cat4);
+      items.push({ ...base, issue: 'cat_mismatch',
+        detail: '跟进表腰部(默认餐饮) / 日报类目=' + base.cat4,
+        waived: catWaived,
+        waivedReason: catWaived ? '到综服务业态' : '',
+      });
+    }
+    // #4 日报分层字段空
+    if (!base.dailyTier || base.dailyTier === '/' || base.dailyTier === ''){
+      items.push({ ...base, issue: 'tier_empty',
+        detail: '日报「品牌分层」字段为空' + (base.cat4 ? ' / 类目=' + base.cat4 : '')
+      });
+    }
+    // #8 四要素数据缺失 (任一 factor == null, 且在餐饮腰部口径)
+    if (RC_CATERING.has(base.cat4) && b.onlineToday === true){
+      const nullDims = [];
+      if (b.bizOk == null) nullDims.push('经营');
+      if (b.priceOk == null) nullDims.push('货盘');
+      if (b.infraOk == null) nullDims.push('基建-商户号');
+      if (b.trafficOk == null) nullDims.push('基建-门店');
+      if (nullDims.length){
+        items.push({ ...base, issue: 'factor_missing',
+          detail: '缺失维度: ' + nullDims.join(', ')
+        });
+      }
+    }
+    // #7 周报未覆盖: storeCount != null AND storeComplete == null (审核通过有但 realStore 缺)
+    if (b.storeCount != null && b.storeComplete == null){
+      items.push({ ...base, issue: 'wr_miss',
+        detail: '审核通过 '+b.storeCount+' 家, 真实门店数缺失'
+      });
+    }
+    // #5 公线打标偏差: 日报分层=腰部 但按审核通过推算应尾部
+    if (base.dailyTier === '2-腰部' && b.storeCount != null && RC_CATERING.has(base.cat4)){
+      const thr = RC_ZHENGCAN.has(base.cat4) ? 5 : 20;
+      if (b.storeCount < thr){
+        items.push({ ...base, issue: 'tier_wrong',
+          detail: '日报标腰部 / 按审核通过门店数 '+b.storeCount+' ('+base.cat4+' 阈值 '+thr+') 应为尾部'
+        });
+      }
+    }
+    // #1 曝光少误判: 跟进表=在线 ∩ 日报不在线 ∩ 日报分层=腰部 ∩ 不在其他场景里
+    // 不筛 cat4: 跟进表腰部本身就是跟进范围的定义, 类目 ≥ 餐饮
+    // 只保留日报分层=腰部 (排除 #2 分层分歧、#4 日报分层空)
+    if (b.onlineToday !== true
+        && base.dailyTier === '2-腰部'){
+      items.push({ ...base, issue: 'low_exp',
+        detail: '跟进表=在线 / 日报当日曝光<100 被判不在线' + (b.storeCount != null ? ' (门店 '+b.storeCount+')' : '')
+      });
+    }
+  });
+
+  // #7/#8 置顶相关: 独立遍历 topBids (置顶名单就是最严过滤, 不再筛跟进表分层/状态)
+  // 构造 BS 的 brandId → 品牌 的索引 (用于拿完整字段)
+  const _bsById = {};
+  (BS||[]).forEach(b => { if (b && b.brandId != null) _bsById[String(b.brandId)] = b; });
+
+  topBids.forEach(tbid => {
+    const b = _bsById[tbid];
+    const baseT = b ? {
+      bid: b.brandId, name: b.name, sp: b.spMapped || '',
+      assistant: b.assistant || '', cat4: b.cat4, storeCount: b.storeCount,
+      storeComplete: b.storeComplete, onlineToday: b.onlineToday,
+      dailyTier: b.dailyTierRaw || '',
+    } : {
+      bid: tbid, name: '(未在日报中)', sp: '', assistant: '',
+      cat4: '', storeCount: null, storeComplete: null, onlineToday: null, dailyTier: '',
+    };
+
+    // #7 已置顶但不在线 (公线 P0): online_today != true
+    if (!b || b.onlineToday !== true){
+      const reason = b
+        ? '日报不在线 (曝光<100)'
+        : '不在当日日报快照中';
+      items.push({ ...baseT, issue: 'top_offline',
+        detail: '已占用置顶坑位但' + reason + ', 建议补位或替换'
+      });
+    }
+
+    // #8 已置顶但四要素不达标 (行业 P0): 已置顶 ∩ 日报在线 ∩ 未全达标 ∩ 无人工保留标
+    if (b && b.onlineToday === true){
+      const allPass = b.bizOk===true && b.priceOk===true && b.infraOk===true && b.trafficOk===true;
+      const hasMark = _hasKeepMark(b.brandId);
+      if (!allPass && !hasMark){
+        const failDims = [];
+        if (b.bizOk === false) failDims.push('经营❌');
+        if (b.priceOk === false) failDims.push('货盘❌');
+        if (b.infraOk === false) failDims.push('基建-商户号❌');
+        if (b.trafficOk === false) failDims.push('基建-门店❌');
+        if (b.bizOk == null) failDims.push('经营·缺');
+        if (b.priceOk == null) failDims.push('货盘·缺');
+        if (b.infraOk == null) failDims.push('基建-商户号·缺');
+        if (b.trafficOk == null) failDims.push('基建-门店·缺');
+        items.push({ ...baseT, issue: 'top_fail_four',
+          detail: '失分维度: ' + (failDims.join(' · ') || '(未识别)')
+        });
+      }
+    }
+  });
+
+  // #9 状态分歧 (行业 P0): 跟进表=流失/筹备中 ∩ 日报=在线
+  (BS||[]).forEach(b => {
+    if (b.tierManual !== '腰部') return;
+    if (b.statusManual !== '流失' && b.statusManual !== '筹备中') return;
+    if (b.onlineToday !== true) return;
+    items.push({
+      bid: b.brandId, name: b.name, sp: b.spMapped || '',
+      assistant: b.assistant || '', cat4: b.cat4, storeCount: b.storeCount,
+      storeComplete: b.storeComplete, onlineToday: b.onlineToday,
+      dailyTier: b.dailyTierRaw || '',
+      issue: 'status_mismatch',
+      detail: '跟进表标「' + b.statusManual + '」但日报当日在线 (曝光≥100), 建议确认是否应改为在线'
+    });
+  });
+
+  return items;
+}
+
+function _rcApplyFilter(items){
+  const q = (document.getElementById('rcSearch')?.value || '').trim().toLowerCase();
+  const fSP = document.getElementById('rcFiltSP')?.value || '';
+  const fAsst = document.getElementById('rcFiltAssistant')?.value || '';
+  const showAck = document.getElementById('rcShowAcked')?.checked;
+  return items.filter(it => {
+    // 已处理项始终保留在列表中 (不再隐藏, 仅换色)
+    // showAck checkbox 现改为 "隐藏已处理"
+    if (showAck && _rcIsAcked(it.bid, it.issue)) return false;
+    if (q){
+      const s = (it.name + ' ' + it.bid).toLowerCase();
+      if (!s.includes(q)) return false;
+    }
+    if (fSP && it.sp !== fSP) return false;
+    if (fAsst && it.assistant !== fAsst) return false;
+    return true;
+  });
+}
+
+function _rcFilterChanged(){ rrc(); }
+
+function _rcExportCSV(){
+  const items = _rcApplyFilter(_rcBuildItems());
+  const rows = [['优先级','负责人','问题类型','品牌ID','品牌名称','经营服务商','对接助理','跟进表分层','日报分层','日报类目','审核通过门店数','当日在线','免跟进','说明']];
+  items.forEach(it => {
+    const m = RC_ISSUE_META[it.issue];
+    rows.push([
+      m.priority, m.owner, m.label,
+      it.bid, it.name, it.sp, it.assistant,
+      '腰部', it.dailyTier, it.cat4, it.storeCount != null ? it.storeCount : '',
+      it.onlineToday === true ? '在线' : (it.onlineToday === false ? '不在线' : '—'),
+      it.waived ? ('是 ('+(it.waivedReason||'放过')+')') : '',
+      it.detail,
+    ]);
+  });
+  const csv = '\ufeff' + rows.map(r => r.map(c => '"'+String(c==null?'':c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'reconcile_' + ((F && F.dataDate) || 'today') + '.csv';
+  a.click();
+}
+
+function rrc(){
+  const body = document.getElementById('rcBody');
+  if (!body) return;
+
+  const allItems = _rcBuildItems();
+  const visible = _rcApplyFilter(allItems);
+
+  // 填筛选器 (只填一次)
+  const spSel = document.getElementById('rcFiltSP');
+  const astSel = document.getElementById('rcFiltAssistant');
+  if (spSel && spSel.options.length <= 1){
+    const sps = Array.from(new Set(allItems.map(it => it.sp).filter(Boolean))).sort();
+    sps.forEach(v => { const o=document.createElement('option'); o.value=v; o.textContent=v; spSel.appendChild(o) });
+  }
+  if (astSel && astSel.options.length <= 1){
+    const asts = Array.from(new Set(allItems.map(it => it.assistant).filter(Boolean))).sort();
+    asts.forEach(v => { const o=document.createElement('option'); o.value=v; o.textContent=v; astSel.appendChild(o) });
+  }
+
+  // 总数 badge
+  const badge = document.getElementById('rcTotalBadge');
+  if (badge){
+    const unacked = allItems.filter(it => !_rcIsAcked(it.bid, it.issue) && !it.waived).length;
+    const waivedCnt = allItems.filter(it => it.waived).length;
+    badge.textContent = '共 ' + unacked + ' 条待处理 · 总 ' + allItems.length + (waivedCnt > 0 ? ' (含 '+waivedCnt+' 免跟进)' : '');
+  }
+
+  // 按 owner 分组
+  const byOwner = { '行业': [], '公线': [] };
+  visible.forEach(it => {
+    const owner = RC_ISSUE_META[it.issue].owner;
+    if (byOwner[owner]) byOwner[owner].push(it);
+  });
+
+  let h = '';
+  ['行业', '公线'].forEach(owner => {
+    const list = byOwner[owner];
+    const ownerColor = owner === '行业' ? { bg:'#fff7ed', bd:'#fdba74', fg:'#c2410c', icon:'🟧' } :
+                                            { bg:'#eff6ff', bd:'#93c5fd', fg:'#1d4ed8', icon:'🟦' };
+    // 按 issue type 聚合
+    const byIss = {};
+    list.forEach(it => {
+      if (!byIss[it.issue]) byIss[it.issue] = [];
+      byIss[it.issue].push(it);
+    });
+    // P 统计 (排除免跟进)
+    const priCnt = { P0:0, P1:0, P2:0 };
+    let ownerWaived = 0;
+    list.forEach(it => {
+      if (it.waived) ownerWaived++;
+      else priCnt[RC_ISSUE_META[it.issue].priority]++;
+    });
+    const priParts = ['P0','P1','P2'].filter(p => priCnt[p]>0).map(p => p+':'+priCnt[p]);
+    if (ownerWaived > 0) priParts.push('免跟进:'+ownerWaived);
+    const priStr = priParts.join(' · ');
+
+    h += '<details open style="background:'+ownerColor.bg+';border:1px solid '+ownerColor.bd+';border-radius:8px;padding:10px 14px;margin-bottom:10px">';
+    h += '<summary style="cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center">';
+    h += '<div style="font-size:13px;font-weight:700;color:'+ownerColor.fg+'">'+ownerColor.icon+' '+owner+'跟进 <span style="font-size:11px;font-weight:400;margin-left:6px">'+list.length+' 条'+(priStr?' ('+priStr+')':'')+'</span></div>';
+    h += '<span style="font-size:11px;color:#94a3b8">▾ 展开/收起</span></summary>';
+    h += '<div style="margin-top:10px">';
+    if (list.length === 0 && !Object.keys(RC_ISSUE_META).some(k => RC_ISSUE_META[k].owner === owner)){
+      h += '<div style="padding:20px;text-align:center;color:#94a3b8;font-size:12px">✅ 该分组下无未处理项</div>';
+    } else {
+      // 确保该 owner 下所有定义的场景都展示（含 0 家）
+      const ownerIssues = Object.keys(RC_ISSUE_META).filter(k => RC_ISSUE_META[k].owner === owner);
+      ownerIssues.sort((a,b) => {
+        const pa = RC_ISSUE_META[a].priority, pb = RC_ISSUE_META[b].priority;
+        return pa < pb ? -1 : pa > pb ? 1 : 0;
+      });
+      ownerIssues.forEach(iss => {
+        const meta = RC_ISSUE_META[iss];
+        const sub = byIss[iss] || [];
+        h += '<details style="background:#fff;border:1px solid '+meta.color+'40;border-radius:6px;padding:8px 12px;margin-bottom:8px">';
+        h += '<summary style="cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center">';
+        h += '<div><span style="display:inline-block;padding:2px 6px;background:'+meta.color+'20;color:'+meta.color+';border-radius:4px;font-size:10px;font-weight:700;margin-right:6px">'+meta.priority+'</span>';
+        h += '<b style="font-size:12px;color:#1e293b">'+meta.label+'</b>';
+        const subWaived = sub.filter(x => x.waived).length;
+        const subActive = sub.length - subWaived;
+        h += ' <span style="font-size:11px;color:#94a3b8;margin-left:4px">· '+meta.desc+' · '+sub.length+' 家'+(subWaived>0?' <span style="color:#059669">(含 '+subWaived+' 免跟进)</span>':'')+'</span></div>';
+        h += '<span style="font-size:11px;color:#94a3b8">▸</span></summary>';
+        h += '<div style="margin-top:8px;border-top:1px dashed #e2e8f0;padding-top:8px">';
+        h += '<table style="width:100%;font-size:11px;border-collapse:collapse">';
+        h += '<thead><tr style="color:#64748b;font-weight:600"><th style="text-align:left;padding:4px 6px">品牌</th><th style="text-align:left;padding:4px 6px">ID</th><th style="text-align:left;padding:4px 6px">类目</th><th style="text-align:left;padding:4px 6px">经营服务商</th><th style="text-align:left;padding:4px 6px">对接助理</th><th style="text-align:left;padding:4px 6px">详情</th><th style="text-align:center;padding:4px 6px;width:90px">操作</th></tr></thead><tbody>';
+        sub.sort((a,b) => a.name.localeCompare(b.name));
+        sub.forEach(it => {
+          const acked = _rcIsAcked(it.bid, it.issue);
+          const waived = it.waived === true;
+          const rowStyle = waived
+            ? 'border-top:1px solid #f1f5f9;background:#f8fafc;color:#94a3b8;'
+            : 'border-top:1px solid #f1f5f9'+(acked?';background:#f0fdf4;':'');
+          h += '<tr style="'+rowStyle+'">';
+          h += '<td style="padding:4px 6px"><b style="'+(waived?'color:#94a3b8;font-weight:500':'')+'">'+it.name+'</b></td>';
+          h += '<td style="padding:4px 6px;color:#64748b">'+it.bid+'</td>';
+          h += '<td style="padding:4px 6px;color:#475569">'+(it.cat4||'—')+'</td>';
+          h += '<td style="padding:4px 6px">'+(it.sp||'—')+'</td>';
+          h += '<td style="padding:4px 6px">'+(it.assistant||'—')+'</td>';
+          const detailHtml = it.detail + (waived ? ' <span style="display:inline-block;margin-left:6px;padding:1px 6px;background:#dcfce7;color:#059669;border-radius:3px;font-size:10px;font-weight:600">🟢 '+(it.waivedReason||'无需反馈')+' · 无需反馈</span>' : '');
+          h += '<td style="padding:4px 6px;color:'+(waived?'#94a3b8':'#475569')+'">'+detailHtml+'</td>';
+          if (waived){
+            h += '<td style="padding:4px 6px;text-align:center"><span style="padding:3px 8px;font-size:10px;color:#94a3b8;background:#f1f5f9;border-radius:4px">— 免跟进</span></td>';
+          } else {
+            h += '<td style="padding:4px 6px;text-align:center"><button onclick="_rcToggleAck(\''+it.bid+'\',\''+it.issue+'\')" style="padding:3px 8px;font-size:10px;border-radius:4px;cursor:pointer;border:1px solid '+(acked?'#86efac':'#cbd5e1')+';background:'+(acked?'#dcfce7':'#fff')+';color:'+(acked?'#15803d':'#64748b')+'">'+(acked?'✓ 已处理':'标记处理')+'</button></td>';
+          }
+          h += '</tr>';
+        });
+        h += '</tbody></table>';
+        h += '</div></details>';
+      });
+    }
+    h += '</div></details>';
+  });
+
+  body.innerHTML = h;
+}
 
 let curS=null,sortD=1;function srt(f){if(curS===f)sortD*=-1;else{curS=f;sortD=1};rbt()}
 function rbt(){const fSP=document.getElementById('fSP').value,fOwner=document.getElementById('fOwner').value,fAsst=document.getElementById('fAsst').value,fCat=document.getElementById('fCat').value,fTier=document.getElementById('fTier').value,fSt=document.getElementById('fSt').value,fOnline=document.getElementById('fOnline').value,fScr=document.getElementById('fScr').value,fQ=document.getElementById('fQ').value.toLowerCase(),fM=document.getElementById('fMetric').value,fOp=document.getElementById('fOp').value,fVr=document.getElementById('fVal').value,fVn=fVr!==''?parseFloat(fVr):null;
-let fl=BS.filter(b=>{if(b.displayLevel==='ka_self')return false;if(fSP&&b.spMapped!==fSP)return false;if(fOwner&&b.owner!==fOwner)return false;if(fAsst&&b.assistant!==fAsst)return false;if(fCat&&b.cat4!==fCat)return false;if(fTier&&b.tierManual!==fTier)return false;if(fSt==='alive'&&b.isAlive!==true)return false;if(fSt==='dead'&&b.isAlive!==false)return false;if(fOnline==='online'&&b.onlineStatus!=='在线')return false;if(fOnline==='pending'&&b.onlineStatus!=='在线待确认')return false;if(fOnline==='nodata'&&b.onlineStatus!=='未更新')return false;if(fOnline==='lost'&&b.statusManual!=='流失')return false;if(fScr==='biz_f'&&b.bizOk!==false)return false;if(fScr==='price_f'&&b.priceOk!==false)return false;if(fScr==='infra_f'&&b.infraOk!==false)return false;if(fScr==='traffic_f'&&b.trafficOk!==false)return false;if(fScr==='all_p'&&!(b.bizOk===true&&b.priceOk===true&&b.infraOk===true&&b.trafficOk===true))return false;if(fScr==='no_data'&&b.hasDailyData)return false;if(fQ&&!b.name.toLowerCase().includes(fQ)&&!String(b.brandId).includes(fQ))return false;if(fM&&fVn!==null){const v=b[fM];if(v==null)return false;if(fOp==='lt'&&!(v<fVn))return false;if(fOp==='lte'&&!(v<=fVn))return false;if(fOp==='gt'&&!(v>fVn))return false;if(fOp==='gte'&&!(v>=fVn))return false}return true});
+let fl=BS.filter(b=>{if(b.displayLevel==='ka_self')return false;if(fSP&&b.spMapped!==fSP)return false;if(fOwner&&b.owner!==fOwner)return false;if(fAsst&&b.assistant!==fAsst)return false;if(fCat&&b.cat4!==fCat)return false;if(fTier&&b.tierManual!==fTier)return false;if(fSt==='alive'&&b.isAlive!==true)return false;if(fSt==='dead'&&b.isAlive!==false)return false;if(fOnline==='online'&&b.onlineStatus!=='在线')return false;if(fOnline==='pending'&&b.onlineStatus!=='在线待确认')return false;if(fOnline==='nodata'&&b.onlineStatus!=='未更新')return false;if(fOnline==='lost'&&b.statusManual!=='流失')return false;if(fScr==='biz_f'&&b.bizOk!==false)return false;if(fScr==='price_f'&&b.priceOk!==false)return false;if(fScr==='infra_f'&&b.infraOk!==false)return false;if(fScr==='traffic_f'&&b.trafficOk!==false)return false;if(fScr==='all_p'&&!(b.bizOk===true&&b.priceOk===true&&b.infraOk===true&&b.trafficOk===true))return false;if(fScr==='no_data'&&b.hasDailyData)return false;if(fQ&&!b.name.toLowerCase().includes(fQ))return false;if(fM&&fVn!==null){const v=b[fM];if(v==null)return false;if(fOp==='lt'&&!(v<fVn))return false;if(fOp==='lte'&&!(v<=fVn))return false;if(fOp==='gt'&&!(v>fVn))return false;if(fOp==='gte'&&!(v>=fVn))return false}return true});
 fl.sort((a,b)=>a.hasDailyData===b.hasDailyData?0:(a.hasDailyData?-1:1));if(curS)fl.sort((a,b)=>{let av=a[curS],bv=b[curS];if(av==null)return 1;if(bv==null)return -1;if(typeof av==='boolean'){av=av?1:0;bv=bv?1:0}if(typeof av==='string')return sortD*av.localeCompare(bv);return sortD*(av-bv)});
 const tb=document.querySelector('#bTbl tbody');tb.innerHTML='';fl.forEach(b=>{const al=b.isAlive===true?'<span class="bd b-ok">存活</span>':(b.isAlive===false?'<span class="bd b-d">未存活</span>':'—');const tg=[];if(b.bizOk===false)tg.push('<span class="bd b-d">经营❌</span>');if(b.priceOk===false)tg.push('<span class="bd b-w">货盘⚠️</span>');if(b.infraOk===false)tg.push('<span class="bd b-w">基建⚠️</span>');if(b.trafficOk===false)tg.push('<span class="bd b-w">流量⚠️</span>');if(!b.hasDailyData)tg.push('<span class="bd b-g">无数据</span>');if(b.bizOk===true&&b.priceOk===true&&b.infraOk===true&&b.trafficOk===true&&b.hasDailyData)tg.push('<span class="bd b-ok">✅</span>');
 tb.innerHTML+=`<tr><td><b>${b.name}</b></td><td>${b.brandId||'—'}</td><td>${b.cat4||'—'}</td><td>${b.spMapped}</td><td>${b.owner||'—'}</td><td>${b.assistant||'—'}</td><td>${b.tierManual||'—'}</td><td>${b.tierDaily||'—'}</td><td>${b.onlineStatus==='在线'?'<span class="bd b-ok">在线</span>':b.onlineStatus==='在线待确认'?'<span class="bd b-w">在线待确认</span>':b.onlineStatus==='流失'?'<span class="bd b-d">流失</span>':b.onlineStatus==='筹备中'?'<span class="bd b-g">筹备中</span>':b.statusManual||'—'}</td><td>${al}</td><td class="nc">${V(b.survivalRate,'%')}</td><td class="nc ${b.miniApp!=null&&b.miniApp<20?'wc':''}">${V(b.miniApp,'%')}</td><td class="nc ${b.priceOk===false?'wc':''}">${b.priceForce!=null?(b.priceForce>0?'+':'')+_P(b.priceForce).replace('—',''):'—'}</td><td class="nc">${b.storeCount!=null?b.storeCount:'—'}</td><td class="nc ${b.storeComplete!=null&&b.storeComplete<90?'wc':''}">${V(b.storeComplete,'%')}</td><td class="nc">${b.dailyTx!=null?b.dailyTx+'w':'—'}</td><td class="nc ${b.txPerStore!=null&&b.txPerStore<5?'wc':''}">${V(b.txPerStore)}</td><td class="nc">${b.e21ExpRatio!=null?_P(b.e21ExpRatio):'—'}</td><td class="nc">${V(b.e21Ratio,'%')}</td><td class="nc">${b.hiRate_uv!=null?(b.hiRate_uv*100).toFixed(1)+'%':'—'}</td><td class="nc">${b.loRate_uv!=null?(b.loRate_uv*100).toFixed(1)+'%':'—'}</td><td class="nc">${b.custAppRate!=null?(b.custAppRate*100).toFixed(1)+'%':'—'}</td><td class="nc">${b.e21EUR!=null?_P(b.e21EUR):'—'}</td><td>${tg.join(' ')||'—'}</td><td><textarea class="rm" placeholder="..." onblur="saveFeedback('${b.brandId||b.name}','${b.name}','remark',this.value)" onclick="event.stopPropagation()">${_fbCache[(b.brandId||b.name)+'_remark']||b.remark||''}</textarea></td></tr>`});document.getElementById('bCnt').textContent=fl.length+'/'+BS.length;setTimeout(autoResizeAll,50)}
@@ -1163,7 +2834,7 @@ tb.innerHTML+=`<tr><td><b>${b.name}</b></td><td>${b.brandId||'—'}</td><td>${b.
 let curCS=null,csD=1;function csrt(f){if(curCS===f)csD*=-1;else{curCS=f;csD=1};rconv()}
 function tgact(el){const next=el.closest('tr').nextElementSibling;if(next&&next.classList.contains('act-detail')){next.classList.toggle('show');const btn=el.querySelector('.xb');if(btn){const n=btn.dataset.n;btn.textContent=next.classList.contains('show')?'收起':n+'个活动'}}}
 function rconv(){var _dlMap={};BS.forEach(function(b){_dlMap[b.brandId]=b.displayLevel||'other'});const fSP=document.getElementById('cSP').value,fCat=document.getElementById('cCat').value,fTier=document.getElementById('cTier').value,fA=document.getElementById('cAlive').value,fQ=document.getElementById('cQ').value.toLowerCase();
-let fl=BC.filter(b=>{if((_dlMap[b.brandId]||'other')==='ka_self')return false;if(fSP&&b.sp!==fSP)return false;if(fCat&&b.cat4!==fCat)return false;if(fTier&&b.tier!==fTier)return false;if(fA==='1'&&b.alive!==true)return false;if(fA==='0'&&b.alive!==false)return false;if(fQ&&!b.name.toLowerCase().includes(fQ)&&!String(b.brandId).includes(fQ))return false;return true});
+let fl=BC.filter(b=>{if((_dlMap[b.brandId]||'other')==='ka_self')return false;if(fSP&&b.sp!==fSP)return false;if(fCat&&b.cat4!==fCat)return false;if(fTier&&b.tier!==fTier)return false;if(fA==='1'&&b.alive!==true)return false;if(fA==='0'&&b.alive!==false)return false;if(fQ&&!b.name.toLowerCase().includes(fQ))return false;return true});
 fl.sort((a,b)=>{if(a.dExpW==null&&b.dExpW!=null)return 1;if(b.dExpW==null&&a.dExpW!=null)return -1;return 0});
 if(curCS)fl.sort((a,b)=>{let av=a[curCS],bv=b[curCS];if(av==null)return 1;if(bv==null)return -1;if(typeof av==='string')return csD*av.localeCompare(bv);return csD*(av-bv)});else fl.sort((a,b)=>{if(a.dUse==null)return 1;if(b.dUse==null)return -1;return(b.dUse||0)-(a.dUse||0)});
 const tb=document.querySelector('#cTbl tbody');tb.innerHTML='';
@@ -1194,7 +2865,7 @@ function exportActCSV(){
 }
 function toggleAllExp(master){document.querySelectorAll('.exp-chk').forEach(function(c){c.checked=master.checked})}
 
-function stab(i){document.querySelectorAll('.tab').forEach((b,j)=>{b.classList.toggle('on',j===i)});document.querySelectorAll('.P').forEach((c,j)=>{c.classList.toggle('on',j===i)})}
+function stab(i){document.querySelectorAll('.tab').forEach((b,j)=>{b.classList.toggle('on',j===i)});document.querySelectorAll('.P').forEach((c,j)=>{c.classList.toggle('on',j===i)});if(i===1&&_pinChart){setTimeout(()=>_pinChart.resize(),50)}}
 
 
 async function initDashboard(targetDate) {
@@ -1202,15 +2873,16 @@ async function initDashboard(targetDate) {
     const D = await loadDashboardData(targetDate);
 
     F=D.final,BS=F.brands,SPS=F.spSummary,SOP=D.sop,BC=D.bc,ACTS=D.acts;
+    window._D=D;
 W=BS.filter(b=>b.tierManual==='腰部'),KA=BS.filter(b=>b.tierManual==='KA');
     actByBrand={};ACTS.forEach(a=>{const n=a.brandName;if(!actByBrand[n])actByBrand[n]=[];actByBrand[n].push(a)});
-const ss=[...new Set(BS.map(b=>b.spMapped))].sort();['fSP','cSP'].forEach(id=>{const s=document.getElementById(id);ss.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o)})});[...new Set(BS.map(b=>b.owner).filter(Boolean))].sort().forEach(v=>{document.getElementById('fOwner').innerHTML+=`<option value="${v}">${v}</option>`});[...new Set(BS.map(b=>b.assistant).filter(Boolean))].sort().forEach(v=>{document.getElementById('fAsst').innerHTML+=`<option value="${v}">${v}</option>`});const catCnt={};BS.forEach(b=>{const c=b.cat4;if(c){catCnt[c]=(catCnt[c]||0)+1}});const cats=Object.keys(catCnt).filter(c=>catCnt[c]>=3).sort();['fCat','cCat'].forEach(id=>{const s=document.getElementById(id);cats.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v+' ('+catCnt[v]+')';s.appendChild(o)})});rsop();rov();rbt();rconv();document.getElementById('loading').style.display='none'
+const ss=[...new Set(BS.map(b=>b.spMapped))].sort();['fSP'].forEach(id=>{const s=document.getElementById(id);if(!s)return;ss.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o)})});[...new Set(BS.map(b=>b.owner).filter(Boolean))].sort().forEach(v=>{const s=document.getElementById('fOwner');if(s)s.innerHTML+=`<option value="${v}">${v}</option>`});[...new Set(BS.map(b=>b.assistant).filter(Boolean))].sort().forEach(v=>{const s=document.getElementById('fAsst');if(s)s.innerHTML+=`<option value="${v}">${v}</option>`});const catCnt={};BS.forEach(b=>{const c=b.cat4;if(c){catCnt[c]=(catCnt[c]||0)+1}});const cats=Object.keys(catCnt).filter(c=>catCnt[c]>=3).sort();['fCat'].forEach(id=>{const s=document.getElementById(id);if(!s)return;cats.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v+' ('+catCnt[v]+')';s.appendChild(o)})});rsop();rov();rintro(D);rfc();rfcmark();rpin();rpinq();rpinc();rrc();document.getElementById('loading').style.display='none'
 
-    // ── Tab2 延迟加载 activity_detail ──
+    // ── 活动明细数据延迟加载（原 Tab2 → 现附录 Tab4）──
     const tabBtns = document.querySelectorAll('.tab');
-    if (tabBtns.length >= 3) {
+    if (tabBtns.length >= 5) {
       let actsLoadedForUI = false;
-      tabBtns[2].addEventListener('click', async function() {
+      tabBtns[4].addEventListener('click', async function() {
         if (!actsLoadedForUI) {
           actsLoadedForUI = true;
           const le = document.getElementById('loading');
@@ -1222,7 +2894,7 @@ const ss=[...new Set(BS.map(b=>b.spMapped))].sort();['fSP','cSP'].forEach(id=>{c
             ACTS.forEach(function(a){var n=a.brandName;if(!actByBrand[n])actByBrand[n]=[];actByBrand[n].push(a)});
           }
           if (le) le.style.display = 'none';
-          if (typeof rconv === 'function') rconv();
+          rconv();
         }
       });
     }
