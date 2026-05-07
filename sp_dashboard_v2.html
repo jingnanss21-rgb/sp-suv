@@ -2393,10 +2393,11 @@ function _pinBuildCard(b){
   const resultCard = function(title, val, color){
     return '<div style="background:#f8fafc;border-radius:8px;padding:14px"><div style="font-size:11px;color:#64748b;font-weight:600;margin-bottom:6px">'+title+'</div><div style="font-size:24px;font-weight:800;color:'+color+'">'+val+'</div></div>';
   };
-  const resultSec = '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">📊 结果指标</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">'+
+  const resultSec = '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">📊 结果指标</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">'+
     resultCard('日均曝光',   daily_exp_w > 0 ? daily_exp_w.toFixed(1)+'w' : '—', '#2563eb') +
     resultCard('日均核销',   daily_use > 0 ? (daily_use>=10000 ? (daily_use/10000).toFixed(1)+'w' : daily_use.toLocaleString()) : '—', '#059669') +
-    resultCard('曝光核销率', eur != null ? eur.toFixed(2)+'%' : '—', '#d97706') +
+    resultCard('曝光核销率', eur != null ? eur.toFixed(2)+'%' : '—', eur != null && eur < 0.4 ? '#dc2626' : '#d97706') +
+    resultCard('存活率',     b.survivalRate != null ? b.survivalRate.toFixed(2)+'%' : '—', b.survivalRate != null && b.survivalRate < 1.0 ? '#dc2626' : '#059669') +
   '</div></div>';
 
   // ② 四要素检查 4 卡
@@ -2449,10 +2450,16 @@ function _pinBuildCard(b){
   '</div>';
 
   // ⑤ 到店核销 4 卡
+  const _vurLow = b.visitUseRate != null && b.visitUseRate < 40;
+  const _vurBg = _vurLow ? 'background:#fef2f2;border:1px solid #fecaca' : 'background:#f0fdf4;border:1px solid #bbf7d0';
+  const _vurColor = _vurLow ? '#dc2626' : '#059669';
+  const _srLow = b.survivalRate != null && b.survivalRate < 1.0;
+  const _srBg = _srLow ? 'background:#fef2f2;border:1px solid #fecaca' : 'background:#f8fafc';
+  const _srColor = _srLow ? '#dc2626' : '#1e293b';
   const visitSec = '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">🎯 到店核销</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">'+
-    '<div style="background:#fef2f2;border-radius:8px;padding:12px;border:1px solid #fecaca"><div style="font-size:11px;color:#64748b;margin-bottom:4px">到店核销率</div><div style="font-size:20px;font-weight:800;color:#dc2626">'+(b.visitUseRate!=null?b.visitUseRate.toFixed(2)+'%':'—')+'</div></div>'+
+    '<div style="'+_vurBg+';border-radius:8px;padding:12px"><div style="font-size:11px;color:#64748b;margin-bottom:4px">到店核销率</div><div style="font-size:20px;font-weight:800;color:'+_vurColor+'">'+(b.visitUseRate!=null?b.visitUseRate.toFixed(2)+'%':'—')+'</div></div>'+
     '<div style="background:#f8fafc;border-radius:8px;padding:12px"><div style="font-size:11px;color:#64748b;margin-bottom:4px">日均交易 (万笔)</div><div style="font-size:20px;font-weight:800;color:#1e293b">'+(b.dailyTx!=null?b.dailyTx.toFixed(2):'—')+'</div></div>'+
-    '<div style="background:#f8fafc;border-radius:8px;padding:12px"><div style="font-size:11px;color:#64748b;margin-bottom:4px">存活率</div><div style="font-size:20px;font-weight:800;color:#1e293b">'+(b.survivalRate!=null?b.survivalRate.toFixed(2)+'%':'—')+'</div></div>'+
+    '<div style="'+_srBg+';border-radius:8px;padding:12px"><div style="font-size:11px;color:#64748b;margin-bottom:4px">存活率</div><div style="font-size:20px;font-weight:800;color:'+_srColor+'">'+(b.survivalRate!=null?b.survivalRate.toFixed(2)+'%':'—')+'</div></div>'+
     '<div style="background:#f8fafc;border-radius:8px;padding:12px"><div style="font-size:11px;color:#64748b;margin-bottom:4px">日均核销</div><div style="font-size:20px;font-weight:800;color:#1e293b">'+(daily_use>0?(daily_use>=10000?(daily_use/10000).toFixed(1)+'w':daily_use.toLocaleString()):'—')+'</div></div>'+
   '</div></div>';
 
