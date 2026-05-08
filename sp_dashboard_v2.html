@@ -226,8 +226,72 @@ async function saveFeedback(brandId,brandName,field,value){
     const t=document.getElementById('toast');if(t){t.textContent='✅ 已保存';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1500);}
   }catch(e){alert('saveFeedback exception: '+e.message)}
 }
+
+// ── 置顶品牌反馈时间线 (pin_feedback 表) ──
+window._pinFeedbackCache = {}; // { brandId: [{id, brand_id, brand_name, content, author, created_at}] }
+
+async function _pinLoadFeedback() {
+  try {
+    const { data, error } = await supa.from('pin_feedback').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    window._pinFeedbackCache = {};
+    (data || []).forEach(f => {
+      if (!window._pinFeedbackCache[f.brand_id]) window._pinFeedbackCache[f.brand_id] = [];
+      window._pinFeedbackCache[f.brand_id].push(f);
+    });
+  } catch(e) { console.warn('[pinFeedback] 加载失败:', e.message); }
+}
+
+async function _pinAddFb(brandId, brandName) {
+  const input = document.getElementById('pinFbInput_' + brandId);
+  if (!input) return;
+  const content = input.value.trim();
+  if (!content) return;
+  try {
+    const { data, error } = await supa.from('pin_feedback').insert({ brand_id: brandId, brand_name: brandName, content: content, author: '' }).select().single();
+    if (error) throw error;
+    if (!window._pinFeedbackCache[brandId]) window._pinFeedbackCache[brandId] = [];
+    window._pinFeedbackCache[brandId].unshift(data);
+    input.value = '';
+    rpinc(); // 刷新卡片
+    const t=document.getElementById('toast');if(t){t.textContent='✅ 反馈已添加';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1500);}
+  } catch(e) { alert('添加反馈失败: ' + e.message); }
+}
+
+async function _pinEditFb(fbId) {
+  // 找到这条反馈
+  let found = null;
+  for (const arr of Object.values(window._pinFeedbackCache)) {
+    found = arr.find(f => f.id === fbId);
+    if (found) break;
+  }
+  if (!found) return;
+  const newContent = prompt('编辑反馈:', found.content);
+  if (newContent === null || newContent.trim() === found.content) return;
+  try {
+    const { error } = await supa.from('pin_feedback').update({ content: newContent.trim(), updated_at: new Date().toISOString() }).eq('id', fbId);
+    if (error) throw error;
+    found.content = newContent.trim();
+    rpinc();
+    const t=document.getElementById('toast');if(t){t.textContent='✅ 已修改';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1500);}
+  } catch(e) { alert('编辑失败: ' + e.message); }
+}
+
+async function _pinDeleteFb(fbId, brandId) {
+  if (!confirm('确认删除这条反馈？')) return;
+  try {
+    const { error } = await supa.from('pin_feedback').delete().eq('id', fbId);
+    if (error) throw error;
+    const arr = window._pinFeedbackCache[brandId];
+    if (arr) window._pinFeedbackCache[brandId] = arr.filter(f => f.id !== fbId);
+    rpinc();
+    const t=document.getElementById('toast');if(t){t.textContent='✅ 已删除';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1500);}
+  } catch(e) { alert('删除失败: ' + e.message); }
+}
+
 let _fbLoaded=false;
 loadFeedback().then(()=>{_fbLoaded=true;try{rbt()}catch(e){};try{if(window.renderScreen)renderScreen()}catch(e){};setTimeout(autoResizeAll,200)});
+_pinLoadFeedback(); // 预加载置顶反馈时间线
 
 // textarea自动撑高
 function autoResize(el){el.style.height='auto';el.style.height=el.scrollHeight+'px'}
@@ -2546,10 +2610,28 @@ function _pinBuildCard(b){
 
   // ⑥ 活动明细模块已移除（见 Tab 2 活动明细完整看板）
 
-  // ⑦ 备注反馈框
-  const remark = _fbCache[b.brandId+'_pin_remark'] || '';
+  // ⑦ 反馈时间线（支持新增/编辑/删除）
+  const _pinFbList = (window._pinFeedbackCache || {})[String(b.brandId)] || [];
   const safeName = (b.name||'').replace(/'/g, "\\'");
-  const fbSec = '<div><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">✏️ 补充反馈</div><textarea placeholder="添加反馈..." style="width:100%;min-height:48px;padding:8px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;resize:vertical" onblur="saveFeedback(\''+b.brandId+'\',\''+safeName+'\',\'pin_remark\',this.value)">'+remark+'</textarea></div>';
+  let fbListHtml = '';
+  if (_pinFbList.length > 0) {
+    fbListHtml = _pinFbList.map(f => {
+      const ts = f.created_at ? f.created_at.substring(0,16).replace('T',' ') : '';
+      return `<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid #f1f5f9;" id="pinFb_${f.id}">
+        <div style="flex:1;font-size:12px;color:#334155;">${(f.content||'').replace(/</g,'&lt;').replace(/\n/g,'<br>')}</div>
+        <div style="white-space:nowrap;font-size:10px;color:#94a3b8;">${ts}${f.author?' · '+f.author:''}</div>
+        <span onclick="_pinEditFb(${f.id})" style="cursor:pointer;font-size:12px;color:#64748b;" title="编辑">✎</span>
+        <span onclick="_pinDeleteFb(${f.id},'${b.brandId}')" style="cursor:pointer;font-size:12px;color:#dc2626;" title="删除">×</span>
+      </div>`;
+    }).join('');
+  }
+  const fbSec = `<div><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">✏️ 反馈记录 (${_pinFbList.length})</div>
+    <div style="max-height:200px;overflow-y:auto;">${fbListHtml || '<div style="font-size:11px;color:#94a3b8;padding:4px 0;">暂无反馈</div>'}</div>
+    <div style="display:flex;gap:6px;margin-top:8px;">
+      <input id="pinFbInput_${b.brandId}" style="flex:1;padding:6px 10px;border:1px solid #e2e8f0;border-radius:5px;font-size:12px;" placeholder="添加反馈...">
+      <button onclick="_pinAddFb('${b.brandId}','${safeName}')" style="padding:6px 12px;background:#2563eb;color:#fff;border:none;border-radius:5px;font-size:12px;cursor:pointer;font-weight:600;">发送</button>
+    </div>
+  </div>`;
 
   return '<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:16px">' +
     head + resultSec + fourSec + chnSec + custSec + visitSec + fbSec +
