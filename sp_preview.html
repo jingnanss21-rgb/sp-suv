@@ -2451,7 +2451,17 @@ function _pinBuildCard(b){
   (hiExp==null&&loExp==null ? '<div style="font-size:10px;color:#d97706;margin-top:6px">⚠️ 0420 起老客 UV 字段缺失，以上为 null</div>' : '') +
   '</div>';
 
-  // ⑤ 到店核销 3 卡
+  // ⑤ 到店核销 4 卡（置顶天数 + 到店核销率 + 领取到店率 + 未达门槛占比）
+  // 置顶天数 = 日报日期 - top_at
+  let _pinDays = null;
+  const _TR = (window._D && window._D.topRecords) || [];
+  const _trRec = _TR.find(r => String(r.brand_id) === String(b.brandId));
+  if (_trRec && _trRec.top_at && window._D && window._D.final && window._D.final.dataDate) {
+    const topDate = new Date(_trRec.top_at);
+    const reportDate = new Date(window._D.final.dataDate);
+    _pinDays = Math.floor((reportDate - topDate) / (1000*60*60*24));
+    if (_pinDays < 0) _pinDays = 0;
+  }
   const _vurLow = b.visitUseRate != null && b.visitUseRate < 40;
   const _vurBg = _vurLow ? 'background:#fef2f2;border:1px solid #fecaca' : 'background:#f0fdf4;border:1px solid #bbf7d0';
   const _vurColor = _vurLow ? '#dc2626' : '#059669';
@@ -2459,7 +2469,7 @@ function _pinBuildCard(b){
   const _cvr = b.claimVisitRate;
   // 未达门槛占比：从活动数据聚合（按品牌加权平均，曝光加权）
   let _noThrRate = null;
-  if (window._D && window._D.acts) {
+  if (window._D && window._D.acts && window._D.acts.length > 0) {
     const brandActs = window._D.acts.filter(a => String(a.brandName) === b.name && a.noThresholdRate != null && a.expPV > 0);
     if (brandActs.length > 0) {
       const totalExp = brandActs.reduce((s,a) => s + (a.expPV||0), 0);
@@ -2469,7 +2479,8 @@ function _pinBuildCard(b){
   const _ntLow = _noThrRate != null && _noThrRate > 0.3;
   const _ntBg = _ntLow ? 'background:#fef2f2;border:1px solid #fecaca' : 'background:#f8fafc';
   const _ntColor = _ntLow ? '#dc2626' : '#1e293b';
-  const visitSec = '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">🎯 到店核销</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">'+
+  const visitSec = '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">🎯 到店核销</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">'+
+    '<div style="background:#f8fafc;border-radius:8px;padding:12px"><div style="font-size:11px;color:#64748b;margin-bottom:4px">置顶天数</div><div style="font-size:20px;font-weight:800;color:#2563eb">'+(_pinDays != null ? _pinDays + '天' : '—')+'</div>'+ (_trRec && _trRec.top_at ? '<div style="font-size:10px;color:#94a3b8;margin-top:2px">'+_trRec.top_at.substring(0,10)+'起</div>' : '') +'</div>'+
     '<div style="'+_vurBg+';border-radius:8px;padding:12px"><div style="font-size:11px;color:#64748b;margin-bottom:4px">到店核销率</div><div style="font-size:20px;font-weight:800;color:'+_vurColor+'">'+(b.visitUseRate!=null?b.visitUseRate.toFixed(2)+'%':'—')+'</div></div>'+
     '<div style="background:#f8fafc;border-radius:8px;padding:12px"><div style="font-size:11px;color:#64748b;margin-bottom:4px">领取到店率</div><div style="font-size:20px;font-weight:800;color:#1e293b">'+(_cvr!=null?_cvr.toFixed(2)+'%':'—')+'</div></div>'+
     '<div style="'+_ntBg+';border-radius:8px;padding:12px"><div style="font-size:11px;color:#64748b;margin-bottom:4px">未达门槛占比</div><div style="font-size:20px;font-weight:800;color:'+_ntColor+'">'+(_noThrRate!=null?(_noThrRate*100).toFixed(1)+'%':'—')+'</div></div>'+
