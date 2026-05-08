@@ -222,6 +222,8 @@ async function saveFeedback(brandId,brandName,field,value){
     if(value){
       await supa.from('brand_feedback').insert({brand_id:String(brandId),brand_name:brandName,field_name:field,field_value:value});
     }
+    // 保存成功提示
+    const t=document.getElementById('toast');if(t){t.textContent='✅ 已保存';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1500);}
   }catch(e){alert('saveFeedback exception: '+e.message)}
 }
 let _fbLoaded=false;
@@ -3015,4 +3017,4 @@ const ss=[...new Set(BS.map(b=>b.spMapped))].sort();['fSP'].forEach(id=>{const s
 }
 initDashboard();
 
-</script></body></html>
+</script><div id="toast" style="position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9999;"></div><style>#toast.show{opacity:1}</style></body></html>
