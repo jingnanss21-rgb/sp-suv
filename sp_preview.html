@@ -2516,7 +2516,10 @@ function _pinBuildCard(b){
     _pinDays = Math.floor((reportDate - topDate) / (1000*60*60*24));
     if (_pinDays < 0) _pinDays = 0;
   }
-  const _vurLow = b.visitUseRate != null && b.visitUseRate < 40;
+  // 到店核销率中位数（置顶品牌）
+  const _vurRates = _allPinnedBS.map(bb => bb.visitUseRate).filter(v => v != null);
+  const _vurMed = _vurRates.length ? _median(_vurRates) : 40;
+  const _vurLow = b.visitUseRate != null && b.visitUseRate < _vurMed;
   const _vurBg = _vurLow ? 'background:#fef2f2;border:1px solid #fecaca' : 'background:#f0fdf4;border:1px solid #bbf7d0';
   const _vurColor = _vurLow ? '#dc2626' : '#059669';
   // 领取到店率
@@ -2535,7 +2538,7 @@ function _pinBuildCard(b){
   const _ntColor = _ntLow ? '#dc2626' : '#1e293b';
   const visitSec = '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">🎯 到店核销</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">'+
     '<div style="background:#f8fafc;border-radius:8px;padding:12px"><div style="font-size:11px;color:#64748b;margin-bottom:4px">置顶天数</div><div style="font-size:20px;font-weight:800;color:#2563eb">'+(_pinDays != null ? _pinDays + '天' : '—')+'</div>'+ (_pinTime ? '<div style="font-size:10px;color:#94a3b8;margin-top:2px">'+_pinTime.substring(0,10)+'起</div>' : '') +'</div>'+
-    '<div style="'+_vurBg+';border-radius:8px;padding:12px"><div style="font-size:11px;color:#64748b;margin-bottom:4px">到店核销率</div><div style="font-size:20px;font-weight:800;color:'+_vurColor+'">'+(b.visitUseRate!=null?b.visitUseRate.toFixed(2)+'%':'—')+'</div></div>'+
+    '<div style="'+_vurBg+';border-radius:8px;padding:12px"><div style="font-size:11px;color:#64748b;margin-bottom:4px">到店核销率</div><div style="font-size:20px;font-weight:800;color:'+_vurColor+'">'+(b.visitUseRate!=null?b.visitUseRate.toFixed(2)+'%':'—')+'</div><div style="font-size:10px;color:#94a3b8;margin-top:2px">中位 '+_vurMed.toFixed(1)+'%</div></div>'+
     '<div style="background:#f8fafc;border-radius:8px;padding:12px"><div style="font-size:11px;color:#64748b;margin-bottom:4px">领取到店率</div><div style="font-size:20px;font-weight:800;color:#1e293b">'+(_cvr!=null?_cvr.toFixed(2)+'%':'—')+'</div></div>'+
     '<div style="'+_ntBg+';border-radius:8px;padding:12px"><div style="font-size:11px;color:#64748b;margin-bottom:4px">未达门槛占比</div><div style="font-size:20px;font-weight:800;color:'+_ntColor+'">'+(_noThrRate!=null?(_noThrRate*100).toFixed(1)+'%':'—')+'</div></div>'+
   '</div></div>';
