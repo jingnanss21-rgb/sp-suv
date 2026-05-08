@@ -145,9 +145,10 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
         <div style="font-size:11px;color:#dc2626;font-weight:500;margin-top:4px">⚠️ 因当前缺失老客日均曝光PV字段，X轴暂用7日累计尽曝UV÷7估算</div>
         <div id="pinDsTabs" style="display:none"></div>
       </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center">
         <select id="pinQFiltAlive" onchange="rpinq();rpinc()" style="padding:5px 8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px"><option value="">存活状态</option><option value="alive">存活</option><option value="dead">未存活</option></select>
         <select id="pinQFiltSP" onchange="rpinq();rpinc()" style="padding:5px 8px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px"><option value="">经营服务商</option></select>
+        <input id="pinQSearch" type="text" placeholder="🔍 搜索品牌定位" oninput="_pinQSearchHighlight()" style="padding:5px 10px;border:1px solid #cbd5e1;border-radius:6px;font-size:12px;min-width:150px;">
       </div>
       <div id="pinQuadrantAlert" style="display:none"></div>
       <div id="pinQuadrant" style="width:100%;height:400px"></div>
@@ -2241,9 +2242,46 @@ function rpinq(){
     window._pinResizeBound = true;
     window.addEventListener('resize', function(){ if (_pinChart) _pinChart.resize() });
   }
+  // 保存 points 供搜索高亮使用
+  window._pinChartPoints = points;
+  // 如果已有搜索词，应用高亮
+  _pinQSearchHighlight();
 }
 
-// ========== Tab 1 · B-3 · 置顶品牌诊断卡片池（KA 摇优惠同构）==========
+// 象限图品牌搜索高亮
+function _pinQSearchHighlight() {
+  if (!_pinChart || !window._pinChartPoints) return;
+  const q = ((document.getElementById('pinQSearch')||{}).value || '').trim().toLowerCase();
+  if (!q) {
+    // 清除高亮 —— 恢复所有点的默认透明度
+    _pinChart.dispatchAction({ type: 'downplay', seriesIndex: [0,1,2,3] });
+    return;
+  }
+  // 查找匹配的品牌
+  const matched = window._pinChartPoints.filter(p =>
+    p.name.toLowerCase().includes(q) || String(p.bid).includes(q)
+  );
+  if (matched.length === 0) return;
+
+  // 先 downplay 所有，再 highlight 匹配的
+  _pinChart.dispatchAction({ type: 'downplay', seriesIndex: [0,1,2,3] });
+
+  // 找到匹配点在各 series 中的 dataIndex
+  const option = _pinChart.getOption();
+  const seriesData = option.series.map(s => s.data);
+  matched.forEach(mp => {
+    for (let si = 0; si < seriesData.length; si++) {
+      const idx = seriesData[si].findIndex(d => d[2] === mp.name && d[4] === mp.bid);
+      if (idx >= 0) {
+        _pinChart.dispatchAction({ type: 'highlight', seriesIndex: si, dataIndex: idx });
+        // 同时显示 tooltip
+        if (matched.length === 1) {
+          _pinChart.dispatchAction({ type: 'showTip', seriesIndex: si, dataIndex: idx });
+        }
+      }
+    }
+  });
+}
 var _pinActiveBrand = null; // 当前选中的 brand_id
 var _pinActiveQuad = null;  // 当前象限筛选 'A'|'B'|'C'|'D'|'U'|null
 function _pinFilterChanged(){ _pinActiveBrand = null; rpinc(); }
@@ -2438,15 +2476,30 @@ function _pinBuildCard(b){
   }).join('');
   const chnSec = '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">📈 上线后流量分析 · 分渠道对比</div><div style="overflow-x:auto"><table style="width:100%;font-size:11px;border-collapse:collapse"><thead><tr style="background:#f1f5f9;color:#475569"><th style="padding:5px 8px;text-align:left">渠道</th><th style="padding:5px 8px" class="nc">曝光量</th><th style="padding:5px 8px" class="nc" style="min-width:140px">曝光占比</th><th style="padding:5px 8px" class="nc">核销量</th><th style="padding:5px 8px" class="nc">核销率</th></tr></thead><tbody>'+chnRows+'</tbody></table></div></div>';
 
-  // ④ 老客尽曝情况（简化: 单块 高频/低频）
+  // ④ 老客尽曝情况（简化: 单块 高频/低频）— 动态计算置顶品牌中位数并 highlight
   const hiExp = b.hiExpUV_all, loExp = b.loExpUV_all;
   const hiApp = b.hiAppUV_all, loApp = b.loAppUV_all;
   const hiRate = (hiApp != null && hiApp > 0 && hiExp != null) ? (hiExp/hiApp*100) : null;
   const loRate = (loApp != null && loApp > 0 && loExp != null) ? (loExp/loApp*100) : null;
-  const custSec = '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">🧍 老客尽曝情况</div><div style="background:#f8fafc;border-radius:8px;padding:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px">'+
-    '<div><div style="font-size:11px;color:#64748b">高频应曝尽曝率</div><div style="font-size:18px;font-weight:700;color:'+(hiRate!=null?'#1e293b':'#94a3b8')+'">'+(hiRate!=null?hiRate.toFixed(1)+'%':'—')+'</div></div>'+
-    '<div><div style="font-size:11px;color:#64748b">低频应曝尽曝率</div><div style="font-size:18px;font-weight:700;color:'+(loRate!=null?'#1e293b':'#94a3b8')+'">'+(loRate!=null?loRate.toFixed(1)+'%':'—')+'</div></div>'+
-    '<div><div style="font-size:11px;color:#64748b;cursor:help" title="= (近7日_高频尽曝UV_二选一 + 低频尽曝UV_二选一) / 7 / 近7日均_曝光PV(w) / 10000&#10;&#10;底表: 品牌日报">二选一老客曝光占比</div><div style="font-size:18px;font-weight:700;color:'+(b.e21Ratio!=null?'#1e293b':'#94a3b8')+'">'+(b.e21Ratio!=null?b.e21Ratio.toFixed(1)+'%':'—')+'</div></div>'+
+  // 计算置顶50品牌中位数
+  const _allPinnedBS = (BS||[]).filter(bb => {
+    const _tr2 = (window._D && window._D.topRecords) || [];
+    const _tbids = new Set(_tr2.map(r => String(r.brand_id)));
+    return _tbids.has(String(bb.brandId)) && bb.onlineToday === true;
+  });
+  const _hiRates = _allPinnedBS.map(bb => bb.hiAppUV_all > 0 && bb.hiExpUV_all != null ? bb.hiExpUV_all/bb.hiAppUV_all*100 : null).filter(v => v != null);
+  const _loRates = _allPinnedBS.map(bb => bb.loAppUV_all > 0 && bb.loExpUV_all != null ? bb.loExpUV_all/bb.loAppUV_all*100 : null).filter(v => v != null);
+  const _e21Rates = _allPinnedBS.map(bb => bb.e21Ratio).filter(v => v != null);
+  const _hiMed = _hiRates.length ? _median(_hiRates) : null;
+  const _loMed = _loRates.length ? _median(_loRates) : null;
+  const _e21Med = _e21Rates.length ? _median(_e21Rates) : null;
+  const _hiLow = hiRate != null && _hiMed != null && hiRate < _hiMed;
+  const _loLow = loRate != null && _loMed != null && loRate < _loMed;
+  const _e21Low = b.e21Ratio != null && _e21Med != null && b.e21Ratio < _e21Med;
+  const custSec = '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">🧍 老客尽曝情况 <span style="font-size:10px;color:#94a3b8;font-weight:400">中位数基于置顶50品牌</span></div><div style="background:#f8fafc;border-radius:8px;padding:12px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px">'+
+    '<div style="'+ (_hiLow?'background:#fef2f2;border-radius:6px;padding:6px':'') +'"><div style="font-size:11px;color:#64748b">高频应曝尽曝率</div><div style="font-size:18px;font-weight:700;color:'+(_hiLow?'#dc2626':(hiRate!=null?'#1e293b':'#94a3b8'))+'">'+(hiRate!=null?hiRate.toFixed(1)+'%':'—')+'</div>'+(_hiMed!=null?'<div style="font-size:10px;color:#94a3b8">中位 '+_hiMed.toFixed(1)+'%</div>':'')+'</div>'+
+    '<div style="'+ (_loLow?'background:#fef2f2;border-radius:6px;padding:6px':'') +'"><div style="font-size:11px;color:#64748b">低频应曝尽曝率</div><div style="font-size:18px;font-weight:700;color:'+(_loLow?'#dc2626':(loRate!=null?'#1e293b':'#94a3b8'))+'">'+(loRate!=null?loRate.toFixed(1)+'%':'—')+'</div>'+(_loMed!=null?'<div style="font-size:10px;color:#94a3b8">中位 '+_loMed.toFixed(1)+'%</div>':'')+'</div>'+
+    '<div style="'+ (_e21Low?'background:#fef2f2;border-radius:6px;padding:6px':'') +'"><div style="font-size:11px;color:#64748b;cursor:help" title="= (近7日_高频尽曝UV_二选一 + 低频尽曝UV_二选一) / 7 / 近7日均_曝光PV(w) / 10000&#10;&#10;底表: 品牌日报">二选一老客曝光占比</div><div style="font-size:18px;font-weight:700;color:'+(_e21Low?'#dc2626':(b.e21Ratio!=null?'#1e293b':'#94a3b8'))+'">'+(b.e21Ratio!=null?b.e21Ratio.toFixed(1)+'%':'—')+'</div>'+(_e21Med!=null?'<div style="font-size:10px;color:#94a3b8">中位 '+_e21Med.toFixed(1)+'%</div>':'')+'</div>'+
   '</div>'+
   (hiExp==null&&loExp==null ? '<div style="font-size:10px;color:#d97706;margin-top:6px">⚠️ 0420 起老客 UV 字段缺失，以上为 null</div>' : '') +
   '</div>';
