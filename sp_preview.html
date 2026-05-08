@@ -2151,10 +2151,9 @@ function rpinq(){
   }
   if (emptyEl){ emptyEl.style.display = 'none'; }
 
-  // 中位数 — Y轴用腰部在线品牌全量到店核销率中位数（不局限于已置顶）
+  // 中位数 — X轴和Y轴都用置顶品牌（即 points 中的品牌）的中位数
   const xMed = _median(points.map(p=>p.x));
-  const _allOnlineVUR = (BS||[]).filter(b => b.tierManual==='腰部' && b.statusManual==='在线' && b.onlineToday===true && b.visitUseRate!=null).map(b=>b.visitUseRate);
-  const yMed = _allOnlineVUR.length ? _median(_allOnlineVUR) : _median(points.map(p=>p.y));
+  const yMed = _median(points.map(p=>p.y));
 
   // 四象限分类
   const cls = function(p){
