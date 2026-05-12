@@ -2217,15 +2217,16 @@ function rpinq(){
   }
   if (emptyEl){ emptyEl.style.display = 'none'; }
 
-  // 中位数 — X轴和Y轴都用置顶品牌（即 points 中的品牌）的中位数
+  // X轴中位数（动态），Y轴固定阈值40%（中位数仅参考）
   const xMed = _median(points.map(p=>p.x));
-  const yMed = _median(points.map(p=>p.y));
+  const yThreshold = 40; // 到店核销率固定阈值
+  const yMedRef = _median(points.map(p=>p.y)); // 中位数仅展示参考
 
-  // 四象限分类
+  // 四象限分类（Y轴用固定阈值40%）
   const cls = function(p){
-    if (p.x >= xMed && p.y >= yMed) return 'A'; // 健康
-    if (p.x >= xMed && p.y <  yMed) return 'B'; // 有量低核销
-    if (p.x <  xMed && p.y >= yMed) return 'C'; // 高核销缺量
+    if (p.x >= xMed && p.y >= yThreshold) return 'A'; // 健康
+    if (p.x >= xMed && p.y <  yThreshold) return 'B'; // 有量低核销
+    if (p.x <  xMed && p.y >= yThreshold) return 'C'; // 高核销缺量
     return 'D'; // 双低
   };
   const color = {A:'#059669', B:'#d97706', C:'#2563eb', D:'#dc2626'};
@@ -2284,7 +2285,8 @@ function rpinq(){
          data: [
            {xAxis: xMed, label:{show:true, position:'end', formatter:function(){return 'X中位 '+(xMed*100).toFixed(1)+'%'}, fontSize:9, color:'#64748b'}},
            {xAxis: 1.0, label:{show:true, position:'end', formatter:'目标 100%', fontSize:9, color:'#dc2626'}, lineStyle:{color:'#dc2626', type:'solid', width:1}},
-           {yAxis: yMed, label:{show:true, position:'insideEndTop', formatter:function(){return 'Y中位 '+yMed.toFixed(1)+'%'}, fontSize:9, color:'#64748b', padding:[0,0,0,4]}}
+           {yAxis: yThreshold, label:{show:true, position:'insideEndTop', formatter:'阈值 '+yThreshold+'%', fontSize:9, color:'#dc2626', padding:[0,0,0,4]}, lineStyle:{color:'#dc2626', type:'solid', width:1}},
+           {yAxis: yMedRef, label:{show:true, position:'insideEndBottom', formatter:function(){return '中位 '+yMedRef.toFixed(1)+'%'}, fontSize:9, color:'#94a3b8', padding:[0,0,0,4]}, lineStyle:{color:'#94a3b8', type:'dashed', width:1}}
          ]}},
       {name:'B 有量低核销',    type:'scatter', symbolSize: function(v){return v[6]}, itemStyle:{color:color.B, opacity:0.65}, data: groups.B},
       {name:'C 高核销缺量',    type:'scatter', symbolSize: function(v){return v[6]}, itemStyle:{color:color.C, opacity:0.65}, data: groups.C},
@@ -2387,7 +2389,7 @@ function rpinc(){
   });
   const valid = pts.filter(p => p.x != null && p.y != null);
   const xMed = _median(valid.map(p => p.x));
-  const yMed = _median(valid.map(p => p.y));
+  const yMed = 40; // 到店核销率固定阈值，与象限图一致
   const quadOf = {};
   pts.forEach(p => {
     if (p.x == null || p.y == null) quadOf[p.b.brandId] = 'U';
@@ -2581,10 +2583,11 @@ function _pinBuildCard(b){
     _pinDays = Math.floor((reportDate - topDate) / (1000*60*60*24));
     if (_pinDays < 0) _pinDays = 0;
   }
-  // 到店核销率中位数（置顶品牌）
+  // 到店核销率：固定阈值40%判断，中位数仅参考展示
   const _vurRates = _allPinnedBS.map(bb => bb.visitUseRate).filter(v => v != null);
-  const _vurMed = _vurRates.length ? _median(_vurRates) : 40;
-  const _vurLow = b.visitUseRate != null && b.visitUseRate < _vurMed;
+  const _vurMedRef = _vurRates.length ? _median(_vurRates) : null;
+  const _vurThreshold = 40;
+  const _vurLow = b.visitUseRate != null && b.visitUseRate < _vurThreshold;
   const _vurBg = _vurLow ? 'background:#fef2f2;border:1px solid #fecaca' : 'background:#f0fdf4;border:1px solid #bbf7d0';
   const _vurColor = _vurLow ? '#dc2626' : '#059669';
   // 领取到店率
@@ -2603,7 +2606,7 @@ function _pinBuildCard(b){
   const _ntColor = _ntLow ? '#dc2626' : '#1e293b';
   const visitSec = '<div style="margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:#1e293b;margin-bottom:8px">🎯 到店核销</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">'+
     '<div style="background:#f8fafc;border-radius:8px;padding:12px"><div style="font-size:11px;color:#64748b;margin-bottom:4px">置顶天数</div><div style="font-size:20px;font-weight:800;color:#2563eb">'+(_pinDays != null ? _pinDays + '天' : '—')+'</div>'+ (_pinTime ? '<div style="font-size:10px;color:#94a3b8;margin-top:2px">'+_pinTime.substring(0,10)+'起</div>' : '') +'</div>'+
-    '<div style="'+_vurBg+';border-radius:8px;padding:12px"><div style="font-size:11px;color:#64748b;margin-bottom:4px">到店核销率</div><div style="font-size:20px;font-weight:800;color:'+_vurColor+'">'+(b.visitUseRate!=null?b.visitUseRate.toFixed(2)+'%':'—')+'</div><div style="font-size:10px;color:#94a3b8;margin-top:2px">中位 '+_vurMed.toFixed(1)+'%</div></div>'+
+    '<div style="'+_vurBg+';border-radius:8px;padding:12px"><div style="font-size:11px;color:#64748b;margin-bottom:4px">到店核销率</div><div style="font-size:20px;font-weight:800;color:'+_vurColor+'">'+(b.visitUseRate!=null?b.visitUseRate.toFixed(2)+'%':'—')+'</div><div style="font-size:10px;color:#94a3b8;margin-top:2px">阈值 '+_vurThreshold+'%'+(_vurMedRef!=null?' · 中位 '+_vurMedRef.toFixed(1)+'%':'')+'</div></div>'+
     '<div style="background:#f8fafc;border-radius:8px;padding:12px"><div style="font-size:11px;color:#64748b;margin-bottom:4px">领取到店率</div><div style="font-size:20px;font-weight:800;color:#1e293b">'+(_cvr!=null?_cvr.toFixed(2)+'%':'—')+'</div></div>'+
     '<div style="'+_ntBg+';border-radius:8px;padding:12px"><div style="font-size:11px;color:#64748b;margin-bottom:4px">未达门槛占比</div><div style="font-size:20px;font-weight:800;color:'+_ntColor+'">'+(_noThrRate!=null?(_noThrRate*100).toFixed(1)+'%':'—')+'</div></div>'+
   '</div></div>';
