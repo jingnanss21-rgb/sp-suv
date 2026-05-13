@@ -200,6 +200,8 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
       <select id="bdFiltTier" onchange="renderBrandDetail()" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px"><option value="">全部分层</option><option value="腰部">腰部</option><option value="KA">KA</option></select>
       <select id="bdFiltSP" onchange="renderBrandDetail()" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px"><option value="">全部服务商</option></select>
       <select id="bdFiltCat" onchange="renderBrandDetail()" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px"><option value="">全部类目</option></select>
+      <select id="bdFiltAlive" onchange="renderBrandDetail()" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px"><option value="">存活状态</option><option value="alive">存活</option><option value="dead">未存活</option></select>
+      <select id="bdFiltAsst" onchange="renderBrandDetail()" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px"><option value="">全部对接助理</option></select>
       <input id="bdSearch" type="text" placeholder="🔍 搜索品牌" oninput="renderBrandDetail()" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px;min-width:120px">
     </div>
   </div>
@@ -3069,7 +3071,7 @@ function renderBrandDetail() {
   // 填充筛选器（只填一次）
   const spSel = document.getElementById('bdFiltSP');
   if (spSel && spSel.options.length <= 1) {
-    const sps = [...new Set(BS.map(b => b.spMapped).filter(Boolean))].sort();
+    const sps = [...new Set(BS.filter(b => b.spMapped && b.spMapped !== '自研KA').map(b => b.spMapped))].sort();
     sps.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; spSel.appendChild(o); });
   }
   const catSel = document.getElementById('bdFiltCat');
@@ -3077,17 +3079,28 @@ function renderBrandDetail() {
     const cats = [...new Set(BS.map(b => b.cat4).filter(Boolean))].sort();
     cats.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; catSel.appendChild(o); });
   }
+  const asstSel = document.getElementById('bdFiltAsst');
+  if (asstSel && asstSel.options.length <= 1) {
+    const assts = [...new Set(BS.filter(b => b.spMapped !== '自研KA').map(b => b.assistant).filter(Boolean))].sort();
+    assts.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; asstSel.appendChild(o); });
+  }
 
   // 筛选
   const fTier = (document.getElementById('bdFiltTier') || {}).value || '';
   const fSP = (document.getElementById('bdFiltSP') || {}).value || '';
   const fCat = (document.getElementById('bdFiltCat') || {}).value || '';
+  const fAlive = (document.getElementById('bdFiltAlive') || {}).value || '';
+  const fAsst = (document.getElementById('bdFiltAsst') || {}).value || '';
   const fQ = ((document.getElementById('bdSearch') || {}).value || '').toLowerCase().trim();
 
   let data = BS.filter(b => {
+    if (b.spMapped === '自研KA') return false; // 剔除自研KA
     if (fTier && b.tierManual !== fTier) return false;
     if (fSP && b.spMapped !== fSP) return false;
     if (fCat && b.cat4 !== fCat) return false;
+    if (fAlive === 'alive' && b.isAlive !== true) return false;
+    if (fAlive === 'dead' && b.isAlive !== false) return false;
+    if (fAsst && b.assistant !== fAsst) return false;
     if (fQ && !(b.name || '').toLowerCase().includes(fQ) && !String(b.brandId).includes(fQ)) return false;
     return true;
   });
