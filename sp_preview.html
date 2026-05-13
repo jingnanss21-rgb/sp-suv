@@ -78,7 +78,8 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
 <div class="tabs">
   <button class="tab on" onclick="stab(0)">📈 引入进度</button>
   <button class="tab" onclick="stab(1)">🎯 运营策略</button>
-  <button class="tab" onclick="stab(2)">🎫 活动明细</button>
+  <button class="tab" onclick="stab(2)">📋 商户明细</button>
+  <button class="tab" onclick="stab(3)">🎫 活动明细</button>
 </div>
 
 <!-- ========== Tab 0: 引入进度（引入概览 + SP 达成度） ========== -->
@@ -191,8 +192,27 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
   <!-- （原 全量失分品牌底表 已删除, 由 A-3 scrTbl 替代）-->
 </div>
 
-<!-- ========== Tab 2: 活动明细（iframe）========== -->
+<!-- ========== Tab 2: 商户明细 ========== -->
 <div class="P" id="t2">
+  <div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+    <div style="font-size:14px;font-weight:700;color:#1e293b">📋 商户明细 <span id="brandDetailCount" style="font-size:12px;color:#64748b;font-weight:400"></span></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <select id="bdFiltTier" onchange="renderBrandDetail()" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px"><option value="">全部分层</option><option value="腰部">腰部</option><option value="KA">KA</option></select>
+      <select id="bdFiltSP" onchange="renderBrandDetail()" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px"><option value="">全部服务商</option></select>
+      <select id="bdFiltCat" onchange="renderBrandDetail()" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px"><option value="">全部类目</option></select>
+      <input id="bdSearch" type="text" placeholder="🔍 搜索品牌" oninput="renderBrandDetail()" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px;min-width:120px">
+    </div>
+  </div>
+  <div style="overflow-x:auto;max-height:calc(100vh - 220px);overflow-y:auto;">
+    <table id="brandDetailTable" style="width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap;">
+      <thead id="bdThead"></thead>
+      <tbody id="bdTbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ========== Tab 3: 活动明细（iframe）========== -->
+<div class="P" id="t3">
   <iframe src="https://act-temp.pages.dev?embed=1" style="width:100%;height:calc(100vh - 180px);min-height:680px;border:0;border-radius:6px;background:#fff"></iframe>
 </div>
 
@@ -3037,7 +3057,146 @@ function exportActCSV(){
 }
 function toggleAllExp(master){document.querySelectorAll('.exp-chk').forEach(function(c){c.checked=master.checked})}
 
-function stab(i){document.querySelectorAll('.tab').forEach((b,j)=>{b.classList.toggle('on',j===i)});document.querySelectorAll('.P').forEach((c,j)=>{c.classList.toggle('on',j===i)});if(i===1&&_pinChart){setTimeout(()=>_pinChart.resize(),50)}}
+// ========== Tab 2: 商户明细 ==========
+var _bdSortKey = 'dailyTx';
+var _bdSortDir = 'desc';
+
+function renderBrandDetail() {
+  const thead = document.getElementById('bdThead');
+  const tbody = document.getElementById('bdTbody');
+  if (!thead || !tbody || !BS || !BS.length) return;
+
+  // 填充筛选器（只填一次）
+  const spSel = document.getElementById('bdFiltSP');
+  if (spSel && spSel.options.length <= 1) {
+    const sps = [...new Set(BS.map(b => b.spMapped).filter(Boolean))].sort();
+    sps.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; spSel.appendChild(o); });
+  }
+  const catSel = document.getElementById('bdFiltCat');
+  if (catSel && catSel.options.length <= 1) {
+    const cats = [...new Set(BS.map(b => b.cat4).filter(Boolean))].sort();
+    cats.forEach(v => { const o = document.createElement('option'); o.value = v; o.textContent = v; catSel.appendChild(o); });
+  }
+
+  // 筛选
+  const fTier = (document.getElementById('bdFiltTier') || {}).value || '';
+  const fSP = (document.getElementById('bdFiltSP') || {}).value || '';
+  const fCat = (document.getElementById('bdFiltCat') || {}).value || '';
+  const fQ = ((document.getElementById('bdSearch') || {}).value || '').toLowerCase().trim();
+
+  let data = BS.filter(b => {
+    if (fTier && b.tierManual !== fTier) return false;
+    if (fSP && b.spMapped !== fSP) return false;
+    if (fCat && b.cat4 !== fCat) return false;
+    if (fQ && !(b.name || '').toLowerCase().includes(fQ) && !String(b.brandId).includes(fQ)) return false;
+    return true;
+  });
+
+  // 排序
+  data.sort((a, b) => {
+    let va = _bdGetVal(a, _bdSortKey), vb = _bdGetVal(b, _bdSortKey);
+    if (va == null && vb == null) return 0;
+    if (va == null) return 1;
+    if (vb == null) return -1;
+    return _bdSortDir === 'desc' ? vb - va : va - vb;
+  });
+
+  document.getElementById('brandDetailCount').textContent = data.length + ' 个品牌';
+
+  // 列定义
+  const cols = [
+    { key: 'brandId', label: '品牌ID', w: 60 },
+    { key: 'name', label: '品牌名称', w: 90, sticky: true },
+    { key: 'cat4', label: '类目', w: 70 },
+    { key: 'spMapped', label: '服务商', w: 70 },
+    { key: 'assistant', label: '对接助理', w: 60 },
+    { key: 'isAlive', label: '存活', w: 40 },
+    { key: 'survivalRate', label: '存活率', w: 55, fmt: 'pct2' },
+    { key: 'storeCount', label: '审核门店', w: 60, fmt: 'int' },
+    { key: '_realStore', label: '真实门店', w: 60, fmt: 'int' },
+    { key: 'dailyTx', label: '日均交易(万)', w: 70, fmt: 'f2' },
+    { key: 'txPerStore', label: '1店几笔', w: 55, fmt: 'f1' },
+    { key: 'miniApp', label: '小程序占比', w: 65, fmt: 'pct1' },
+    { key: 'priceForce', label: '价格力', w: 55, fmt: 'pct2' },
+    { key: '_storeComplete', label: '门店完整度', w: 65, fmt: 'pct1' },
+    { key: 'hiAppUV_all', label: '应曝UV高频', w: 70, fmt: 'int', group: '全渠道老客' },
+    { key: 'loAppUV_all', label: '应曝UV低频', w: 70, fmt: 'int' },
+    { key: 'hiExpUV_all', label: '尽曝UV高频', w: 70, fmt: 'int' },
+    { key: 'loExpUV_all', label: '尽曝UV低频', w: 70, fmt: 'int' },
+    { key: '_oldCustRatio', label: '老客曝光占比', w: 70, fmt: 'pct2' },
+    { key: 'hiAppUV', label: '应曝UV高频', w: 70, fmt: 'int', group: '二选一渠道' },
+    { key: 'loAppUV', label: '应曝UV低频', w: 70, fmt: 'int' },
+    { key: 'hiExpUV', label: '尽曝UV高频', w: 70, fmt: 'int' },
+    { key: 'loExpUV', label: '尽曝UV低频', w: 70, fmt: 'int' },
+    { key: 'e21Ratio', label: '老客曝光占比', w: 70, fmt: 'pct2' },
+  ];
+
+  // 表头
+  const thStyle = 'padding:6px 8px;text-align:right;background:#f8fafc;border-bottom:2px solid #e2e8f0;cursor:pointer;user-select:none;font-weight:600;color:#475569;position:sticky;top:0;z-index:2;';
+  const thStyleL = thStyle.replace('text-align:right', 'text-align:left');
+  thead.innerHTML = '<tr>' + cols.map(c => {
+    const align = ['brandId','name','cat4','spMapped','assistant','isAlive'].includes(c.key) ? thStyleL : thStyle;
+    const arrow = _bdSortKey === c.key ? (_bdSortDir === 'desc' ? ' ▼' : ' ▲') : '';
+    const stickyExtra = c.sticky ? 'position:sticky;left:0;z-index:3;' : '';
+    return `<th onclick="_bdSort('${c.key}')" style="${align}${stickyExtra}min-width:${c.w}px;font-size:10px;">${c.label}${arrow}</th>`;
+  }).join('') + '</tr>';
+
+  // 行
+  const tdStyle = 'padding:4px 8px;border-bottom:1px solid #f1f5f9;text-align:right;';
+  const tdStyleL = tdStyle.replace('text-align:right', 'text-align:left');
+  tbody.innerHTML = data.map(b => {
+    return '<tr>' + cols.map(c => {
+      const v = _bdGetVal(b, c.key);
+      const align = ['brandId','name','cat4','spMapped','assistant','isAlive'].includes(c.key) ? tdStyleL : tdStyle;
+      const stickyExtra = c.sticky ? 'position:sticky;left:0;z-index:1;background:#fff;' : '';
+      let display;
+      if (c.key === 'isAlive') {
+        display = v === true ? '<span style="color:#059669">✓</span>' : (v === false ? '<span style="color:#dc2626">✗</span>' : '—');
+      } else if (c.key === 'name') {
+        display = v || '—';
+      } else {
+        display = _bdFmt(v, c.fmt);
+      }
+      return `<td style="${align}${stickyExtra}">${display}</td>`;
+    }).join('') + '</tr>';
+  }).join('');
+}
+
+function _bdGetVal(b, key) {
+  if (key === '_realStore') {
+    return (b.storeCount && b.storeComplete && b.storeComplete > 0) ? Math.round(b.storeCount / (b.storeComplete / 100)) : null;
+  }
+  if (key === '_storeComplete') {
+    return b.storeComplete;
+  }
+  if (key === '_oldCustRatio') {
+    const exp7 = (b.hiExpUV_all || 0) + (b.loExpUV_all || 0);
+    return (exp7 > 0 && b.dailyTx > 0) ? (exp7 / 7 / (b.dailyTx * 10000) * 100) : null;
+  }
+  return b[key];
+}
+
+function _bdFmt(v, fmt) {
+  if (v == null) return '—';
+  if (fmt === 'pct1') return v.toFixed(1) + '%';
+  if (fmt === 'pct2') return v.toFixed(2) + '%';
+  if (fmt === 'f1') return v.toFixed(1);
+  if (fmt === 'f2') return v.toFixed(2);
+  if (fmt === 'int') return typeof v === 'number' ? Math.round(v).toLocaleString() : String(v);
+  return String(v);
+}
+
+function _bdSort(key) {
+  if (_bdSortKey === key) {
+    _bdSortDir = _bdSortDir === 'desc' ? 'asc' : 'desc';
+  } else {
+    _bdSortKey = key;
+    _bdSortDir = 'desc';
+  }
+  renderBrandDetail();
+}
+
+function stab(i){document.querySelectorAll('.tab').forEach((b,j)=>{b.classList.toggle('on',j===i)});document.querySelectorAll('.P').forEach((c,j)=>{c.classList.toggle('on',j===i)});if(i===1&&_pinChart){setTimeout(()=>_pinChart.resize(),50)}if(i===2&&!window._bdRendered){window._bdRendered=true;renderBrandDetail();}}
 
 
 async function initDashboard(targetDate) {
@@ -3054,9 +3213,9 @@ const ss=[...new Set(BS.map(b=>b.spMapped))].sort();['fSP'].forEach(id=>{const s
     // 也预加载活动数据供品牌诊断卡片使用 (未达门槛占比)
     D.loadActivities().then(acts => { window._D.acts = acts; ACTS = acts; actByBrand={};ACTS.forEach(a=>{const n=a.brandName;if(!actByBrand[n])actByBrand[n]=[];actByBrand[n].push(a)}); }).catch(()=>{});
     const tabBtns = document.querySelectorAll('.tab');
-    if (tabBtns.length >= 5) {
+    if (tabBtns.length >= 4) {
       let actsLoadedForUI = false;
-      tabBtns[4].addEventListener('click', async function() {
+      tabBtns[3].addEventListener('click', async function() {
         if (!actsLoadedForUI) {
           actsLoadedForUI = true;
           const le = document.getElementById('loading');
