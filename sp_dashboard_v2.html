@@ -3117,14 +3117,18 @@ function renderBrandDetail() {
   document.getElementById('brandDetailCount').textContent = data.length + ' 个品牌';
 
   // 列定义
+  const _bdTopBids = new Set(((window._D && window._D.topRecords) || []).map(r => String(r.brand_id)));
   const cols = [
     { key: 'brandId', label: '品牌ID', w: 60 },
     { key: 'name', label: '品牌名称', w: 90, sticky: true },
     { key: 'cat4', label: '类目', w: 70 },
     { key: 'spMapped', label: '服务商', w: 70 },
     { key: 'assistant', label: '对接助理', w: 60 },
+    { key: '_isPinned', label: '置顶', w: 40 },
     { key: 'isAlive', label: '存活', w: 40 },
     { key: 'survivalRate', label: '存活率', w: 55, fmt: 'pct2' },
+    { key: '_isPass', label: '四要素达标', w: 60 },
+    { key: '_passType', label: '达标分类', w: 65 },
     { key: 'storeCount', label: '审核门店', w: 60, fmt: 'int' },
     { key: '_realStore', label: '真实门店', w: 60, fmt: 'int' },
     { key: 'dailyTx', label: '日均交易(万)', w: 70, fmt: 'f2' },
@@ -3148,7 +3152,7 @@ function renderBrandDetail() {
   const thStyle = 'padding:6px 8px;text-align:right;background:#f8fafc;border-bottom:2px solid #e2e8f0;cursor:pointer;user-select:none;font-weight:600;color:#475569;position:sticky;top:0;z-index:2;';
   const thStyleL = thStyle.replace('text-align:right', 'text-align:left');
   thead.innerHTML = '<tr>' + cols.map(c => {
-    const align = ['brandId','name','cat4','spMapped','assistant','isAlive'].includes(c.key) ? thStyleL : thStyle;
+    const align = _leftAlignKeys.includes(c.key) ? thStyleL : thStyle;
     const arrow = _bdSortKey === c.key ? (_bdSortDir === 'desc' ? ' ▼' : ' ▲') : '';
     const stickyExtra = c.sticky ? 'position:sticky;left:0;z-index:3;' : '';
     return `<th onclick="_bdSort('${c.key}')" style="${align}${stickyExtra}min-width:${c.w}px;font-size:10px;">${c.label}${arrow}</th>`;
@@ -3157,14 +3161,21 @@ function renderBrandDetail() {
   // 行
   const tdStyle = 'padding:4px 8px;border-bottom:1px solid #f1f5f9;text-align:right;';
   const tdStyleL = tdStyle.replace('text-align:right', 'text-align:left');
+  const _leftAlignKeys = ['brandId','name','cat4','spMapped','assistant','isAlive','_isPinned','_isPass','_passType'];
   tbody.innerHTML = data.map(b => {
     return '<tr>' + cols.map(c => {
       const v = _bdGetVal(b, c.key);
-      const align = ['brandId','name','cat4','spMapped','assistant','isAlive'].includes(c.key) ? tdStyleL : tdStyle;
+      const align = _leftAlignKeys.includes(c.key) ? tdStyleL : tdStyle;
       const stickyExtra = c.sticky ? 'position:sticky;left:0;z-index:1;background:#fff;' : '';
       let display;
       if (c.key === 'isAlive') {
         display = v === true ? '<span style="color:#059669">✓</span>' : (v === false ? '<span style="color:#dc2626">✗</span>' : '—');
+      } else if (c.key === '_isPinned') {
+        display = v ? '<span style="color:#2563eb;font-weight:700">✓</span>' : '';
+      } else if (c.key === '_isPass') {
+        display = v === true ? '<span style="color:#059669">✓ 达标</span>' : (v === false ? '<span style="color:#dc2626">✗</span>' : '—');
+      } else if (c.key === '_passType') {
+        display = v === '系统达标' ? '<span style="color:#059669">系统</span>' : (v === '人工达标' ? '<span style="color:#d97706">人工</span>' : '—');
       } else if (c.key === 'name') {
         display = v || '—';
       } else {
@@ -3176,6 +3187,23 @@ function renderBrandDetail() {
 }
 
 function _bdGetVal(b, key) {
+  if (key === '_isPinned') {
+    return _bdTopBids.has(String(b.brandId));
+  }
+  if (key === '_isPass') {
+    const sysPass = b.bizOk === true && b.priceOk === true && b.infraOk === true && b.trafficOk === true;
+    const bid = b.brandId;
+    const manualPass = !!(_fbCache[bid+'_screen_biz'] || _fbCache[bid+'_screen_price'] || _fbCache[bid+'_screen_infra'] || _fbCache[bid+'_screen_store']);
+    return sysPass || manualPass ? true : false;
+  }
+  if (key === '_passType') {
+    const sysPass = b.bizOk === true && b.priceOk === true && b.infraOk === true && b.trafficOk === true;
+    const bid = b.brandId;
+    const manualPass = !!(_fbCache[bid+'_screen_biz'] || _fbCache[bid+'_screen_price'] || _fbCache[bid+'_screen_infra'] || _fbCache[bid+'_screen_store']);
+    if (sysPass) return '系统达标';
+    if (manualPass) return '人工达标';
+    return null;
+  }
   if (key === '_realStore') {
     return (b.storeCount && b.storeComplete && b.storeComplete > 0) ? Math.round(b.storeCount / (b.storeComplete / 100)) : null;
   }
