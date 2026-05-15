@@ -3148,6 +3148,9 @@ function renderBrandDetail() {
     { key: 'e21Ratio', label: '老客曝光占比', w: 70, fmt: 'pct2' },
   ];
 
+  // 左对齐列
+  const _leftAlignKeys = ['brandId','name','cat4','spMapped','assistant','isAlive','_isPinned','_isPass','_passType'];
+
   // 表头
   const thStyle = 'padding:6px 8px;text-align:right;background:#f8fafc;border-bottom:2px solid #e2e8f0;cursor:pointer;user-select:none;font-weight:600;color:#475569;position:sticky;top:0;z-index:2;';
   const thStyleL = thStyle.replace('text-align:right', 'text-align:left');
@@ -3161,7 +3164,6 @@ function renderBrandDetail() {
   // 行
   const tdStyle = 'padding:4px 8px;border-bottom:1px solid #f1f5f9;text-align:right;';
   const tdStyleL = tdStyle.replace('text-align:right', 'text-align:left');
-  const _leftAlignKeys = ['brandId','name','cat4','spMapped','assistant','isAlive','_isPinned','_isPass','_passType'];
   tbody.innerHTML = data.map(b => {
     return '<tr>' + cols.map(c => {
       const v = _bdGetVal(b, c.key);
