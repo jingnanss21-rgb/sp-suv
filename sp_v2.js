@@ -2899,6 +2899,12 @@ function renderBrandDetail() {
     if (va == null && vb == null) return 0;
     if (va == null) return 1;
     if (vb == null) return -1;
+    // 布尔：true > false
+    if (typeof va === 'boolean') { va = va ? 1 : 0; vb = vb ? 1 : 0; }
+    // 字符串：localeCompare
+    if (typeof va === 'string' && typeof vb === 'string') {
+      return _bdSortDir === 'desc' ? vb.localeCompare(va, 'zh') : va.localeCompare(vb, 'zh');
+    }
     return _bdSortDir === 'desc' ? vb - va : va - vb;
   });
 
