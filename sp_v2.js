@@ -3022,6 +3022,12 @@ function _bdFmt(v, fmt) {
   return String(v);
 }
 
+function bdClearFilters() {
+  ['bdFiltTier','bdFiltSP','bdFiltCat','bdFiltAlive','bdFiltAsst','bdFiltPin','bdFiltPass'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  const q = document.getElementById('bdSearch'); if (q) q.value = '';
+  renderBrandDetail();
+}
+
 function _bdSort(key) {
   if (_bdSortKey === key) {
     _bdSortDir = _bdSortDir === 'desc' ? 'asc' : 'desc';
