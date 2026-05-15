@@ -202,6 +202,8 @@ textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3
       <select id="bdFiltCat" onchange="renderBrandDetail()" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px"><option value="">全部类目</option></select>
       <select id="bdFiltAlive" onchange="renderBrandDetail()" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px"><option value="">存活状态</option><option value="alive">存活</option><option value="dead">未存活</option></select>
       <select id="bdFiltAsst" onchange="renderBrandDetail()" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px"><option value="">全部对接助理</option></select>
+      <select id="bdFiltPin" onchange="renderBrandDetail()" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px"><option value="">是否置顶</option><option value="yes">置顶</option><option value="no">非置顶</option></select>
+      <select id="bdFiltPass" onchange="renderBrandDetail()" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px"><option value="">四要素达标</option><option value="pass">达标</option><option value="fail">未达标</option><option value="sys">系统达标</option><option value="manual">人工达标</option></select>
       <input id="bdSearch" type="text" placeholder="🔍 搜索品牌" oninput="renderBrandDetail()" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px;min-width:120px">
     </div>
   </div>
@@ -3062,6 +3064,7 @@ function toggleAllExp(master){document.querySelectorAll('.exp-chk').forEach(func
 // ========== Tab 2: 商户明细 ==========
 var _bdSortKey = 'dailyTx';
 var _bdSortDir = 'desc';
+var _bdTopBids = new Set();
 
 function renderBrandDetail() {
   const thead = document.getElementById('bdThead');
@@ -3091,7 +3094,12 @@ function renderBrandDetail() {
   const fCat = (document.getElementById('bdFiltCat') || {}).value || '';
   const fAlive = (document.getElementById('bdFiltAlive') || {}).value || '';
   const fAsst = (document.getElementById('bdFiltAsst') || {}).value || '';
+  const fPin = (document.getElementById('bdFiltPin') || {}).value || '';
+  const fPass = (document.getElementById('bdFiltPass') || {}).value || '';
   const fQ = ((document.getElementById('bdSearch') || {}).value || '').toLowerCase().trim();
+
+  // 提前初始化 _bdTopBids 供筛选使用
+  _bdTopBids = new Set(((window._D && window._D.topRecords) || []).map(r => String(r.brand_id)));
 
   let data = BS.filter(b => {
     if (b.spMapped === '自研KA') return false; // 剔除自研KA
@@ -3101,6 +3109,16 @@ function renderBrandDetail() {
     if (fAlive === 'alive' && b.isAlive !== true) return false;
     if (fAlive === 'dead' && b.isAlive !== false) return false;
     if (fAsst && b.assistant !== fAsst) return false;
+    if (fPin === 'yes' && !_bdTopBids.has(String(b.brandId))) return false;
+    if (fPin === 'no' && _bdTopBids.has(String(b.brandId))) return false;
+    if (fPass) {
+      const isPass = _bdGetVal(b, '_isPass');
+      const passType = _bdGetVal(b, '_passType');
+      if (fPass === 'pass' && !isPass) return false;
+      if (fPass === 'fail' && isPass) return false;
+      if (fPass === 'sys' && passType !== '系统达标') return false;
+      if (fPass === 'manual' && passType !== '人工达标') return false;
+    }
     if (fQ && !(b.name || '').toLowerCase().includes(fQ) && !String(b.brandId).includes(fQ)) return false;
     return true;
   });
@@ -3117,7 +3135,6 @@ function renderBrandDetail() {
   document.getElementById('brandDetailCount').textContent = data.length + ' 个品牌';
 
   // 列定义
-  const _bdTopBids = new Set(((window._D && window._D.topRecords) || []).map(r => String(r.brand_id)));
   const cols = [
     { key: 'brandId', label: '品牌ID', w: 60 },
     { key: 'name', label: '品牌名称', w: 90, sticky: true },
