@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>餐饮服务商·运营看板</title>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
-<style>*{margin:0;padding:0;box-sizing:border-box}:root{--b:#2563eb;--b1:#dbeafe;--b2:#1e40af;--g:#059669;--g1:#d1fae5;--r:#dc2626;--r1:#fee2e2;--o:#d97706;--o1:#fef3c7;--x0:#f8fafc;--x1:#f1f5f9;--x2:#e2e8f0;--x3:#cbd5e1;--x4:#94a3b8;--x5:#64748b;--x6:#475569;--x7:#334155;--rd:8px;--s:0 1px 3px rgba(0,0,0,.07)}body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;background:#eef2f7;color:#1e293b;font-size:13px;line-height:1.5}.hdr{background:linear-gradient(135deg,#0f172a,#1e3a5f 50%,#1e40af);color:#fff;padding:20px 24px 14px}.hdr h1{font-size:18px}.hdr p{font-size:11px;color:rgba(255,255,255,.5);margin-top:2px}.W{max-width:1600px;margin:0 auto;padding:0 16px 32px}.tabs{display:flex;margin:14px 0 0;background:#fff;border-radius:var(--rd) var(--rd) 0 0;overflow:hidden;box-shadow:var(--s)}.tab{flex:1;padding:11px;text-align:center;font-size:13px;font-weight:600;color:var(--x5);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent}.tab:hover{color:#1e293b;background:var(--x0)}.tab.on{color:var(--b);border-bottom-color:var(--b)}.P{display:none}.P.on{display:block}.S{margin:28px 0}.ST{font-size:14px;font-weight:700;margin-bottom:8px;color:var(--x7)}.kg{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:8px;margin:8px 0}.kc{background:#fff;border-radius:var(--rd);padding:12px;box-shadow:var(--s);position:relative;overflow:hidden}.kc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}.kc.cb::before{background:var(--b)}.kc.cg::before{background:var(--g)}.kc.co::before{background:var(--o)}.kc.cr::before{background:var(--r)}.kl{font-size:10px;color:var(--x5)}.kv{font-size:20px;font-weight:800}.ks{font-size:10px;color:var(--x4);margin-top:1px}.pb{height:4px;background:var(--x2);border-radius:2px;overflow:hidden;margin-top:4px}.pf{height:100%;border-radius:2px}.pf-b{background:var(--b)}.pf-g{background:var(--g)}.pf-o{background:var(--o)}.pt{font-size:9px;color:var(--x5);text-align:right}.kt{display:inline-block;font-size:9px;font-weight:600;padding:1px 5px;border-radius:3px;margin-top:2px}.kt-ok{background:var(--g1);color:var(--g)}.kt-d{background:var(--r1);color:var(--r)}.sop-card{background:#fff;border-radius:var(--rd);box-shadow:var(--s);padding:20px;margin:12px 0}.sop-timeline{position:relative;padding-left:28px}.sop-timeline::before{content:'';position:absolute;left:11px;top:4px;bottom:4px;width:2px;background:var(--x2)}.sop-node{position:relative;margin-bottom:24px}.sop-node:last-child{margin-bottom:0}.sop-dot{position:absolute;left:-28px;top:2px;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;z-index:1}.sop-dot.dot-b{background:var(--b)}.sop-dot.dot-g{background:var(--g)}.sop-dot.dot-o{background:var(--o)}.sop-node h3{font-size:14px;font-weight:700;margin-bottom:4px}.sop-node .sn-sub{font-size:11px;color:var(--x5);margin-bottom:10px}.sop-factors{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.sf-card{background:var(--x0);border:1px solid var(--x2);border-radius:6px;padding:12px}.sf-card h5{font-size:12px;font-weight:700;margin-bottom:6px;color:var(--x7)}.sf-std{font-size:11px;color:var(--x6);line-height:1.6;margin-bottom:8px}.sf-std .sv{color:var(--b);font-weight:700}.an-tbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}.an-tbl th{background:var(--x7);color:#fff;padding:8px 12px;text-align:center;font-size:11px}.an-tbl td{padding:8px 12px;text-align:center;border:1px solid var(--x2)}.an-tbl td:first-child{text-align:left;font-weight:600;background:var(--x0)}.an-tbl .row-a td{background:var(--g1)}.an-tbl .row-d td{background:var(--r1)}.an-tbl .row-a td:first-child,.an-tbl .row-d td:first-child{background:var(--x0)}.an-tbl b{font-size:14px}.ref{width:100%;border-collapse:collapse;font-size:12px}.ref th,.ref td{padding:8px 10px;border:1px solid var(--x2);text-align:center}.ref th.h0{background:var(--x6);color:#fff}.ref th.h1{background:#4a7ab5;color:#fff}.ref th.h2{background:var(--x4);color:#fff}.ref .ra td{background:var(--g1)}.ref .rd td{background:var(--r1)}.tw{background:#fff;border-radius:var(--rd);box-shadow:var(--s);overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:11px}th{background:var(--x0);color:var(--x6);font-weight:600;text-align:left;padding:6px 7px;border-bottom:1.5px solid var(--x2);white-space:nowrap;position:sticky;top:0;z-index:2;cursor:pointer;font-size:10px}th:hover{background:var(--x2)}td{padding:5px 7px;border-bottom:1px solid var(--x1);vertical-align:middle;white-space:nowrap}tr:hover td{background:var(--x0)}.nc{text-align:right;font-variant-numeric:tabular-nums}#spTbl th,#spTbl td{text-align:left !important}.bd{display:inline-block;font-size:9px;font-weight:600;padding:1px 5px;border-radius:3px}.b-ok{background:var(--g1);color:var(--g)}.b-w{background:var(--o1);color:var(--o)}.b-d{background:var(--r1);color:var(--r)}.b-g{background:var(--x2);color:var(--x6)}.wc{color:var(--r);font-weight:600}.oc{color:var(--g)}.up{color:var(--g)}.dn{color:var(--r)}.fb{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0;align-items:center}.fb select,.fb input{padding:5px 7px;border:1px solid var(--x3);border-radius:5px;font-size:11px;background:#fff}.fl{font-size:10px;color:var(--x5);font-weight:600}textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3);border-radius:3px;font-size:10px;resize:vertical;font-family:inherit;overflow:hidden}.act-row{cursor:pointer}.act-detail{display:none}.act-detail.show{display:table-row}.xb{background:var(--b1);color:var(--b);border:none;border-radius:3px;padding:2px 7px;font-size:10px;cursor:pointer;font-weight:600}.xb:hover{background:var(--b);color:#fff}.bar-group{margin:8px 0}.bar-row{display:flex;align-items:center;margin:5px 0;font-size:11px}.bar-label{width:130px;flex-shrink:0;text-align:right;padding-right:8px;color:var(--x6)}.bar-track{flex:1;height:18px;background:var(--x1);border-radius:3px;overflow:hidden;position:relative}.bar-fill{height:100%;border-radius:3px;display:flex;align-items:center;padding-left:6px;font-size:9px;font-weight:600;color:#fff;min-width:2px}.bf-1{background:#c9736b}.bf-2{background:#c9b36b}.bf-3{background:#7bb88a}.bar-val{min-width:65px;padding-left:8px;font-weight:600;font-size:11px;color:var(--x6)}.bar-pair{display:flex;gap:12px;flex-wrap:wrap}.bar-pair>div{flex:1;min-width:280px}.bar-pair h4{font-size:12px;font-weight:700;margin-bottom:4px;padding-bottom:4px;border-bottom:1px solid var(--x2)}.dist-bar{display:flex;height:26px;border-radius:4px;overflow:hidden;margin:6px 0}.dist-seg{display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;color:#fff;min-width:2px}.dist-legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;font-size:10px;color:var(--x6)}.dist-legend span{display:flex;align-items:center;gap:3px}.dist-legend i{width:8px;height:8px;border-radius:2px;display:inline-block}.qa{background:#fff;border-radius:var(--rd);box-shadow:var(--s);padding:14px;margin-bottom:12px}.qa-q{font-size:12px;font-weight:700;color:var(--x7);margin-bottom:4px}.qa-a{font-size:12px;color:var(--b);font-weight:600;margin-bottom:8px;padding:6px 10px;background:var(--b1);border-radius:4px}.ins{background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border:1px solid #bae6fd;border-radius:var(--rd);padding:14px 16px;margin:14px 0;font-size:12px;color:#0c4a6e;line-height:1.7}.ins b{color:#0369a1}@media(max-width:900px){.sop-factors{grid-template-columns:1fr}.kg{grid-template-columns:repeat(2,1fr)}}</style></head><body>
+<style>*{margin:0;padding:0;box-sizing:border-box}:root{--b:#2563eb;--b1:#dbeafe;--b2:#1e40af;--g:#059669;--g1:#d1fae5;--r:#dc2626;--r1:#fee2e2;--o:#d97706;--o1:#fef3c7;--x0:#f8fafc;--x1:#f1f5f9;--x2:#e2e8f0;--x3:#cbd5e1;--x4:#94a3b8;--x5:#64748b;--x6:#475569;--x7:#334155;--rd:8px;--s:0 1px 3px rgba(0,0,0,.07)}body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;background:#eef2f7;color:#1e293b;font-size:13px;line-height:1.5}.hdr{background:linear-gradient(135deg,#0f172a,#1e3a5f 50%,#1e40af);color:#fff;padding:20px 24px 14px}.hdr h1{font-size:18px}.hdr p{font-size:11px;color:rgba(255,255,255,.5);margin-top:2px}.W{max-width:1600px;margin:0 auto;padding:0 16px 32px}.tabs{display:flex;margin:14px 0 0;background:#fff;border-radius:var(--rd) var(--rd) 0 0;overflow:hidden;box-shadow:var(--s)}.tab{flex:1;padding:11px;text-align:center;font-size:13px;font-weight:600;color:var(--x5);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent}.tab:hover{color:#1e293b;background:var(--x0)}.tab.on{color:var(--b);border-bottom-color:var(--b)}.P{display:none}.P.on{display:block}.S{margin:28px 0}.ST{font-size:14px;font-weight:700;margin-bottom:8px;color:var(--x7)}.kg{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:8px;margin:8px 0}.kc{background:#fff;border-radius:var(--rd);padding:12px;box-shadow:var(--s);position:relative;overflow:hidden}.kc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}.kc.cb::before{background:var(--b)}.kc.cg::before{background:var(--g)}.kc.co::before{background:var(--o)}.kc.cr::before{background:var(--r)}.kl{font-size:10px;color:var(--x5)}.kv{font-size:20px;font-weight:800}.ks{font-size:10px;color:var(--x4);margin-top:1px}.pb{height:4px;background:var(--x2);border-radius:2px;overflow:hidden;margin-top:4px}.pf{height:100%;border-radius:2px}.pf-b{background:var(--b)}.pf-g{background:var(--g)}.pf-o{background:var(--o)}.pt{font-size:9px;color:var(--x5);text-align:right}.kt{display:inline-block;font-size:9px;font-weight:600;padding:1px 5px;border-radius:3px;margin-top:2px}.kt-ok{background:var(--g1);color:var(--g)}.kt-d{background:var(--r1);color:var(--r)}.sop-card{background:#fff;border-radius:var(--rd);box-shadow:var(--s);padding:20px;margin:12px 0}.sop-timeline{position:relative;padding-left:28px}.sop-timeline::before{content:'';position:absolute;left:11px;top:4px;bottom:4px;width:2px;background:var(--x2)}.sop-node{position:relative;margin-bottom:24px}.sop-node:last-child{margin-bottom:0}.sop-dot{position:absolute;left:-28px;top:2px;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;z-index:1}.sop-dot.dot-b{background:var(--b)}.sop-dot.dot-g{background:var(--g)}.sop-dot.dot-o{background:var(--o)}.sop-node h3{font-size:14px;font-weight:700;margin-bottom:4px}.sop-node .sn-sub{font-size:11px;color:var(--x5);margin-bottom:10px}.sop-factors{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.sf-card{background:var(--x0);border:1px solid var(--x2);border-radius:6px;padding:12px}.sf-card h5{font-size:12px;font-weight:700;margin-bottom:6px;color:var(--x7)}.sf-std{font-size:11px;color:var(--x6);line-height:1.6;margin-bottom:8px}.sf-std .sv{color:var(--b);font-weight:700}.an-tbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}.an-tbl th{background:var(--x7);color:#fff;padding:8px 12px;text-align:center;font-size:11px}.an-tbl td{padding:8px 12px;text-align:center;border:1px solid var(--x2)}.an-tbl td:first-child{text-align:left;font-weight:600;background:var(--x0)}.an-tbl .row-a td{background:var(--g1)}.an-tbl .row-d td{background:var(--r1)}.an-tbl .row-a td:first-child,.an-tbl .row-d td:first-child{background:var(--x0)}.an-tbl b{font-size:14px}.ref{width:100%;border-collapse:collapse;font-size:12px}.ref th,.ref td{padding:8px 10px;border:1px solid var(--x2);text-align:center}.ref th.h0{background:var(--x6);color:#fff}.ref th.h1{background:#4a7ab5;color:#fff}.ref th.h2{background:var(--x4);color:#fff}.ref .ra td{background:var(--g1)}.ref .rd td{background:var(--r1)}.tw{background:#fff;border-radius:var(--rd);box-shadow:var(--s);overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:11px}th{background:var(--x0);color:var(--x6);font-weight:600;text-align:left;padding:6px 7px;border-bottom:1.5px solid var(--x2);white-space:nowrap;position:sticky;top:0;z-index:2;cursor:pointer;font-size:10px}th:hover{background:var(--x2)}td{padding:5px 7px;border-bottom:1px solid var(--x1);vertical-align:middle;white-space:nowrap}tr:hover td{background:var(--x0)}.nc{text-align:right;font-variant-numeric:tabular-nums}#spTbl th,#spTbl td{text-align:left !important}.bd{display:inline-block;font-size:9px;font-weight:600;padding:1px 5px;border-radius:3px}.b-ok{background:var(--g1);color:var(--g)}.b-w{background:var(--o1);color:var(--o)}.b-d{background:var(--r1);color:var(--r)}.b-g{background:var(--x2);color:var(--x6)}.wc{color:var(--r);font-weight:600}.oc{color:var(--g)}.up{color:var(--g)}.dn{color:var(--r)}.fb{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0;align-items:center}.fb select,.fb input{padding:5px 7px;border:1px solid var(--x3);border-radius:5px;font-size:11px;background:#fff}.fl{font-size:10px;color:var(--x5);font-weight:600}textarea.rm{width:100%;min-height:22px;padding:3px 5px;border:1px solid var(--x3);border-radius:3px;font-size:10px;resize:vertical;font-family:inherit;overflow:hidden}.act-row{cursor:pointer}.act-detail{display:none}.act-detail.show{display:table-row}.xb{background:var(--b1);color:var(--b);border:none;border-radius:3px;padding:2px 7px;font-size:10px;cursor:pointer;font-weight:600}.xb:hover{background:var(--b);color:#fff}.bar-group{margin:8px 0}.bar-row{display:flex;align-items:center;margin:5px 0;font-size:11px}.bar-label{width:130px;flex-shrink:0;text-align:right;padding-right:8px;color:var(--x6)}.bar-track{flex:1;height:18px;background:var(--x1);border-radius:3px;overflow:hidden;position:relative}.bar-fill{height:100%;border-radius:3px;display:flex;align-items:center;padding-left:6px;font-size:9px;font-weight:600;color:#fff;min-width:2px}.bf-1{background:#c9736b}.bf-2{background:#c9b36b}.bf-3{background:#7bb88a}.bar-val{min-width:65px;padding-left:8px;font-weight:600;font-size:11px;color:var(--x6)}.bar-pair{display:flex;gap:12px;flex-wrap:wrap}.bar-pair>div{flex:1;min-width:280px}.bar-pair h4{font-size:12px;font-weight:700;margin-bottom:4px;padding-bottom:4px;border-bottom:1px solid var(--x2)}.dist-bar{display:flex;height:26px;border-radius:4px;overflow:hidden;margin:6px 0}.dist-seg{display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;color:#fff;min-width:2px}.dist-legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;font-size:10px;color:var(--x6)}.dist-legend span{display:flex;align-items:center;gap:3px}.dist-legend i{width:8px;height:8px;border-radius:2px;display:inline-block}.qa{background:#fff;border-radius:var(--rd);box-shadow:var(--s);padding:14px;margin-bottom:12px}.qa-q{font-size:12px;font-weight:700;color:var(--x7);margin-bottom:4px}.qa-a{font-size:12px;color:var(--b);font-weight:600;margin-bottom:8px;padding:6px 10px;background:var(--b1);border-radius:4px}.ins{background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border:1px solid #bae6fd;border-radius:var(--rd);padding:14px 16px;margin:14px 0;font-size:12px;color:#0c4a6e;line-height:1.7}.ins b{color:#0369a1}@media(max-width:900px){.sop-factors{grid-template-columns:1fr}.kg{grid-template-columns:repeat(2,1fr)}}.sp-drawer-mask{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.35);z-index:999;display:none;opacity:0;transition:opacity .25s}.sp-drawer-mask.show{display:block;opacity:1}.sp-drawer{position:fixed;top:0;right:-540px;width:520px;height:100vh;background:#f8fafc;z-index:1000;box-shadow:-4px 0 24px rgba(0,0,0,.12);transition:right .3s cubic-bezier(.4,0,.2,1);overflow-y:auto;padding:24px}.sp-drawer.show{right:0}.sp-drawer-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;border:1px solid var(--x2);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--x5);z-index:1}.sp-drawer-close:hover{background:var(--x1);color:var(--x7)}</style></head><body>
 <div id="loading" style="position:fixed;top:0;left:0;right:0;bottom:0;background:#eef2f7;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column"><div style="font-size:16px;color:#475569;font-weight:600">🍜 加载中...</div><div style="font-size:11px;color:#94a3b8;margin-top:6px">正在渲染数据</div></div>
 <div class="hdr" style="position:sticky;top:0;z-index:900;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap"><div><h1>🍜 餐饮服务商 · 运营看板</h1><p><span id="hdrDataDate"></span></p></div><div style="padding:4px 8px"><select id="dateSelector" style="padding:4px 8px;border:1px solid #ddd;border-radius:4px;font-size:12px"></select></div></div><div class="W">
 <div class="tabs">
@@ -35,6 +35,21 @@
   <div class="S">
     <div class="ST">📊 服务商目标达成概览</div>
     <div class="tw"><table id="spTbl"><thead><tr><th>服务商</th><th>类型</th><th>负责人</th><th class="nc">目标</th><th class="nc">投放</th><th class="nc">在线</th><th class="nc">流失</th><th class="nc">存活</th><th class="nc">存活率</th><th>进度</th></tr></thead><tbody></tbody></table></div>
+  </div>
+</div>
+<!-- SP 趋势抽屉 -->
+<div id="spDrawerMask" class="sp-drawer-mask" onclick="closeSpDrawer()"></div>
+<div id="spDrawer" class="sp-drawer">
+  <button class="sp-drawer-close" onclick="closeSpDrawer()">✕</button>
+  <div id="spDrawerHead" style="margin-bottom:16px"></div>
+  <div id="spDrawerCards" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px"></div>
+  <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-bottom:14px">
+    <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:8px">📈 投放品牌趋势</div>
+    <div id="spDrawerTrendChart" style="width:100%;height:240px"></div>
+  </div>
+  <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px">
+    <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:8px">📊 存活率趋势</div>
+    <div id="spDrawerAliveChart" style="width:100%;height:240px"></div>
   </div>
 </div>
 <!-- ========== Tab 1: 运营策略（SOP + 引入前四要素 + 引入后置顶）========== -->
@@ -267,7 +282,7 @@ fetchJSON('brand_channel', 'data_date=eq.' + targetDate + '&select=*'),
 fetchJSON('sp_info', 'select=*'),
 fetchJSON('sop_snapshot', 'data_date=eq.' + targetDate + '&select=*'),
 fetchJSON('brand_top_records', 'select=*').catch(()=>[]),
-fetchAllParallel('brand_snapshot', 'select=data_date,brand_id,tier,sub_category,online_today,is_alive,hi_exp_uv_all,lo_exp_uv_all,visit_use_rate,daily_tx&data_date=gte.' + trendStart + '&data_date=lte.' + targetDate + '&order=data_date.asc').catch(()=>[]),
+fetchAllParallel('brand_snapshot', 'select=data_date,brand_id,sp_name,tier,sub_category,online_today,is_alive,hi_exp_uv_all,lo_exp_uv_all,visit_use_rate,daily_tx&data_date=gte.' + trendStart + '&data_date=lte.' + targetDate + '&order=data_date.asc').catch(()=>[]),
 ]);
 const spSummary = {};
 spInfos.forEach(s => {
@@ -1207,7 +1222,7 @@ ${topBar('#c2410c')}
 })()}
 </div>`;
 }
-function rov(){const tb=document.querySelector('#spTbl tbody');tb.innerHTML='';Object.keys(SPS).filter(k=>SPS[k].brands.length>0 && (SPS[k].target||0)>0).sort((a,b)=>{const ta=SPS[a].type||'',tb2=SPS[b].type||'';return(ta.indexOf('SaaS')>=0?0:1)-(tb2.indexOf('SaaS')>=0?0:1)||SPS[b].brands.length-SPS[a].brands.length}).forEach(k=>{const s=SPS[k],bs2=W.filter(b=>b.spMapped===k);if(!bs2.length)return;const o2=bs2.filter(b=>b.statusManual==='在线'),l2=bs2.filter(b=>b.statusManual==='流失'),a2=o2.filter(b=>b.isAlive===true);const sr2=o2.length?(a2.length/o2.length*100).toFixed(1):'—';const p2=s.target?(bs2.length/s.target*100).toFixed(1):'—';const pc=parseFloat(p2)>=100?'pf-g':parseFloat(p2)>=60?'pf-b':'pf-o';tb.innerHTML+=`<tr><td><b>${s.name}</b></td><td>${s.type||'—'}</td><td>${s.owner||'—'}</td><td class="nc">${s.target||'—'}</td><td class="nc"><b>${bs2.length}</b></td><td class="nc">${o2.length}</td><td class="nc">${l2.length}</td><td class="nc">${a2.length}</td><td class="nc ${parseFloat(sr2)>=50?'oc':'wc'}">${sr2}%</td><td style="min-width:80px"><div class="pb"><div class="pf ${pc}" style="width:${Math.min(parseFloat(p2)||0,100)}%"></div></div><div class="pt">${p2}%</div></td></tr>`})}
+function rov(){const tb=document.querySelector('#spTbl tbody');tb.innerHTML='';Object.keys(SPS).filter(k=>SPS[k].brands.length>0 && (SPS[k].target||0)>0).sort((a,b)=>{const ta=SPS[a].type||'',tb2=SPS[b].type||'';return(ta.indexOf('SaaS')>=0?0:1)-(tb2.indexOf('SaaS')>=0?0:1)||SPS[b].brands.length-SPS[a].brands.length}).forEach(k=>{const s=SPS[k],bs2=W.filter(b=>b.spMapped===k);if(!bs2.length)return;const o2=bs2.filter(b=>b.statusManual==='在线'),l2=bs2.filter(b=>b.statusManual==='流失'),a2=o2.filter(b=>b.isAlive===true);const sr2=o2.length?(a2.length/o2.length*100).toFixed(1):'—';const p2=s.target?(bs2.length/s.target*100).toFixed(1):'—';const pc=parseFloat(p2)>=100?'pf-g':parseFloat(p2)>=60?'pf-b':'pf-o';const esc=s.name.replace(/'/g,"\\'");tb.innerHTML+=`<tr style="cursor:pointer" onclick="openSpDrawer('${esc}')" title="点击查看趋势"><td><b>${s.name}</b></td><td>${s.type||'—'}</td><td>${s.owner||'—'}</td><td class="nc">${s.target||'—'}</td><td class="nc"><b>${bs2.length}</b></td><td class="nc">${o2.length}</td><td class="nc">${l2.length}</td><td class="nc">${a2.length}</td><td class="nc ${parseFloat(sr2)>=50?'oc':'wc'}">${sr2}%</td><td style="min-width:80px"><div class="pb"><div class="pf ${pc}" style="width:${Math.min(parseFloat(p2)||0,100)}%"></div></div><div class="pt">${p2}%</div></td></tr>`})}
 const INTRO_CATERING = new Set(['正餐','茶饮咖啡','中式快餐','甜品烘焙','西式快餐','小吃','其他餐饮']);
 var _introChart = null;
 var _aliveChart = null;
@@ -1552,7 +1567,158 @@ data: aliveSeries
 }]
 });
 }
-function rfc(){
+// ========== SP 趋势抽屉 ==========
+var _spDrawerTrendChart = null, _spDrawerAliveChart = null;
+function openSpDrawer(spName){
+  var D = window._D;
+  if (!D) return;
+  var sp = SPS[spName] || {};
+  // 头部
+  document.getElementById('spDrawerHead').innerHTML =
+    '<div style="font-size:18px;font-weight:800;color:#1e293b;margin-bottom:4px">'+spName+'</div>'+
+    '<div style="font-size:12px;color:#64748b">'+
+    (sp.type||'')+(sp.owner?' · '+sp.owner:'')+
+    (sp.target?' · 目标 <b style="color:#2563eb">'+sp.target+'</b>':'')+
+    '</div>';
+  // 当日数据
+  var bs2 = (W||[]).filter(function(b){return b.spMapped===spName});
+  var deployed = bs2.length;
+  var onlineArr = bs2.filter(function(b){return b.statusManual==='在线'});
+  var onlineCnt = onlineArr.filter(function(b){return b.onlineToday===true}).length;
+  var aliveCnt = onlineArr.filter(function(b){return b.onlineToday===true && b.isAlive===true}).length;
+  var aliveRate = onlineCnt > 0 ? (aliveCnt/onlineCnt*100).toFixed(1)+'%' : '—';
+  var lostCnt = bs2.filter(function(b){return b.statusManual==='流失'}).length;
+  function _mc(label, icon, val, sub, color){
+    return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:12px">'+
+    '<div style="font-size:10px;color:#64748b;font-weight:600">'+icon+' '+label+'</div>'+
+    '<div style="font-size:24px;font-weight:800;color:'+(color||'#1e293b')+';margin-top:4px">'+val+'</div>'+
+    (sub?'<div style="font-size:10px;color:#94a3b8;margin-top:2px">'+sub+'</div>':'')+
+    '</div>';
+  }
+  document.getElementById('spDrawerCards').innerHTML =
+    _mc('投放','📦',deployed,'含流失 '+lostCnt,'#2563eb')+
+    _mc('在线','📡',onlineCnt,'当日在线','#059669')+
+    _mc('存活','✅',aliveCnt,'存活率≥1%','#059669')+
+    _mc('存活率','📊',aliveRate,'存活/在线','#0369a1');
+  // 趋势数据
+  var trendRows = (D.trendRows||[]).filter(function(r){return r && r.sp_name===spName && r.tier==='腰部'});
+  var allDates = Array.from(new Set((D.trendRows||[]).map(function(r){return r.data_date}))).sort();
+  var targetDate = (F && F.dataDate) || '';
+  var xDates = allDates.filter(function(d){return d<=targetDate && d>='2026-04-01'});
+  if (xDates.length === 0){
+    document.getElementById('spDrawerTrendChart').innerHTML='<div style="padding:20px;text-align:center;color:#94a3b8;font-size:12px">暂无趋势数据</div>';
+    document.getElementById('spDrawerAliveChart').innerHTML='<div style="padding:20px;text-align:center;color:#94a3b8;font-size:12px">暂无趋势数据</div>';
+    document.getElementById('spDrawerMask').classList.add('show');
+    document.getElementById('spDrawer').classList.add('show');
+    return;
+  }
+  // 绿线：当日在线
+  var greenByDate = {};
+  trendRows.forEach(function(r){
+    if (r.online_today!==true) return;
+    var d=r.data_date;
+    if(!greenByDate[d]) greenByDate[d]=new Set();
+    greenByDate[d].add(r.brand_id);
+  });
+  var greenSeries = xDates.map(function(d){return greenByDate[d]?greenByDate[d].size:0});
+  // 蓝线：累计已投放（该SP腰部×在线+流失 的首次出现）
+  var followBids = new Set();
+  bs2.forEach(function(b){
+    if(b.brandId!=null && (b.statusManual==='在线'||b.statusManual==='流失')) followBids.add(Number(b.brandId));
+  });
+  var firstSeen = {};
+  trendRows.forEach(function(r){
+    if(!r||r.brand_id==null) return;
+    var bid=r.brand_id, d=r.data_date;
+    if(firstSeen[bid]==null||d<firstSeen[bid]) firstSeen[bid]=d;
+  });
+  var events = [];
+  Object.keys(firstSeen).forEach(function(bid){
+    var b=Number(bid);
+    if(followBids.has(b)) events.push([firstSeen[bid],b]);
+  });
+  events.sort(function(a,b){return a[0]<b[0]?-1:a[0]>b[0]?1:0});
+  var cum = new Set(), blueSeries = [], idx2 = 0;
+  xDates.forEach(function(d){
+    while(idx2<events.length&&events[idx2][0]<=d){cum.add(events[idx2][1]);idx2++}
+    blueSeries.push(cum.size);
+  });
+  // X轴格式
+  var xFmt = function(val,idx){
+    if(idx===0||idx===xDates.length-1||idx%7===0) return val.substring(5);
+    return '';
+  };
+  // 图1：投放+在线趋势
+  var el1 = document.getElementById('spDrawerTrendChart');
+  if(_spDrawerTrendChart){_spDrawerTrendChart.dispose();_spDrawerTrendChart=null}
+  _spDrawerTrendChart = echarts.init(el1);
+  _spDrawerTrendChart.setOption({
+    grid:{left:48,right:48,top:40,bottom:32},
+    tooltip:{trigger:'axis',formatter:function(params){
+      var s='<b>'+params[0].axisValue+'</b>';
+      params.forEach(function(p){s+='<br>'+p.marker+p.seriesName+': <b>'+p.value+'</b> 家'});
+      var g=params.find(function(p){return p.seriesName.indexOf('在线')>=0});
+      var b=params.find(function(p){return p.seriesName.indexOf('已投放')>=0});
+      if(g&&b){s+='<br><span style="color:#94a3b8">未在线: <b>'+(b.value-g.value)+'</b></span>'}
+      return s;
+    }},
+    xAxis:{type:'category',data:xDates,boundaryGap:false,axisLabel:{fontSize:10,color:'#64748b',formatter:xFmt,interval:0},axisLine:{lineStyle:{color:'#cbd5e1'}},axisTick:{show:false}},
+    yAxis:[
+      {type:'value',name:'在线',position:'left',nameTextStyle:{fontSize:10,color:'#059669',fontWeight:600,align:'right'},nameGap:18,axisLabel:{fontSize:10,color:'#059669'},splitLine:{lineStyle:{color:'#e2e8f0',type:'dashed'}},scale:true},
+      {type:'value',name:'已投放',position:'right',nameTextStyle:{fontSize:10,color:'#2563eb',fontWeight:600,align:'left'},nameGap:18,axisLabel:{fontSize:10,color:'#2563eb'},splitLine:{show:false},scale:true}
+    ],
+    series:[
+      {name:'当日在线',type:'line',yAxisIndex:0,smooth:false,symbol:'circle',symbolSize:function(v,p){return p.dataIndex===xDates.length-1?7:3},lineStyle:{width:2,color:'#059669'},itemStyle:{color:'#059669'},areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:'rgba(5,150,105,0.14)'},{offset:1,color:'rgba(5,150,105,0.01)'}]}},data:greenSeries},
+      {name:'累计已投放',type:'line',yAxisIndex:1,smooth:false,symbol:'circle',symbolSize:function(v,p){return p.dataIndex===xDates.length-1?7:3},lineStyle:{width:2,color:'#2563eb'},itemStyle:{color:'#2563eb'},data:blueSeries}
+    ]
+  });
+  // 图2：存活+存活率趋势
+  var aliveByDate = {};
+  trendRows.forEach(function(r){
+    if(r.online_today!==true) return;
+    var d=r.data_date;
+    if(!aliveByDate[d]) aliveByDate[d]={online:0,alive:0};
+    aliveByDate[d].online++;
+    if(r.is_alive===true) aliveByDate[d].alive++;
+  });
+  var aliveCntSeries2 = xDates.map(function(d){var v=aliveByDate[d];return v?v.alive:0});
+  var aliveRateSeries2 = xDates.map(function(d){var v=aliveByDate[d];if(!v||v.online===0)return null;return +(v.alive/v.online*100).toFixed(1)});
+  var el2 = document.getElementById('spDrawerAliveChart');
+  if(_spDrawerAliveChart){_spDrawerAliveChart.dispose();_spDrawerAliveChart=null}
+  _spDrawerAliveChart = echarts.init(el2);
+  _spDrawerAliveChart.setOption({
+    grid:{left:48,right:48,top:40,bottom:32},
+    legend:{show:false},
+    tooltip:{trigger:'axis',formatter:function(params){
+      var d=params[0].axisValue;
+      var v=aliveByDate[d]||{online:0,alive:0};
+      var s='<b>'+d+'</b>';
+      params.forEach(function(p){var u=p.seriesName==='存活率'?'%':'家';s+='<br>'+p.marker+p.seriesName+': <b>'+p.value+u+'</b>'});
+      s+='<br><span style="color:#94a3b8">存活 '+v.alive+' / 在线 '+v.online+'</span>';
+      return s;
+    }},
+    xAxis:{type:'category',data:xDates,boundaryGap:false,axisLabel:{fontSize:10,color:'#64748b',formatter:xFmt,interval:0},axisLine:{lineStyle:{color:'#cbd5e1'}},axisTick:{show:false}},
+    yAxis:[
+      {type:'value',name:'存活',position:'left',nameTextStyle:{fontSize:10,color:'#10b981',fontWeight:600,align:'right'},nameGap:18,axisLabel:{fontSize:10,color:'#10b981'},splitLine:{lineStyle:{color:'#e2e8f0',type:'dashed'}},scale:true,min:0},
+      {type:'value',name:'存活率',position:'right',nameTextStyle:{fontSize:10,color:'#0369a1',fontWeight:600,align:'left'},nameGap:18,axisLabel:{fontSize:10,color:'#0369a1',formatter:'{value}%'},splitLine:{show:false},scale:true,min:0}
+    ],
+    series:[
+      {name:'存活品牌数',type:'line',yAxisIndex:0,smooth:false,symbol:'circle',symbolSize:function(v,p){return p.dataIndex===xDates.length-1?7:3},lineStyle:{width:2,color:'#10b981'},itemStyle:{color:'#10b981'},data:aliveCntSeries2},
+      {name:'存活率',type:'line',yAxisIndex:1,smooth:false,symbol:'circle',symbolSize:function(v,p){return p.dataIndex===xDates.length-1?7:3},lineStyle:{width:2,color:'#0369a1'},itemStyle:{color:'#0369a1'},areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:'rgba(3,105,161,0.14)'},{offset:1,color:'rgba(3,105,161,0.01)'}]}},data:aliveRateSeries2}
+    ]
+  });
+  // 显示
+  document.getElementById('spDrawerMask').classList.add('show');
+  document.getElementById('spDrawer').classList.add('show');
+}
+function closeSpDrawer(){
+  document.getElementById('spDrawerMask').classList.remove('show');
+  document.getElementById('spDrawer').classList.remove('show');
+  if(_spDrawerTrendChart){_spDrawerTrendChart.dispose();_spDrawerTrendChart=null}
+  if(_spDrawerAliveChart){_spDrawerAliveChart.dispose();_spDrawerAliveChart=null}
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeSpDrawer()});
+// ========== END SP 趋势抽屉 ==========
 const el = document.getElementById('fcKg');
 if (!el) return;
 const wc = (BS||[]).filter(b =>
