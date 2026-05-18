@@ -1643,6 +1643,10 @@ function openSpDrawer(spName){
     while(idx2<events.length&&events[idx2][0]<=d){cum.add(events[idx2][1]);idx2++}
     blueSeries.push(cum.size);
   });
+  // 过滤：绿线和蓝线都为0的日期用null（避免坐标轴被拉到0）
+  for(var _fi=0;_fi<xDates.length;_fi++){
+    if(greenSeries[_fi]===0 && blueSeries[_fi]===0){greenSeries[_fi]=null;blueSeries[_fi]=null}
+  }
   // X轴格式
   var xFmt = function(val,idx){
     if(idx===0||idx===xDates.length-1||idx%7===0) return val.substring(5);
@@ -1656,10 +1660,11 @@ function openSpDrawer(spName){
     grid:{left:48,right:48,top:40,bottom:32},
     tooltip:{trigger:'axis',formatter:function(params){
       var s='<b>'+params[0].axisValue+'</b>';
-      params.forEach(function(p){s+='<br>'+p.marker+p.seriesName+': <b>'+p.value+'</b> 家'});
-      var g=params.find(function(p){return p.seriesName.indexOf('在线')>=0});
-      var b=params.find(function(p){return p.seriesName.indexOf('已投放')>=0});
-      if(g&&b){s+='<br><span style="color:#94a3b8">未在线: <b>'+(b.value-g.value)+'</b></span>'}
+      var b2=params.find(function(p){return p.seriesName.indexOf('已投放')>=0});
+      var g2=params.find(function(p){return p.seriesName.indexOf('在线')>=0});
+      if(b2&&b2.value!=null) s+='<br>'+b2.marker+b2.seriesName+': <b>'+b2.value+'</b> 家';
+      if(g2&&g2.value!=null) s+='<br>'+g2.marker+g2.seriesName+': <b>'+g2.value+'</b> 家';
+      if(g2&&b2&&g2.value!=null&&b2.value!=null){s+='<br><span style="color:#94a3b8">未在线: <b>'+(b2.value-g2.value)+'</b></span>'}
       return s;
     }},
     xAxis:{type:'category',data:xDates,boundaryGap:false,axisLabel:{fontSize:10,color:'#64748b',formatter:xFmt,interval:0},axisLine:{lineStyle:{color:'#cbd5e1'}},axisTick:{show:false}},
@@ -1681,7 +1686,7 @@ function openSpDrawer(spName){
     aliveByDate[d].online++;
     if(r.is_alive===true) aliveByDate[d].alive++;
   });
-  var aliveCntSeries2 = xDates.map(function(d){var v=aliveByDate[d];return v?v.alive:0});
+  var aliveCntSeries2 = xDates.map(function(d){var v=aliveByDate[d];return (v&&v.online>0)?v.alive:null});
   var aliveRateSeries2 = xDates.map(function(d){var v=aliveByDate[d];if(!v||v.online===0)return null;return +(v.alive/v.online*100).toFixed(1)});
   var el2 = document.getElementById('spDrawerAliveChart');
   if(_spDrawerAliveChart){_spDrawerAliveChart.dispose();_spDrawerAliveChart=null}
