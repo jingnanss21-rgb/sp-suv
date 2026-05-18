@@ -2811,7 +2811,7 @@ actsLoadedForUI = true;
 const le = document.getElementById('loading');
 if (le) { le.style.display = 'flex'; }
 const freshActs = await D.loadActivities();
-ACTS.length = 0; ACTS.push.apply(ACTS, freshActs);
+ACTS.length = 0; for(var _i=0;_i<freshActs.length;_i++)ACTS.push(freshActs[_i]);
 if (typeof actByBrand !== 'undefined') {
 Object.keys(actByBrand).forEach(function(k){delete actByBrand[k]});
 ACTS.forEach(function(a){var n=a.brandName;if(!actByBrand[n])actByBrand[n]=[];actByBrand[n].push(a)});
