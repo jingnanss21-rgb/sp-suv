@@ -139,7 +139,7 @@
       <select id="bdFiltAlive" onchange="renderBrandDetail()" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px"><option value="">存活状态</option><option value="alive">存活</option><option value="dead">未存活</option></select>
       <select id="bdFiltAsst" onchange="renderBrandDetail()" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px"><option value="">全部对接助理</option></select>
       <select id="bdFiltPin" onchange="renderBrandDetail()" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px"><option value="">是否置顶</option><option value="yes">置顶</option><option value="no">非置顶</option></select>
-      <select id="bdFiltPass" onchange="renderBrandDetail()" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px"><option value="">四要素达标</option><option value="pass">达标</option><option value="fail">未达标</option><option value="sys">系统达标</option><option value="manual">人工达标</option></select>
+      <select id="bdFiltPass" onchange="renderBrandDetail()" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px"><option value="">四要素达标</option><option value="pass">达标（全部）</option><option value="passPin">达标可置顶</option><option value="fail">未达标</option><option value="sys">系统达标</option><option value="manual">人工达标</option></select>
       <input id="bdSearch" type="text" placeholder="🔍 搜索品牌" oninput="renderBrandDetail()" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px;min-width:120px">
       <button onclick="bdClearFilters()" style="padding:4px 10px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px;background:#f8fafc;cursor:pointer;color:#64748b;white-space:nowrap">✕ 清除筛选</button>
     </div>
@@ -2839,6 +2839,11 @@ if (fPass) {
 const isPass = _bdGetVal(b, '_isPass');
 const passType = _bdGetVal(b, '_passType');
 if (fPass === 'pass' && !isPass) return false;
+if (fPass === 'passPin') {
+  if (!isPass) return false;
+  const bizFb = _fbCache[String(b.brandId)+'_screen_biz'] || '';
+  if (bizFb === '沟通确认后希望在线') return false;
+}
 if (fPass === 'fail' && isPass) return false;
 if (fPass === 'sys' && passType !== '系统达标') return false;
 if (fPass === 'manual' && passType !== '人工达标') return false;
