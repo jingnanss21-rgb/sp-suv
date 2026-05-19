@@ -142,6 +142,7 @@
       <select id="bdFiltPass" onchange="renderBrandDetail()" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px"><option value="">四要素达标</option><option value="pass">达标（全部）</option><option value="passPin">达标可置顶</option><option value="fail">未达标</option><option value="sys">系统达标</option><option value="manual">人工达标</option></select>
       <input id="bdSearch" type="text" placeholder="🔍 搜索品牌" oninput="renderBrandDetail()" style="padding:4px 8px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px;min-width:120px">
       <button onclick="bdClearFilters()" style="padding:4px 10px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px;background:#f8fafc;cursor:pointer;color:#64748b;white-space:nowrap">✕ 清除筛选</button>
+      <button id="bdToggleHidden" onclick="window._bdShowHidden=!window._bdShowHidden;this.textContent=window._bdShowHidden?'◂ 收起明细列':'▸ 展开明细列';renderBrandDetail()" style="padding:4px 10px;border:1px solid #cbd5e1;border-radius:5px;font-size:12px;background:#f8fafc;cursor:pointer;color:#64748b;white-space:nowrap">▸ 展开明细列</button>
     </div>
   </div>
   <div style="overflow-x:auto;max-height:calc(100vh - 220px);overflow-y:auto;">
@@ -2797,6 +2798,7 @@ function toggleAllExp(master){document.querySelectorAll('.exp-chk').forEach(func
 var _bdSortKey = 'dailyTx';
 var _bdSortDir = 'desc';
 var _bdTopBids = new Set();
+window._bdShowHidden = false;
 function renderBrandDetail() {
 const thead = document.getElementById('bdThead');
 const tbody = document.getElementById('bdTbody');
@@ -2881,15 +2883,19 @@ const cols = [
 { key: 'miniApp', label: '小程序占比', w: 65, fmt: 'pct1' },
 { key: 'priceForce', label: '价格力', w: 55, fmt: 'pct2' },
 { key: '_storeComplete', label: '门店完整度', w: 65, fmt: 'pct1' },
-{ key: 'hiAppUV_all', label: '全-应曝高频', w: 70, fmt: 'int', group: '全渠道老客' },
-{ key: 'loAppUV_all', label: '全-应曝低频', w: 70, fmt: 'int' },
-{ key: 'hiExpUV_all', label: '全-尽曝高频', w: 70, fmt: 'int' },
-{ key: 'loExpUV_all', label: '全-尽曝低频', w: 70, fmt: 'int' },
+{ key: 'hiAppUV_all', label: '全-应曝高频', w: 70, fmt: 'int', group: '全渠道老客', hidden: true },
+{ key: 'loAppUV_all', label: '全-应曝低频', w: 70, fmt: 'int', hidden: true },
+{ key: 'hiExpUV_all', label: '全-尽曝高频', w: 70, fmt: 'int', hidden: true },
+{ key: 'loExpUV_all', label: '全-尽曝低频', w: 70, fmt: 'int', hidden: true },
+{ key: '_allHiRate', label: '全-高频尽曝率', w: 75, fmt: 'pct1' },
+{ key: '_allLoRate', label: '全-低频尽曝率', w: 75, fmt: 'pct1' },
 { key: '_oldCustRatio', label: '全-老客曝光占比', w: 80, fmt: 'pct2' },
-{ key: 'hiAppUV', label: '二-应曝高频', w: 70, fmt: 'int', group: '二选一渠道' },
-{ key: 'loAppUV', label: '二-应曝低频', w: 70, fmt: 'int' },
-{ key: 'hiExpUV', label: '二-尽曝高频', w: 70, fmt: 'int' },
-{ key: 'loExpUV', label: '二-尽曝低频', w: 70, fmt: 'int' },
+{ key: 'hiAppUV', label: '二-应曝高频', w: 70, fmt: 'int', group: '二选一渠道', hidden: true },
+{ key: 'loAppUV', label: '二-应曝低频', w: 70, fmt: 'int', hidden: true },
+{ key: 'hiExpUV', label: '二-尽曝高频', w: 70, fmt: 'int', hidden: true },
+{ key: 'loExpUV', label: '二-尽曝低频', w: 70, fmt: 'int', hidden: true },
+{ key: '_e21HiRate', label: '二-高频尽曝率', w: 75, fmt: 'pct1' },
+{ key: '_e21LoRate', label: '二-低频尽曝率', w: 75, fmt: 'pct1' },
 { key: 'e21Ratio', label: '二-老客曝光占比', w: 80, fmt: 'pct2' },
 ];
 const _leftAlignKeys = ['brandId','name','cat4','spMapped','assistant','isAlive','_isPinned','_isPass','_passType'];
@@ -2899,7 +2905,8 @@ thead.innerHTML = '<tr>' + cols.map(c => {
 const align = _leftAlignKeys.includes(c.key) ? thStyleL : thStyle;
 const arrow = _bdSortKey === c.key ? (_bdSortDir === 'desc' ? ' ▼' : ' ▲') : '';
 const stickyExtra = c.sticky ? 'position:sticky;left:0;z-index:3;' : '';
-return `<th onclick="_bdSort('${c.key}')" style="${align}${stickyExtra}min-width:${c.w}px;font-size:10px;">${c.label}${arrow}</th>`;
+const hiddenStyle = (c.hidden && !window._bdShowHidden) ? 'display:none;' : '';
+return `<th onclick="_bdSort('${c.key}')" style="${align}${stickyExtra}${hiddenStyle}min-width:${c.w}px;font-size:10px;" class="${c.hidden?'bd-hideable':''}">${c.label}${arrow}</th>`;
 }).join('') + '</tr>';
 const tdStyle = 'padding:4px 8px;border-bottom:1px solid #f1f5f9;text-align:right;';
 const tdStyleL = tdStyle.replace('text-align:right', 'text-align:left');
@@ -2908,6 +2915,7 @@ return '<tr>' + cols.map(c => {
 const v = _bdGetVal(b, c.key);
 const align = _leftAlignKeys.includes(c.key) ? tdStyleL : tdStyle;
 const stickyExtra = c.sticky ? 'position:sticky;left:0;z-index:1;background:#fff;' : '';
+const hiddenStyle = (c.hidden && !window._bdShowHidden) ? 'display:none;' : '';
 let display;
 if (c.key === 'isAlive') {
 display = v === true ? '<span style="color:#059669">✓</span>' : (v === false ? '<span style="color:#dc2626">✗</span>' : '—');
@@ -2922,7 +2930,7 @@ display = v || '—';
 } else {
 display = _bdFmt(v, c.fmt);
 }
-return `<td style="${align}${stickyExtra}">${display}</td>`;
+return `<td style="${align}${stickyExtra}${hiddenStyle}">${display}</td>`;
 }).join('') + '</tr>';
 }).join('');
 }
@@ -2954,6 +2962,18 @@ if (key === '_oldCustRatio') {
 const exp7 = (b.hiExpUV_all || 0) + (b.loExpUV_all || 0);
 const expPv7 = (b.expPv || 0) * 10000 * 7;
 return (exp7 > 0 && expPv7 > 0) ? (exp7 / expPv7 * 100) : null;
+}
+if (key === '_allHiRate') {
+return (b.hiAppUV_all > 0 && b.hiExpUV_all != null) ? (b.hiExpUV_all / b.hiAppUV_all * 100) : null;
+}
+if (key === '_allLoRate') {
+return (b.loAppUV_all > 0 && b.loExpUV_all != null) ? (b.loExpUV_all / b.loAppUV_all * 100) : null;
+}
+if (key === '_e21HiRate') {
+return (b.hiAppUV > 0 && b.hiExpUV != null) ? (b.hiExpUV / b.hiAppUV * 100) : null;
+}
+if (key === '_e21LoRate') {
+return (b.loAppUV > 0 && b.loExpUV != null) ? (b.loExpUV / b.loAppUV * 100) : null;
 }
 return b[key];
 }
