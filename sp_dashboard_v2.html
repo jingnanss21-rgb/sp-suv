@@ -2881,16 +2881,16 @@ const cols = [
 { key: 'miniApp', label: '小程序占比', w: 65, fmt: 'pct1' },
 { key: 'priceForce', label: '价格力', w: 55, fmt: 'pct2' },
 { key: '_storeComplete', label: '门店完整度', w: 65, fmt: 'pct1' },
-{ key: 'hiAppUV_all', label: '应曝UV高频', w: 70, fmt: 'int', group: '全渠道老客' },
-{ key: 'loAppUV_all', label: '应曝UV低频', w: 70, fmt: 'int' },
-{ key: 'hiExpUV_all', label: '尽曝UV高频', w: 70, fmt: 'int' },
-{ key: 'loExpUV_all', label: '尽曝UV低频', w: 70, fmt: 'int' },
-{ key: '_oldCustRatio', label: '老客曝光占比', w: 70, fmt: 'pct2' },
-{ key: 'hiAppUV', label: '应曝UV高频', w: 70, fmt: 'int', group: '二选一渠道' },
-{ key: 'loAppUV', label: '应曝UV低频', w: 70, fmt: 'int' },
-{ key: 'hiExpUV', label: '尽曝UV高频', w: 70, fmt: 'int' },
-{ key: 'loExpUV', label: '尽曝UV低频', w: 70, fmt: 'int' },
-{ key: 'e21Ratio', label: '老客曝光占比', w: 70, fmt: 'pct2' },
+{ key: 'hiAppUV_all', label: '全-应曝高频', w: 70, fmt: 'int', group: '全渠道老客' },
+{ key: 'loAppUV_all', label: '全-应曝低频', w: 70, fmt: 'int' },
+{ key: 'hiExpUV_all', label: '全-尽曝高频', w: 70, fmt: 'int' },
+{ key: 'loExpUV_all', label: '全-尽曝低频', w: 70, fmt: 'int' },
+{ key: '_oldCustRatio', label: '全-老客曝光占比', w: 80, fmt: 'pct2' },
+{ key: 'hiAppUV', label: '二-应曝高频', w: 70, fmt: 'int', group: '二选一渠道' },
+{ key: 'loAppUV', label: '二-应曝低频', w: 70, fmt: 'int' },
+{ key: 'hiExpUV', label: '二-尽曝高频', w: 70, fmt: 'int' },
+{ key: 'loExpUV', label: '二-尽曝低频', w: 70, fmt: 'int' },
+{ key: 'e21Ratio', label: '二-老客曝光占比', w: 80, fmt: 'pct2' },
 ];
 const _leftAlignKeys = ['brandId','name','cat4','spMapped','assistant','isAlive','_isPinned','_isPass','_passType'];
 const thStyle = 'padding:6px 8px;text-align:right;background:#f8fafc;border-bottom:2px solid #e2e8f0;cursor:pointer;user-select:none;font-weight:600;color:#475569;position:sticky;top:0;z-index:2;';
@@ -2952,7 +2952,8 @@ return b.storeComplete;
 }
 if (key === '_oldCustRatio') {
 const exp7 = (b.hiExpUV_all || 0) + (b.loExpUV_all || 0);
-return (exp7 > 0 && b.dailyTx > 0) ? (exp7 / 7 / (b.dailyTx * 10000) * 100) : null;
+const expPv7 = (b.expPv || 0) * 10000 * 7;
+return (exp7 > 0 && expPv7 > 0) ? (exp7 / expPv7 * 100) : null;
 }
 return b[key];
 }
