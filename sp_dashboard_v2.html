@@ -1947,7 +1947,7 @@ let curSp = _markExpanded.activeSp[reasonKey];
 if (!curSp || !bySp[curSp]) curSp = spList[0];
 h += '<div style="border:1px solid '+cc.bd+';border-radius:8px;overflow:hidden">';
 h += '<div style="padding:8px 12px;background:'+cc.bg+';display:flex;align-items:center;justify-content:space-between">' +
-'<div style="font-size:12px;font-weight:700;color:'+cc.fg+'">'+reason+'</div>' +
+'<div style="font-size:12px;font-weight:700;color:'+cc.fg+'">'+reason+(reason==='沟通确认后希望在线'?' <span style="font-size:10px;background:#fef3c7;color:#92400e;padding:2px 6px;border-radius:4px;font-weight:600;margin-left:6px">⚠️ 不参与置顶</span>':'')+'</div>' +
 '<div style="font-size:11px;color:'+cc.fg+';font-weight:600">'+brands.length+' 家</div>' +
 '</div>';
 const spKeyEsc = reasonKey.replace(/'/g, "\\'");
@@ -1960,11 +1960,7 @@ h += '<button onclick="_mkPickSp(\''+spKeyEsc+'\',\''+sp.replace(/'/g,"\\\'")+'\
 });
 h += '</div>';
 h += '<div style="font-size:12px;color:#475569;line-height:1.8;padding-left:2px">' +
-bySp[curSp].map(b => {
-const _noPin = (curIss === '经营模式' && b.reason === '沟通确认后希望在线');
-return '<span style="white-space:nowrap;color:#1e293b">'+b.name+'<span style="color:#94a3b8">（'+b.bid+'）</span>'+(_noPin?'<span style="font-size:9px;background:#fef3c7;color:#92400e;padding:1px 5px;border-radius:3px;margin-left:2px">⚠️ 不参与置顶</span>':'')+
-'</span>';
-}).join('<span style="color:#cbd5e1;margin:0 6px">·</span>') +
+bySp[curSp].map(b => '<span style="white-space:nowrap;color:#1e293b">'+b.name+'<span style="color:#94a3b8">（'+b.bid+'）</span></span>').join('<span style="color:#cbd5e1;margin:0 6px">·</span>') +
 '</div>';
 h += '</div>';
 h += '</div>';
