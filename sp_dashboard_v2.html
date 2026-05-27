@@ -77,7 +77,7 @@
   <div class="S">
     <div class="ST">🎯 上线后 · 达标商户置顶</div>
     <!-- B-1 总览 2 卡 -->
-    <div id="pinKg" style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px"></div>
+    <div id="pinKg" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px"></div>
     <!-- B-2 象限图 + 数据源 tab -->
     <div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin-top:12px">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px">
@@ -2023,6 +2023,9 @@ value + (unit ? '<span style="font-size:14px;color:#94a3b8;font-weight:500;margi
 let html = '';
 html += card('已置顶', '🎯', pinnedTotal,   '家', pinBarHtml, '#059669');
 html += card('未置顶', '⏳', passUnpinned.length, '家', '<div style="font-size:11px;color:#94a3b8;margin-top:6px">候补补位池 · 50 名额限制</div>', '#0891b2');
+const pinnedSurvived = pinnedOnline.filter(b => b.survivalRate != null && b.survivalRate >= 1);
+const survRate = pinnedTotal > 0 ? (pinnedSurvived.length / pinnedTotal * 100).toFixed(1) : '—';
+html += card('置顶存活率', '💚', survRate === '—' ? '—' : survRate, survRate === '—' ? '' : '%', '<div style="font-size:11px;color:#64748b;margin-top:6px">存活 <b style="color:#059669">'+pinnedSurvived.length+'</b> / 置顶 <b>'+pinnedTotal+'</b></div>', survRate !== '—' && parseFloat(survRate) >= 80 ? '#059669' : '#d97706');
 el.innerHTML = html;
 }
 var _pinChart = null;
