@@ -2271,8 +2271,8 @@ let list = pinnedOnline.filter(b => {
 if (_pinActiveQuad && quadOf[b.brandId] !== _pinActiveQuad) return false;
 if (fSP && b.spMapped !== fSP) return false;
 if (fOwner && b.owner !== fOwner) return false;
-if (fAlive === 'alive' && b.isAlive !== true) return false;
-if (fAlive === 'dead' && b.isAlive !== false) return false;
+if (fAlive === 'alive' && !(b.survivalRate != null && b.survivalRate >= 1)) return false;
+if (fAlive === 'dead' && (b.survivalRate != null && b.survivalRate >= 1)) return false;
 if (fCat && b.cat4 !== fCat) return false;
 if (fQ){
 const nm = (b.name||'').toLowerCase();
@@ -2835,8 +2835,8 @@ if (b.spMapped === '自研KA') return false; // 剔除自研KA
 if (fTier && b.tierManual !== fTier) return false;
 if (fSP && b.spMapped !== fSP) return false;
 if (fCat && b.cat4 !== fCat) return false;
-if (fAlive === 'alive' && b.isAlive !== true) return false;
-if (fAlive === 'dead' && b.isAlive !== false) return false;
+if (fAlive === 'alive' && !(b.survivalRate != null && b.survivalRate >= 1)) return false;
+if (fAlive === 'dead' && (b.survivalRate != null && b.survivalRate >= 1)) return false;
 if (fAsst && b.assistant !== fAsst) return false;
 if (fPin === 'yes' && !_bdTopBids.has(String(b.brandId))) return false;
 if (fPin === 'no' && _bdTopBids.has(String(b.brandId))) return false;
@@ -2922,7 +2922,8 @@ const stickyExtra = c.sticky ? 'position:sticky;left:0;z-index:1;background:#fff
 const hiddenStyle = (c.hidden && !window._bdShowHidden) ? 'display:none;' : '';
 let display;
 if (c.key === 'isAlive') {
-display = v === true ? '<span style="color:#059669">✓</span>' : (v === false ? '<span style="color:#dc2626">✗</span>' : '—');
+const alive = b.survivalRate != null && b.survivalRate >= 1;
+display = alive ? '<span style="color:#059669">✓</span>' : '<span style="color:#dc2626">✗</span>';
 } else if (c.key === '_isPinned') {
 display = v ? '<span style="color:#2563eb;font-weight:700">✓</span>' : '';
 } else if (c.key === '_isPass') {
@@ -2939,6 +2940,9 @@ return `<td style="${align}${stickyExtra}${hiddenStyle}">${display}</td>`;
 }).join('');
 }
 function _bdGetVal(b, key) {
+if (key === 'isAlive') {
+return (b.survivalRate != null && b.survivalRate >= 1) ? true : false;
+}
 if (key === '_isPinned') {
 return _bdTopBids.has(String(b.brandId));
 }
