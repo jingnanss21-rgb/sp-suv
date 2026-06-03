@@ -276,7 +276,7 @@ const dates = await fetchJSON('brand_snapshot', 'select=data_date&order=data_dat
 if (!dates.length) throw new Error('brand_snapshot 中无数据');
 targetDate = dates[0].data_date;
 }
-const trendStart = (function(){const d=new Date(targetDate);d.setDate(d.getDate()-34);return d.toISOString().substring(0,10);})();
+const trendStart = (function(){const d=new Date(targetDate);d.setDate(d.getDate()-62);return d.toISOString().substring(0,10);})();
 const [snapshots, channels, spInfos, sopRows, topRecords, trendRows] = await Promise.all([
 fetchJSON('brand_snapshot', 'data_date=eq.' + targetDate + '&select=*'),
 fetchJSON('brand_channel', 'data_date=eq.' + targetDate + '&select=*'),
