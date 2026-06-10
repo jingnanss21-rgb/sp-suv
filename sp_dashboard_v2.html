@@ -690,7 +690,7 @@ const infra=(_fbCache[b.brandId+'_screen_infra']||'').trim();
 const store=(_fbCache[b.brandId+'_screen_store']||'').trim();
 const rm=(_fbCache[b.brandId+'_screen_remark']||'').trim();
 if(biz.includes('计划下线')||price.includes('计划下线')||infra.includes('计划下线')||store.includes('计划下线')||rm.includes('下线')){offN++;offList.push(b.name)}
-else if(biz==='会员占比>=50%'||biz==='准备切代金券投放'||price==='全场券'||infra.includes('经营规模小')||store==='公线真实门店不准，实际>=90%'||store==='服务商仅覆盖部分门店，已全部上传'||rm.includes('经营规模')||(rm.includes('存活')&&!rm.includes('未存活'))){keepN++;keepList.push(b.name)}
+else if(biz==='会员占比超过50%'||biz==='代金券投放中'||price==='全场券'||price==='已更新更优货盘，价格力更新延迟'||infra==='经营规模小，1店<10笔合理'||store==='服务商仅覆盖部分门店，已全部上传'){keepN++;keepList.push(b.name)}
 else if(biz==='沟通确认中'||biz==='沟通确认后希望在线'||price==='沟通确认中'||infra==='沟通确认中'||store==='沟通确认中')talkN++;
 else{otherN++;otherList.push({name:b.name,rm:rm})}
 });
@@ -730,10 +730,10 @@ ${otherN?'<tr style="background:var(--x0)"><td style="padding:5px 8px;font-weigh
 </details>`;
 }
 if(_fbLoaded||Object.keys(_fbCache).length>0){
-const _keepReasons={'会员占比超过50%':'经营模式','沟通确认后希望在线':'经营模式','准备切代金券投放':'经营模式','代金券投放中':'经营模式','全场券':'货盘','已沟通，整改中':'货盘','经营规模小，1店<10笔合理':'基建-商户号','已沟通，整改中':'基建-商户号','公线真实门店不准需修正':'基建-门店','服务商仅覆盖部分门店，已全部上传':'基建-门店'};
+const _keepReasons={'会员占比超过50%':'经营模式','代金券投放中':'经营模式','全场券':'货盘','已更新更优货盘，价格力更新延迟':'货盘','经营规模小，1店<10笔合理':'基建-商户号','服务商仅覆盖部分门店，已全部上传':'基建-门店'};
 const _offlineKw=['计划下线','不接受代金券','商家无法提供','商家无法获取','商家无法上传'];
 const _progressKw=['沟通确认中','已沟通，整改中','已沟通，未回复','基建沟通中'];
-const _keepVals=new Set(['会员占比超过50%','沟通确认后希望在线','准备切代金券投放','代金券投放中','全场券','经营规模小，1店<10笔合理','公线真实门店不准需修正','服务商仅覆盖部分门店，已全部上传']);
+const _keepVals=new Set(['会员占比超过50%','代金券投放中','全场券','已更新更优货盘，价格力更新延迟','经营规模小，1店<10笔合理','服务商仅覆盖部分门店，已全部上传']);
 const keepMap={},offMap={},progMap={};
 const otherList=[];
 let keepN=0,offN=0,progN=0,otherN=0;
@@ -784,7 +784,7 @@ return;
 otherN++;
 otherList.push(b);
 });
-const _keepRules={'经营模式':{'screen_biz':['会员占比超过50%','沟通确认后希望在线','准备切代金券投放','代金券投放中']},'货盘':{'screen_price':['全场券','已更新更优货盘，价格力更新延迟']},'基建-商户号':{'screen_infra':['经营规模小，1店<10笔合理']},'基建-门店':{'screen_store':['公线真实门店不准需修正','服务商仅覆盖部分门店，已全部上传','已整改，待内部确认']}};
+const _keepRules={'经营模式':{'screen_biz':['会员占比超过50%','代金券投放中']},'货盘':{'screen_price':['全场券','已更新更优货盘，价格力更新延迟']},'基建-商户号':{'screen_infra':['经营规模小，1店<10笔合理']},'基建-门店':{'screen_store':['服务商仅覆盖部分门店，已全部上传']}};
 const _offRules={'经营模式':{'screen_biz':['不接受代金券，计划下线']},'货盘':{'screen_price':['商家无法提供，计划下线']},'基建-商户号':{'screen_infra':['商家无法获取，计划下线']},'基建-门店':{'screen_store':['商家无法上传，计划下线']}};
 const _progRules={'经营模式':{'screen_biz':['沟通确认中','已沟通，整改中','已沟通，未回复']},'货盘':{'screen_price':['沟通确认中','已沟通，整改中','已沟通，未回复']},'基建-商户号':{'screen_infra':['沟通确认中','基建沟通中','已沟通，整改中','已沟通，未回复','总部拿不到商户号，待沟通pos商或门店给420单号方案']},'基建-门店':{'screen_store':['沟通确认中','已沟通，整改中','已沟通，未回复']}};
 function classifyBrand(b){
@@ -1804,10 +1804,10 @@ el.innerHTML = html;
 var _markExpanded = { activeClass: 'keep', activeIssue: null, activeSp: {} }; // 一级: 分类, 二级: 四要素维度, 三级: {reason: sp}
 const _mkIssue2Field = {'经营模式':'screen_biz','货盘':'screen_price','基建-商户号':'screen_infra','基建-门店':'screen_store'};
 const _mkKeepRules = {
-'经营模式': ['会员占比超过50%','沟通确认后希望在线','准备切代金券投放','代金券投放中'],
+'经营模式': ['会员占比超过50%','代金券投放中'],
 '货盘': ['全场券','已更新更优货盘，价格力更新延迟'],
 '基建-商户号': ['经营规模小，1店<10笔合理'],
-'基建-门店': ['公线真实门店不准需修正','服务商仅覆盖部分门店，已全部上传','已整改，待内部确认']
+'基建-门店': ['服务商仅覆盖部分门店，已全部上传']
 };
 const _mkOffRules = {
 '经营模式': ['不接受代金券，计划下线'],
