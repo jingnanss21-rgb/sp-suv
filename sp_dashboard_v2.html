@@ -174,6 +174,30 @@ _fbLoaded=true;if(typeof renderScreen==='function')renderScreen();
 const{data}=await supa.from('brand_feedback').select('*').order('updated_at',{ascending:false});
 if(data)data.forEach(r=>{const k=r.brand_id+'_'+r.field_name;_fbCache[k]=r.field_value});
 }
+// === 严口径人工打标"达标"规则（2026-06-10 引入） ===
+// 仅这些反馈选项算单维度达标，其他反馈（如"沟通确认中"、"已沟通整改中"等）一律视为未达标
+const _KEEP_RULES = {
+'screen_biz':   ['会员占比超过50%','代金券投放中'],
+'screen_price': ['全场券','已更新更优货盘，价格力更新延迟'],
+'screen_infra': ['经营规模小，1店<10笔合理'],
+'screen_store': ['服务商仅覆盖部分门店，已全部上传']
+};
+// 单维度是否最终达标 = 系统达标(true) OR 该维度反馈在 _KEEP_RULES 列表
+function _dimPass(b, factorKey, fbKey){
+if (b && b[factorKey] === true) return true;
+if (!b || b.brandId == null) return false;
+const v = (_fbCache[String(b.brandId)+'_'+fbKey] || '').trim();
+return (_KEEP_RULES[fbKey]||[]).indexOf(v) >= 0;
+}
+// 4 维度全部达标
+function _allDimPass(b){
+return _dimPass(b,'bizOk','screen_biz') && _dimPass(b,'priceOk','screen_price')
+    && _dimPass(b,'infraOk','screen_infra') && _dimPass(b,'trafficOk','screen_store');
+}
+// 系统全达标
+function _isSysPass(b){
+return b && b.bizOk===true && b.priceOk===true && b.infraOk===true && b.trafficOk===true;
+}
 async function saveFeedback(brandId,brandName,field,value){
 _fbCache[brandId+'_'+field]=value;
 try{
@@ -1990,10 +2014,9 @@ b.tierManual === '腰部' && b.statusManual === '在线' && b.onlineToday === tr
 const hasMark = function(b){
 const bid = b.brandId;
 if (!bid) return false;
-return !!(_fbCache[bid+'_screen_biz'] || _fbCache[bid+'_screen_price']
-|| _fbCache[bid+'_screen_infra'] || _fbCache[bid+'_screen_store']);
+return _allDimPass(b);
 };
-const isPass = b => (b.bizOk===true && b.priceOk===true && b.infraOk===true && b.trafficOk===true) || hasMark(b);
+const isPass = b => _isSysPass(b) || _allDimPass(b);
 const _bsMapAll = {};
 (BS||[]).forEach(b => { if (b && b.brandId != null) _bsMapAll[String(b.brandId)] = b; });
 const pinnedOnline = Array.from(topBids).filter(bid => {
@@ -2485,12 +2508,9 @@ const items = []; // { bid, name, sp, assistant, issue, detail, sortKey }
 const wc = (BS||[]).filter(b => b.tierManual === '腰部' && b.statusManual === '在线');
 const TR = (window._D && window._D.topRecords) || [];
 const topBids = new Set(TR.map(r => String(r.brand_id)));
-const _hasKeepMark = function(bid){
-if (!bid) return false;
-return !!(_fbCache[bid+'_screen_biz'] ||
-_fbCache[bid+'_screen_price'] ||
-_fbCache[bid+'_screen_infra'] ||
-_fbCache[bid+'_screen_store']);
+const _hasKeepMark = function(brandObj){
+if (!brandObj || brandObj.brandId == null) return false;
+return _allDimPass(brandObj);
 };
 wc.forEach(b => {
 const base = {
@@ -2576,7 +2596,7 @@ detail: '已占用置顶坑位但' + reason + ', 建议补位或替换'
 }
 if (b && b.onlineToday === true){
 const allPass = b.bizOk===true && b.priceOk===true && b.infraOk===true && b.trafficOk===true;
-const hasMark = _hasKeepMark(b.brandId);
+const hasMark = _hasKeepMark(b);
 if (!allPass && !hasMark){
 const failDims = [];
 if (b.bizOk === false) failDims.push('经营❌');
@@ -2943,17 +2963,11 @@ if (key === '_isPinned') {
 return _bdTopBids.has(String(b.brandId));
 }
 if (key === '_isPass') {
-const sysPass = b.bizOk === true && b.priceOk === true && b.infraOk === true && b.trafficOk === true;
-const bid = b.brandId;
-const manualPass = !!(_fbCache[bid+'_screen_biz'] || _fbCache[bid+'_screen_price'] || _fbCache[bid+'_screen_infra'] || _fbCache[bid+'_screen_store']);
-return sysPass || manualPass ? true : false;
+return (_isSysPass(b) || _allDimPass(b)) ? true : false;
 }
 if (key === '_passType') {
-const sysPass = b.bizOk === true && b.priceOk === true && b.infraOk === true && b.trafficOk === true;
-const bid = b.brandId;
-const manualPass = !!(_fbCache[bid+'_screen_biz'] || _fbCache[bid+'_screen_price'] || _fbCache[bid+'_screen_infra'] || _fbCache[bid+'_screen_store']);
-if (sysPass) return '系统达标';
-if (manualPass) return '人工达标';
+if (_isSysPass(b)) return '系统达标';
+if (_allDimPass(b)) return '人工达标';
 return null;
 }
 if (key === '_realStore') {
