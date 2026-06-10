@@ -491,7 +491,6 @@ const result=[];
 (BS||[]).forEach(b=>{
 if(b.tierManual!=='腰部')return;
 if(b.statusManual!=='在线')return;
-if(b.onlineToday!==true)return;
 const issues=[];
 if(b.bizOk===false) issues.push('经营模式');
 if(b.priceOk===false) issues.push('货盘');
@@ -610,7 +609,7 @@ document.getElementById('scrCnt').textContent=fl.length+'/'+SCR.length+' 品牌'
 var _sh=document.getElementById('scrHdrCnt');if(_sh)_sh.textContent=fl.length;
 var _missing=(BS||[]).filter(function(b){
 if(b.tierManual!=='腰部')return false;
-if(b.onlineToday!==true)return false;
+if(b.statusManual!=='在线')return false;
 var hasNull=(b.bizOk===null||b.priceOk===null||b.infraOk===null||b.trafficOk===null||
 b.bizOk===undefined||b.priceOk===undefined||b.infraOk===undefined||b.trafficOk===undefined);
 if(!hasNull)return false;
@@ -620,7 +619,7 @@ var _scrBids=new Set(fl.map(function(x){return String(x.brandId)}));
 var _allScrBids=new Set((SCR||[]).map(function(x){return String(x.brandId)}));
 var _gap=(BS||[]).filter(function(b){
 if(b.tierManual!=='腰部')return false;
-if(b.onlineToday!==true)return false;
+if(b.statusManual!=='在线')return false;
 if(b.bizOk===true && b.priceOk===true && b.infraOk===true && b.trafficOk===true)return false; // 达标的不算
 if(_allScrBids.has(String(b.brandId)))return false; // 已在 SCR 里的不算（无论是否被过滤）
 if(b.bizOk===null||b.priceOk===null||b.infraOk===null||b.trafficOk===null)return false; // 已纳入 missing
@@ -1826,7 +1825,6 @@ const result=[];
 (BS||[]).forEach(b=>{
 if(b.tierManual!=='腰部')return;
 if(b.statusManual!=='在线')return;
-if(b.onlineToday!==true)return;
 const issues=[];
 if(b.bizOk===false) issues.push('经营模式');
 if(b.priceOk===false) issues.push('货盘');
@@ -1851,7 +1849,6 @@ const bs = _bsMap[String(b.brandId)];
 if (!bs) return;
 if (bs.tierManual !== '腰部') return;
 if (bs.statusManual !== '在线') return;
-if (bs.onlineToday !== true) return;
 seenBids.add(String(b.brandId));
 (b.issues||[]).forEach(iss => {
 if (!_mkIssues.includes(iss)) return;
@@ -1869,7 +1866,6 @@ matrix[iss][cls].push({bid:b.brandId, name:b.name, sp:b.sp, reason:val, metric:m
 (BS||[]).forEach(b => {
 if (b.tierManual !== '腰部') return;
 if (b.statusManual !== '在线') return;
-if (b.onlineToday !== true) return;
 if (seenBids.has(String(b.brandId))) return; // 已被 SCR 归类的跳过
 const dimsNull = [];
 if (b.bizOk == null) dimsNull.push(['经营模式', (b.miniApp != null && !Number.isNaN(b.miniApp)) ? '小程序 '+b.miniApp.toFixed(1)+'%' : '数据缺失']);
